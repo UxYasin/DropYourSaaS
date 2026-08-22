@@ -27,13 +27,13 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-3 z-40 px-4 sm:px-6 w-full max-w-5xl mx-auto">
+    <header className="sticky top-3 z-40 px-4 w-full max-w-3xl mx-auto flex justify-center">
       <div
         className={cn(
-          'w-full px-4 sm:px-6 py-2.5 rounded-[24px] flex items-center justify-between transition-all duration-300',
+          'w-full px-3.5 sm:px-5 py-2 rounded-[24px] flex items-center justify-between gap-4 transition-all duration-300',
           scrolled
-            ? 'bg-background/70 backdrop-blur-2xl shadow-md border border-solid border-border/80'
-            : 'bg-background/40 backdrop-blur-md border border-transparent shadow-none'
+            ? 'bg-background/75 backdrop-blur-2xl shadow-md border border-solid border-border/80'
+            : 'bg-background/45 backdrop-blur-md border border-transparent shadow-none'
         )}
       >
         <div className="flex items-center gap-3">
