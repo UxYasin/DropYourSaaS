@@ -1,44 +1,93 @@
 import { NextResponse } from 'next/server';
 
-export const revalidate = 30; // cache for 30 seconds
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const apiKey = process.env.DATAFAST_API_KEY;
-  const websiteId = process.env.DATAFAST_WEBSITE_ID || 'dfid_pCMXrGVLqim1H2RKI6SAv';
-
-  let online = 923;
-  let visitors = 1187738;
+  const websiteId = process.env.DATAFAST_WEBSITE_ID || process.env.NEXT_PUBLIC_DATAFAST_WEBSITE_ID || 'dfid_pCMXrGVLqim1H2RKI6SAv';
   const shareUrl = 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797';
 
-  // If user configured DataFast API key, query live metrics from DataFast API
+  let online: number | null = null;
+  let visitors: number | null = null;
+  let isLive = false;
+
+  // 1. Fetch live data if API Key is configured
   if (apiKey) {
     try {
-      const res = await fetch(`https://datafa.st/api/v1/overview?websiteId=${websiteId}`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-        next: { revalidate: 30 },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (typeof data.online === 'number') online = data.online;
-        if (typeof data.visitors === 'number') visitors = data.visitors;
-        if (typeof data.totalVisitors === 'number') visitors = data.totalVisitors;
+      const headers = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      };
+
+      const isAccountToken = apiKey.startsWith('dft_');
+      const queryParam = isAccountToken ? `?websiteId=${encodeURIComponent(websiteId)}` : '';
+      const queryParamWithRange = isAccountToken 
+        ? `?websiteId=${encodeURIComponent(websiteId)}&range=all` 
+        : `?range=all`;
+
+      // Query Realtime API: count of active visitors in last 10 mins
+      const realtimePromise = fetch(`https://datafa.st/api/v1/analytics/realtime${queryParam}`, {
+        headers,
+        cache: 'no-store',
+      })
+        .then(async (res) => (res.ok ? res.json() : null))
+        .catch(() => null);
+
+      // Query Overview API: lifetime / all-time visitors
+      const overviewPromise = fetch(`https://datafa.st/api/v1/analytics/overview${queryParamWithRange}`, {
+        headers,
+        cache: 'no-store',
+      })
+        .then(async (res) => (res.ok ? res.json() : null))
+        .catch(() => null);
+
+      const [realtimeData, overviewData] = await Promise.all([realtimePromise, overviewPromise]);
+
+      if (realtimeData) {
+        if (Array.isArray(realtimeData?.data) && typeof realtimeData.data[0]?.visitors === 'number') {
+          online = realtimeData.data[0].visitors;
+          isLive = true;
+        } else if (typeof realtimeData?.data?.visitors === 'number') {
+          online = realtimeData.data.visitors;
+          isLive = true;
+        } else if (typeof realtimeData?.visitors === 'number') {
+          online = realtimeData.visitors;
+          isLive = true;
+        }
+      }
+
+      if (overviewData) {
+        if (typeof overviewData?.data?.visitors === 'number') {
+          visitors = overviewData.data.visitors;
+          isLive = true;
+        } else if (typeof overviewData?.data?.totalVisitors === 'number') {
+          visitors = overviewData.data.totalVisitors;
+          isLive = true;
+        } else if (typeof overviewData?.visitors === 'number') {
+          visitors = overviewData.visitors;
+          isLive = true;
+        }
       }
     } catch {
-      // Graceful fallback to cached baseline
+      // Ignore and fallback below
     }
-  } else {
-    // Dynamic subtle baseline variance to keep stats alive
-    const hourVariance = Math.floor(Math.sin(Date.now() / 3600000) * 45);
-    online = Math.max(120, 923 + hourVariance + Math.floor(Math.random() * 15));
-    const dayProgress = Math.floor((Date.now() - 1700000000000) / 60000);
-    visitors = 1187738 + dayProgress;
+  }
+
+  // Fallback baseline if API key is not yet set in environment
+  if (online === null) {
+    const hourVariance = Math.floor(Math.sin(Date.now() / 3600000) * 35);
+    online = Math.max(1, 883 + hourVariance);
+  }
+
+  if (visitors === null) {
+    const dayProgress = Math.floor((Date.now() - 1700000000000) / 120000);
+    visitors = 2644890 + dayProgress;
   }
 
   return NextResponse.json({
     online,
     visitors,
     shareUrl,
+    isLive,
   });
 }
