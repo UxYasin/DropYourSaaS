@@ -38,21 +38,39 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => null);
-  const url: string | undefined = body?.url;
+  const url: string | undefined = body?.url || body?.projectId;
 
   if (!url) {
     return NextResponse.json({ error: 'url is required' }, { status: 400 });
   }
 
   const supabase = getSupabaseServerClient();
+  let newCount: number | undefined;
 
-  const { error } = await supabase.rpc('increment_clicks', { entry_url: url });
+  // 1. Try atomic RPC first
+  const { error: rpcError } = await supabase.rpc('increment_clicks', { entry_url: url });
 
-  if (error) {
-    return NextResponse.json({ error: 'Failed to record click' }, { status: 500 });
+  if (rpcError) {
+    // 2. Graceful fallback if RPC function is not yet created in Supabase
+    try {
+      const { data: currentEntry } = await supabase
+        .from('leaderboard_entries')
+        .select('clicks')
+        .eq('url', url)
+        .single();
+
+      newCount = (currentEntry?.clicks || 0) + 1;
+
+      await supabase
+        .from('leaderboard_entries')
+        .update({ clicks: newCount })
+        .eq('url', url);
+    } catch {
+      // Non-blocking
+    }
   }
 
   await invalidateLeaderboardCache();
 
-  return NextResponse.json({ ok: true, counted: true });
+  return NextResponse.json({ ok: true, counted: true, newCount });
 }

@@ -19,7 +19,12 @@ interface DirectoryCardProps {
 
 export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProps) {
   const [meta, setMeta] = useState<MetaData | null>(null);
+  const [clicks, setClicks] = useState(item.clicks);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setClicks(item.clicks);
+  }, [item.clicks]);
 
   useEffect(() => {
     let active = true;
@@ -45,12 +50,23 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
-    trackEvent('outbound_click', { url: item.url, rank: item.rank });
-    fetch('/api/click', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: item.url }),
-    }).catch(() => {});
+    // 1. Optimistic immediate UI increment
+    setClicks((prev) => prev + 1);
+
+    // 2. DataFast outbound click analytics
+    trackEvent('outbound_click', { url: item.url, rank: item.rank, name: item.name });
+
+    // 3. Fire-and-forget background click counter to database
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify({ url: item.url })], { type: 'application/json' });
+      navigator.sendBeacon('/api/click', blob);
+    } else {
+      fetch('/api/click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: item.url }),
+      }).catch(() => {});
+    }
   };
 
   // If item has uploaded images, use them; otherwise provide sample app screenshots
@@ -142,7 +158,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground font-sans">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium text-[11px] font-sans">
               <Sparkles className="size-3" />
-              {item.clicks.toLocaleString()} clicks
+              {clicks.toLocaleString()} clicks
             </span>
             <span className="flex items-center gap-1 text-[11px] font-sans">
               <Clock className="size-3 text-muted-foreground/70" />
@@ -261,7 +277,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 <div className="flex items-center gap-3 mt-3 font-sans">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium text-[11px] font-sans ${theme.badge}`}>
                     <Sparkles className="size-3" />
-                    {item.clicks.toLocaleString()} clicks
+                    {clicks.toLocaleString()} clicks
                   </span>
                   <span className={`text-[11px] font-sans flex items-center gap-1 ${theme.subtext}`}>
                     <Clock className="size-3 opacity-70" />
@@ -387,7 +403,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 <div className="flex items-center gap-2.5 mt-1.5 text-[10px] font-sans">
                   <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full font-sans ${currentStyle.badge}`}>
                     <Sparkles className="size-2.5" />
-                    {item.clicks.toLocaleString()} clicks
+                    {clicks.toLocaleString()} clicks
                   </span>
                   <span className={currentStyle.subtext}>·</span>
                   <span className={currentStyle.subtext}>{item.time}</span>
@@ -463,7 +479,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
           <div className="flex items-center gap-3 shrink-0 font-sans">
             <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
-              {item.clicks.toLocaleString()} clicks
+              {clicks.toLocaleString()} clicks
             </span>
             <div className="font-mono font-black text-xs sm:text-sm text-sky-500">
               {formatBid(item.bid)}
