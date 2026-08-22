@@ -76,7 +76,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl -z-10 pointer-events-none" />
 
           {/* Main info header */}
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
               <span className="font-mono text-xl sm:text-2xl font-black text-foreground shrink-0 mt-1">
                 #{item.rank}
@@ -99,17 +99,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   />
                 </div>
               </a>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <a
                     href={href}
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className="font-mono font-black text-lg sm:text-xl text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                    className="font-mono font-black text-base sm:text-lg text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
                   >
                     <span className="truncate">{title}</span>
-                    <ExternalLink className="size-4 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+                    <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
                   <span className="font-sans text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
                     TOP SPOT #1
@@ -122,14 +122,14 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
 
             {/* Price & CTA */}
-            <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className="font-mono font-black text-2xl sm:text-3xl text-sky-500 tracking-tight">
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+              <div className="font-mono font-black text-2xl sm:text-3xl text-sky-500 tracking-tight shrink-0">
                 {formatBid(item.bid)}
               </div>
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0"
               >
                 Take this spot
               </button>
@@ -214,7 +214,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
     return (
       <div ref={containerRef} className="group relative">
         <div className={`rounded-[20px] border ${theme.border} ${theme.bg} p-4 sm:p-5 shadow-[var(--shadow-1)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden`}>
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 min-w-0 flex-1">
               <span className={`font-mono text-xl sm:text-2xl font-black shrink-0 mt-0.5 ${theme.rankColor}`}>
                 #{item.rank}
@@ -237,14 +237,14 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   />
                 </div>
               </a>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <a
                     href={href}
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className={`font-mono font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 ${theme.text}`}
+                    className={`font-mono font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 min-w-0 max-w-full ${theme.text}`}
                   >
                     <span className="truncate">{title}</span>
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -270,14 +270,14 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
 
             {/* Price & CTA */}
-            <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight ${theme.priceColor}`}>
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
+              <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight shrink-0 ${theme.priceColor}`}>
                 {formatBid(item.bid)}
               </div>
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs shadow-xs active:scale-95 transition-all ${theme.btn}`}
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 ${theme.btn}`}
               >
                 Take this spot
               </button>

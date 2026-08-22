@@ -7,6 +7,19 @@ interface MetaData {
   image?: string
 }
 
+function decodeHtml(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#([0-9]+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .trim();
+}
+
 async function fetchMetaData(url: string): Promise<MetaData> {
   const hostname = new URL(url).hostname
   
@@ -23,12 +36,12 @@ async function fetchMetaData(url: string): Promise<MetaData> {
     const html = await response.text()
     
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-    const title = titleMatch ? titleMatch[1].trim() : hostname
+    const title = titleMatch ? decodeHtml(titleMatch[1]) : hostname
     
     const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
       || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i)
       || html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
-    const description = descMatch ? descMatch[1].trim() : ""
+    const description = descMatch ? decodeHtml(descMatch[1]) : ""
 
     const imgMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
       || html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
