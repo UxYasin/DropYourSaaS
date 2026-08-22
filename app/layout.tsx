@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   title: 'DropYourSaaS · Developer Directory & Software Index',
   description: 'A curated digital software directory and developer indexing platform. Submit and feature your SaaS product.',
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-icon.png',
   },
 };
 
