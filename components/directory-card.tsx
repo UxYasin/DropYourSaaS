@@ -62,18 +62,18 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   ]).slice(0, 6);
 
   /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (2x Height of #2/#3, Animated Rainbow Glow)
+     VARIANT 1: #1 SPOT (2x Height of #2/#3, Slim Rainbow Glow)
      ------------------------------------------------------------- */
   if (variant === 'top1') {
     return (
-      <div ref={containerRef} className="group relative my-2">
-        {/* Animated Rainbow Glowing Outer Shadow */}
-        <div className="absolute -inset-1 sm:-inset-1.5 rounded-[26px] animate-rainbow-glow opacity-85 blur-lg group-hover:opacity-100 group-hover:blur-xl transition-all duration-300 pointer-events-none" />
-        <div className="absolute -inset-0.5 rounded-[24px] animate-rainbow-glow opacity-90 pointer-events-none" />
+      <div ref={containerRef} className="group relative my-1.5">
+        {/* Subtle, slim animated rainbow ambient glow */}
+        <div className="absolute -inset-[2px] rounded-[24px] animate-rainbow-glow opacity-35 blur-xs group-hover:opacity-60 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
+        <div className="absolute -inset-[1px] rounded-[23px] animate-rainbow-glow opacity-50 pointer-events-none" />
 
-        <Card className="relative rounded-[22px] border-none bg-card/95 backdrop-blur-md p-5 sm:p-6 shadow-2xl transition-all duration-200 overflow-hidden">
-          {/* Subtle glowing ambient internal accent */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl -z-10 pointer-events-none" />
+        <Card className="relative rounded-[22px] border-none bg-card p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+          {/* Subtle ambient internal accent */}
+          <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl -z-10 pointer-events-none" />
 
           {/* Main info header */}
           <div className="flex items-start justify-between gap-4">
