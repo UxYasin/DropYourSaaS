@@ -226,95 +226,68 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
             {/* Expanded Content Section */}
             {isExpanded && (
-              <div className="mt-4 pt-4 border-t border-border/60 space-y-4 animate-in fade-in-50 duration-200">
+              <div className="mt-4 pt-4 border-t border-border/60 space-y-3 animate-in fade-in-50 duration-200">
                 {/* Category & List for Sale Row (50% - 50%) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
                   {/* Left: Category Dropdown (50%) */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                        <Tag className="size-3 text-amber-500" />
-                        Select Category
-                      </label>
-                    </div>
-
-                    <div className="relative flex-1 flex items-center">
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
-                      >
-                        {CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                        <ChevronDown className="size-4" />
-                      </div>
+                  <div className="relative flex-1 flex items-center">
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                      <ChevronDown className="size-4" />
                     </div>
                   </div>
 
                   {/* Right: List for Sale (50%) */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                        <DollarSign className="size-3 text-amber-500" />
-                        Marketplace
-                      </label>
-                    </div>
-
-                    <div className="h-12 p-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold font-sans text-foreground truncate">
-                            List for Sale?
-                          </div>
-                          <div className="text-[10px] font-body text-muted-foreground truncate">
-                            Feature in Buy/Sell
-                          </div>
+                  <div className="h-12 p-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="min-w-0 text-left">
+                        <div className="text-xs font-bold font-sans text-foreground truncate">
+                          List for Sale?
+                        </div>
+                        <div className="text-[10px] font-body text-muted-foreground truncate">
+                          Feature in Buy/Sell
                         </div>
                       </div>
-
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={isForSale}
-                        onClick={() => setIsForSale(!isForSale)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          isForSale ? 'bg-emerald-500' : 'bg-zinc-600'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                            isForSale ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
                     </div>
+
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={isForSale}
+                      onClick={() => setIsForSale(!isForSale)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isForSale ? 'bg-emerald-500' : 'bg-zinc-600'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                          isForSale ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
                   </div>
                 </div>
 
                 {/* Your Email Input */}
-                <div className="flex flex-col text-left">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                      <Mail className="size-3 text-amber-500" />
-                      Your Email
-                    </label>
-                  </div>
-
-                  <div className="relative flex-1 flex items-center">
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
-                      required
-                    />
-                  </div>
+                <div className="relative flex-1 flex items-center">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
+                    required
+                  />
                 </div>
 
                 {/* Expanded Action Buttons Row */}
