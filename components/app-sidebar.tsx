@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -30,8 +31,21 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <Link href="/" className="font-bold text-xl">
-          DropYourSaaS
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo-light.svg"
+            alt="DropYourSaaS"
+            width={120}
+            height={40}
+            className="h-6 w-auto block dark:hidden"
+          />
+          <Image
+            src="/logo-dark.svg"
+            alt="DropYourSaaS"
+            width={120}
+            height={40}
+            className="h-6 w-auto hidden dark:block"
+          />
         </Link>
       </SidebarHeader>
       <SidebarContent>

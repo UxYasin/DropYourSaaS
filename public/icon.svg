@@ -1,0 +1,22 @@
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 2.93 2.93">
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+      }
+
+      .st1 {
+        fill: #171717;
+      }
+
+      .st2 {
+        fill: #fd970b;
+      }
+    </style>
+  </defs>
+  <rect class="st0" width="2.93" height="2.93" rx=".49" ry=".49"/>
+  <g>
+    <path class="st1" d="M2.45.46l-1.86.49-.11.44.34.34.11-.41.67.67-.41.11.33.33.44-.11.49-1.86Z"/>
+    <polygon class="st2" points="1.19 2.1 .68 2.23 .82 1.72 1.19 2.1"/>
+  </g>
+</svg>

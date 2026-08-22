@@ -9,6 +9,9 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'DropYourSaaS · Developer Directory & Software Index',
   description: 'A curated digital software directory and developer indexing platform. Submit and feature your SaaS product.',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });

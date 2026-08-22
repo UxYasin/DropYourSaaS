@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -24,9 +25,23 @@ export function Header() {
               <span className="sr-only">Toggle Sidebar</span>
             </Button>
           )}
-          <Link href="/" className="font-semibold text-lg tracking-tight text-primary flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-primary inline-block" />
-            DropYourSaaS
+          <Link href="/" className="flex items-center gap-2 group">
+            <Image
+              src="/logo-light.svg"
+              alt="DropYourSaaS"
+              width={140}
+              height={46}
+              className="h-7 w-auto block dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.svg"
+              alt="DropYourSaaS"
+              width={140}
+              height={46}
+              className="h-7 w-auto hidden dark:block"
+              priority
+            />
           </Link>
         </div>
         <div className="flex items-center gap-4">
