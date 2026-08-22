@@ -32,7 +32,7 @@ export function LatestActivity() {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75"></span>
             <span className="relative inline-flex size-1.5 rounded-full bg-primary"></span>
           </span>
-          Latest activity
+          Recent Submissions
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -50,7 +50,7 @@ export function LatestActivity() {
                 />
                 <span className="font-medium truncate">{item.name}</span>
                 <Badge variant="outline" className="text-xs flex-shrink-0">
-                  #{item.rank}
+                  Tier #{item.rank}
                 </Badge>
                 <span className="text-xs text-muted-foreground flex-shrink-0">·</span>
                 <span className="text-xs text-muted-foreground flex-shrink-0">{item.amount}</span>

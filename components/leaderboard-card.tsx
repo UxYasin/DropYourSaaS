@@ -46,7 +46,7 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
   const description = meta?.description || '';
   const favicon = meta?.favicon || `https://www.google.com/s2/favicons?domain=${item.name}&sz=32`;
 
-  const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=outbid&utm_medium=leaderboard&utm_campaign=listings`;
+  const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
     fetch('/api/click', {
@@ -110,7 +110,7 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
             className="flex items-center justify-center bg-primary/10 text-primary text-sm font-medium cursor-pointer border border-primary/60 border-t-0 rounded-b-lg py-3"
             onClick={() => onClaimClick(item.rank, item.bid + 1)}
           >
-            Claim this listing for {formatBid(item.bid + 1)}
+            Upgrade to Tier #{item.rank} for {formatBid(item.bid + 1)}
           </div>
         </div>
       </div>
@@ -168,7 +168,7 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
           className="flex items-center justify-center bg-primary/10 text-primary text-sm font-medium cursor-pointer border border-primary/60 border-t-0 rounded-b-lg py-3"
           onClick={() => onClaimClick(item.rank, item.bid + 1)}
         >
-          Claim this listing for {formatBid(item.bid + 1)}
+          Upgrade to Tier #{item.rank} for {formatBid(item.bid + 1)}
         </div>
       </div>
     </div>

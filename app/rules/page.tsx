@@ -9,68 +9,61 @@ export default function RulesPage() {
         <Header />
         <main className="flex-1">
           <div className="max-w-4xl mx-auto px-4 py-16">
-            <h1 className="text-4xl font-bold tracking-tight">Rules</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Directory Guidelines</h1>
             <div className="mt-8 space-y-8">
               <section>
-                <h2 className="text-xl font-semibold mb-3">How ranking works</h2>
+                <h2 className="text-xl font-semibold mb-3">How Directory Indexing Works</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
-                  <li>New listings are whole US dollars, $5 minimum, $1 at a time.</li>
+                  <li>Directory listings start at $1 USD minimum.</li>
                   <li>
-                    Bids already on the board keep their amount until they raise or get outranked.
+                    Products featured on the index maintain their verified placement tier based on their profile indexing level.
                   </li>
                   <li>
-                    Paying less than #1 still puts you on the board at whatever rank that bid can
-                    take.
+                    Submissions placed at any tier are indexed in the public directory and discoverable immediately.
                   </li>
                   <li>
-                    Equal bids stay in the order they were placed — the older bid keeps the higher
-                    rank.
+                    Equal indexing tiers maintain chronologically ordered placements (earlier verified profiles maintain priority).
                   </li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3">Outbidding</h2>
+                <h2 className="text-xl font-semibold mb-3">Tier Upgrades &amp; Profile Boosting</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
                   <li>
-                    Enter the same website or @handle again to raise that listing to any rank.
+                    Enter your previously listed website URL or handle to upgrade your project to a higher tier.
                   </li>
                   <li>
-                    The new bid must be at least $1 above your current bid; you only pay the
-                    difference.
+                    Upgrades require a minimum $1 increase over your current tier; you only pay the upgrade difference.
                   </li>
-                  <li>Someone else cannot take your rank by paying that difference.</li>
+                  <li>All profile metadata, titles, and preview descriptions are dynamically refreshed upon upgrade.</li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3">What you can list</h2>
+                <h2 className="text-xl font-semibold mb-3">Submission Standards &amp; Content Policy</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
-                  <li>A product website, or an X @handle.</li>
+                  <li>Accepted entries: software products, developer tools, SaaS applications, and creator profiles.</li>
                   <li>
-                    Chat and invite links are not allowed — Telegram, WhatsApp, Discord, Messenger,
-                    Signal, and similar.
+                    Direct messaging/invite-only channels are disallowed (e.g., Telegram, WhatsApp, Discord invite links).
                   </li>
-                  <li>Links to sexual content are not allowed.</li>
+                  <li>Adult, illegal, malicious, or deceptive software listings are strictly prohibited.</li>
                   <li>
-                    Query parameters are stripped from listing links. Affiliate, referral, and
-                    tracking URLs will not work.
+                    Affiliate/redirect tracking parameters are normalized to maintain clean canonical URLs.
                   </li>
                   <li>
-                    Link shortener URLs are not allowed. If you submit one, it is replaced by the
-                    URL it redirects to.
+                    Link shortener URLs are automatically resolved to their canonical destination domain.
                   </li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold mb-3">After you pay</h2>
+                <h2 className="text-xl font-semibold mb-3">Indexing &amp; Activation</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
                   <li>
-                    Your listing is public. Clicks go to the URL or profile you submitted, without
-                    query parameters.
+                    Once a submission is processed, your listing is indexed across the verified public directory.
                   </li>
-                  <li>A completed payment is what claims the rank.</li>
+                  <li>Visitors click directly through to your canonical software product URL.</li>
                 </ul>
               </section>
             </div>

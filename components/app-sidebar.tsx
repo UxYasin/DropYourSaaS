@@ -14,9 +14,9 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { title: 'Leaderboard', href: '/' },
+  { title: 'Directory', href: '/' },
   { title: 'About', href: '/about' },
-  { title: 'Rules', href: '/rules' },
+  { title: 'Guidelines', href: '/rules' },
 ];
 
 export function AppSidebar() {
@@ -31,7 +31,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <Link href="/" className="font-bold text-xl">
-          outbid.lol
+          DropYourSaaS
         </Link>
       </SidebarHeader>
       <SidebarContent>

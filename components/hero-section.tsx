@@ -87,7 +87,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         2,934 online
       </div>
       <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-        Claim #{displayRank} for{' '}
+        List Your SaaS for{' '}
         <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">
           <button
             type="button"
@@ -119,8 +119,8 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         </div>
       </h1>
       <p className="text-muted-foreground mt-3 text-base sm:text-lg max-w-3xl mx-auto px-4">
-        New spots start at $1. Paying less than the #1 price still puts you on the board at whatever
-        place that bid can take.
+        Instant directory indexing starting at $1. Submit your project profile to be featured across
+        our verified developer index.
       </p>
 
       <div className="mt-8 max-w-lg mx-auto px-4">
@@ -145,13 +145,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             onClick={handleClaim}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Redirecting…' : 'Claim'}
+            {isSubmitting ? 'Redirecting…' : 'Submit SaaS'}
           </Button>
         </div>
         {error && <p className="text-xs text-destructive mt-2">{error}</p>}
         <p className="text-xs text-muted-foreground mt-2">
-          Already on the list? Enter the same URL or @handle and up your bid — you only pay the
-          difference.
+          Already listed? Enter your product URL to boost your indexing tier and update your profile metadata.
         </p>
       </div>
     </section>

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       url,
       name: entryName,
       amountCents: String(amountCents),
-      description: `Outbid listing: ${entryName}`,
+      description: `DropYourSaaS Directory Indexing: ${entryName}`,
     },
   });
 
