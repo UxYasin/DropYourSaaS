@@ -6,6 +6,7 @@ import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIc
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
+import { IS_FREE_MODE } from '@/lib/copy';
 
 import { CATEGORIES } from '@/lib/categories';
 
@@ -171,7 +172,7 @@ export function SubmissionModal({
                   {title || url}
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-primary/20 text-primary font-bold">
-                  #{selectedRank} Spot · ${bid}
+                  #{selectedRank} Spot · {IS_FREE_MODE ? 'FREE' : `$${bid}`}
                 </span>
               </div>
               <p className="font-body text-xs text-zinc-400 line-clamp-2 mt-0.5">
@@ -335,7 +336,7 @@ export function SubmissionModal({
                 </>
               ) : (
                 <>
-                  Save & Continue (${bid})
+                  Save & Continue {IS_FREE_MODE ? '(Free)' : `($${bid})`}
                   <ArrowRight className="size-4" />
                 </>
               )}

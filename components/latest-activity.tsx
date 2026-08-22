@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { LatestActivitySkeleton } from '@/components/latest-activity-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
+import { siteCopy } from '@/lib/copy';
 
 export function LatestActivity() {
   const [items, setItems] = useState<{ name: string; rank: number; amount: string; time: string; url: string }[]>([]);
@@ -100,7 +101,9 @@ export function LatestActivity() {
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono">
                       #{item.rank}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
+                    {siteCopy.feed.showPrices && (
+                      <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
+                    )}
                   </div>
                   <span className="text-[10px] text-muted-foreground font-sans shrink-0">{item.time}</span>
                 </a>

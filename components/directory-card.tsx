@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Sparkles, Clock, MousePointerClick, ChevronRight, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
+import { siteCopy } from '@/lib/copy';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
@@ -141,15 +142,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
             {/* Price & CTA */}
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-              <div className="font-mono font-black text-2xl sm:text-3xl text-sky-500 tracking-tight shrink-0">
-                {formatBid(item.bid)}
-              </div>
+              {siteCopy.feed.showPrices && (
+                <div className="font-mono font-black text-2xl sm:text-3xl text-sky-500 tracking-tight shrink-0">
+                  {formatBid(item.bid)}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
                 className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0"
               >
-                Take this spot
+                {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
@@ -289,15 +292,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
             {/* Price & CTA */}
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
-              <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight shrink-0 ${theme.priceColor}`}>
-                {formatBid(item.bid)}
-              </div>
+              {siteCopy.feed.showPrices && (
+                <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight shrink-0 ${theme.priceColor}`}>
+                  {formatBid(item.bid)}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
                 className={`px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 ${theme.btn}`}
               >
-                Take this spot
+                {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
@@ -413,15 +418,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
             {/* Price & CTA */}
             <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
-              <div className={`font-mono font-black text-sm sm:text-base ${currentStyle.text}`}>
-                {formatBid(item.bid)}
-              </div>
+              {siteCopy.feed.showPrices && (
+                <div className={`font-mono font-black text-sm sm:text-base ${currentStyle.text}`}>
+                  {formatBid(item.bid)}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
                 className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
               >
-                Take spot
+                {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
@@ -481,15 +488,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
               {clicks.toLocaleString()} clicks
             </span>
-            <div className="font-mono font-black text-xs sm:text-sm text-sky-500">
-              {formatBid(item.bid)}
-            </div>
+            {siteCopy.feed.showPrices && (
+              <div className="font-mono font-black text-xs sm:text-sm text-sky-500">
+                {formatBid(item.bid)}
+              </div>
+            )}
             <button
               type="button"
               onClick={() => onClaimClick(item.rank, item.bid + 1)}
               className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
             >
-              Claim
+              {siteCopy.feed.listingButton}
             </button>
           </div>
         </div>

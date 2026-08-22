@@ -1,6 +1,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
+import { siteCopy } from '@/lib/copy';
 
 export default function AboutPage() {
   return (
@@ -16,15 +17,7 @@ export default function AboutPage() {
                 We provide builders and founders with high-visibility listing slots to showcase their products
                 to developers, founders, and early adopters.
               </p>
-              <p>
-                The indexing system is transparent and self-serve: submit your SaaS profile to secure an active
-                directory tier. Products with higher indexing tiers receive prime placement across our directory,
-                trending feeds, and discoverability channels.
-              </p>
-              <p>
-                Existing listings can upgrade their tier at any time by paying the tier difference to boost their
-                placement and maximize discovery.
-              </p>
+              <p>{siteCopy.about.modelDescription}</p>
             </div>
           </div>
         </main>

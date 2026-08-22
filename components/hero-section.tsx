@@ -7,6 +7,7 @@ import { Globe, Minus, Plus, Loader2 } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { LiveStatsPill } from '@/components/live-stats-pill';
 import { SubmissionModal, type ScrapedData } from '@/components/submission-modal';
+import { siteCopy, IS_FREE_MODE } from '@/lib/copy';
 
 import { CATEGORIES } from '@/lib/categories';
 import { Tag, Sparkles as SparklesIcon, ChevronDown, ChevronUp, DollarSign, Mail } from 'lucide-react';
@@ -136,42 +137,50 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         <LiveStatsPill />
       </div>
       <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight max-w-2xl mx-auto">
-        List Your SaaS for{' '}
-        <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">
-          <button
-            type="button"
-            onClick={handleDecrease}
-            className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
-            aria-label="Decrease tier amount"
-          >
-            <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </button>
-          <input
-            type="text"
-            value={bidText}
-            onChange={(e) => {
-              const num = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
-              if (!isNaN(num) && num >= 1 && num <= 100000) {
-                setBid(num);
-                onBidChange?.(num);
-              }
-            }}
-            className="bg-transparent border-none outline-none text-primary text-center font-mono font-bold text-3xl sm:text-4xl md:text-5xl p-0 focus:ring-0 w-auto min-w-0"
-            size={bidText.length}
-          />
-          <button
-            type="button"
-            onClick={handleIncrease}
-            className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
-            aria-label="Increase tier amount"
-          >
-            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </button>
-        </div>
+        {IS_FREE_MODE ? (
+          <>
+            List Your SaaS for{' '}
+            <span className="text-primary font-mono font-bold">Free</span>
+          </>
+        ) : (
+          <>
+            List Your SaaS for{' '}
+            <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">
+              <button
+                type="button"
+                onClick={handleDecrease}
+                className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+                aria-label="Decrease tier amount"
+              >
+                <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </button>
+              <input
+                type="text"
+                value={bidText}
+                onChange={(e) => {
+                  const num = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
+                  if (!isNaN(num) && num >= 1 && num <= 100000) {
+                    setBid(num);
+                    onBidChange?.(num);
+                  }
+                }}
+                className="bg-transparent border-none outline-none text-primary text-center font-mono font-bold text-3xl sm:text-4xl md:text-5xl p-0 focus:ring-0 w-auto min-w-0"
+                size={bidText.length}
+              />
+              <button
+                type="button"
+                onClick={handleIncrease}
+                className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+                aria-label="Increase tier amount"
+              >
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </button>
+            </div>
+          </>
+        )}
       </h1>
       <p className="text-muted-foreground mt-3 text-xs sm:text-sm max-w-[60ch] mx-auto leading-relaxed">
-        Instant directory indexing starting at $1. Submit your project profile to be featured across
-        our verified developer index.
+        {siteCopy.hero.description}
       </p>
 
       <div className="mt-7 max-w-xl mx-auto px-4">
@@ -334,7 +343,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         {error && <p className="text-xs text-destructive mt-2 text-center font-medium">{error}</p>}
 
         <p className="mt-3.5 text-xs text-muted-foreground leading-relaxed text-center">
-          Already listed? Drop in the same link to push your tier higher — you&apos;re only charged the difference.
+          {siteCopy.hero.subtext}
         </p>
       </div>
 

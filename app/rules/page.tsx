@@ -1,6 +1,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
+import { siteCopy } from '@/lib/copy';
 
 export default function RulesPage() {
   return (
@@ -14,29 +15,18 @@ export default function RulesPage() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">How Directory Indexing Works</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
-                  <li>Directory listings start at $1 USD minimum.</li>
-                  <li>
-                    Products featured on the index maintain their verified placement tier based on their profile indexing level.
-                  </li>
-                  <li>
-                    Submissions placed at any tier are indexed in the public directory and discoverable immediately.
-                  </li>
-                  <li>
-                    Equal indexing tiers maintain chronologically ordered placements (earlier verified profiles maintain priority).
-                  </li>
+                  {siteCopy.guidelines.indexingRules.map((rule, idx) => (
+                    <li key={idx}>{rule}</li>
+                  ))}
                 </ul>
               </section>
 
               <section>
                 <h2 className="text-xl font-semibold mb-3">Tier Upgrades &amp; Profile Boosting</h2>
                 <ul className="space-y-2 text-muted-foreground list-disc list-inside">
-                  <li>
-                    Enter your previously listed website URL or handle to upgrade your project to a higher tier.
-                  </li>
-                  <li>
-                    Upgrades require a minimum $1 increase over your current tier; you only pay the upgrade difference.
-                  </li>
-                  <li>All profile metadata, titles, and preview descriptions are dynamically refreshed upon upgrade.</li>
+                  {siteCopy.guidelines.upgradeRules.map((rule, idx) => (
+                    <li key={idx}>{rule}</li>
+                  ))}
                 </ul>
               </section>
 
