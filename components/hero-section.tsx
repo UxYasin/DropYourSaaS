@@ -171,24 +171,16 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       </p>
 
       <div className="mt-7 max-w-xl mx-auto px-4">
-        {/* Glow wrapper with dynamic 24px radius */}
+        {/* Glow wrapper with fixed 24px radius */}
         <div className="relative group/input text-left">
           {/* Animated rainbow glow */}
-          <div
-            className={`absolute -inset-[2px] transition-all duration-300 pointer-events-none ${
-              isExpanded ? 'rounded-[26px]' : 'rounded-full'
-            } animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm`}
-          />
-          <div
-            className={`absolute -inset-[1px] transition-all duration-300 pointer-events-none ${
-              isExpanded ? 'rounded-[25px]' : 'rounded-full'
-            } animate-rainbow-glow opacity-55`}
-          />
+          <div className="absolute -inset-[2px] rounded-[26px] transition-all duration-300 pointer-events-none animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm" />
+          <div className="absolute -inset-[1px] rounded-[25px] transition-all duration-300 pointer-events-none animate-rainbow-glow opacity-55" />
 
-          {/* Expanding Container with 24px border radius */}
+          {/* 24px Container in both collapsed and expanded states */}
           <div
-            className={`relative bg-card border border-border/80 shadow-xl transition-all duration-300 ease-out overflow-hidden ${
-              isExpanded ? 'rounded-[24px] p-4 sm:p-5' : 'rounded-full p-1.5 sm:p-2'
+            className={`relative bg-card border border-border/80 shadow-xl rounded-[24px] transition-all duration-300 ease-out overflow-hidden ${
+              isExpanded ? 'p-4 sm:p-5' : 'p-1.5 sm:p-2'
             }`}
           >
             {/* Top Input Row */}
@@ -219,7 +211,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               {!isExpanded && (
                 <button
                   type="button"
-                  className="h-10 sm:h-11 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
+                  className="h-10 sm:h-11 px-5 sm:px-6 rounded-[18px] shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
                   onClick={() => setIsExpanded(true)}
                 >
                   <Plus className="size-3.5 sm:size-4" />
