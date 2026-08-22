@@ -188,7 +188,13 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             }`}
           >
             {/* Top Input Row */}
-            <div className="flex items-center">
+            <div
+              className={`flex items-center transition-all duration-200 ${
+                isExpanded
+                  ? 'bg-[#f5f5f5] dark:bg-muted/40 border border-border/60 rounded-[18px] p-1.5 sm:p-2'
+                  : ''
+              }`}
+            >
               <div className="relative flex-1 flex items-center min-w-0">
                 {isHandle ? (
                   <XIcon className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
