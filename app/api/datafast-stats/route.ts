@@ -57,7 +57,10 @@ export async function GET() {
       }
 
       if (overviewData) {
-        if (typeof overviewData?.data?.visitors === 'number') {
+        if (Array.isArray(overviewData?.data) && typeof overviewData.data[0]?.visitors === 'number') {
+          visitors = overviewData.data[0].visitors;
+          isLive = true;
+        } else if (typeof overviewData?.data?.visitors === 'number') {
           visitors = overviewData.data.visitors;
           isLive = true;
         } else if (typeof overviewData?.data?.totalVisitors === 'number') {
