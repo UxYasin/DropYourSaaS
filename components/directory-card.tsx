@@ -62,13 +62,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   ]).slice(0, 6);
 
   /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (2x Height of #2/#3, Pure Image Gallery)
+     VARIANT 1: #1 SPOT (2x Height of #2/#3, Animated Rainbow Glow)
      ------------------------------------------------------------- */
   if (variant === 'top1') {
     return (
-      <div ref={containerRef} className="group relative">
-        <Card className="rounded-[22px] border-2 border-amber-500/40 bg-card p-5 sm:p-6 shadow-md hover:border-amber-500/70 hover:shadow-lg transition-all duration-200 overflow-hidden">
-          {/* Subtle glowing ambient accent */}
+      <div ref={containerRef} className="group relative my-2">
+        {/* Animated Rainbow Glowing Outer Shadow */}
+        <div className="absolute -inset-1 sm:-inset-1.5 rounded-[26px] animate-rainbow-glow opacity-85 blur-lg group-hover:opacity-100 group-hover:blur-xl transition-all duration-300 pointer-events-none" />
+        <div className="absolute -inset-0.5 rounded-[24px] animate-rainbow-glow opacity-90 pointer-events-none" />
+
+        <Card className="relative rounded-[22px] border-none bg-card/95 backdrop-blur-md p-5 sm:p-6 shadow-2xl transition-all duration-200 overflow-hidden">
+          {/* Subtle glowing ambient internal accent */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl -z-10 pointer-events-none" />
 
           {/* Main info header */}
@@ -107,7 +111,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     <span className="truncate">{title}</span>
                     <ExternalLink className="size-4 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/30 shrink-0">
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
                     TOP SPOT #1
                   </span>
                 </div>
@@ -125,7 +129,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-sm hover:shadow active:scale-95 transition-all"
+                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all"
               >
                 Take this spot
               </button>
@@ -144,7 +148,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </span>
           </div>
 
-          {/* Pure Image Container Gallery (No text blocks, pure screenshots/images) */}
+          {/* Pure Image Container Gallery */}
           <div className="mt-5 pt-4 border-t border-border/60">
             <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
               {displayImages.map((imgUrl, idx) => (
@@ -178,19 +182,41 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   }
 
   /* -------------------------------------------------------------
-     VARIANT 2: TOP 2 & TOP 3 (Prominent Podium Cards with Big Thumb)
+     VARIANT 2: TOP 2 & TOP 3 (Prominent Colored Podium Cards)
      ------------------------------------------------------------- */
   if (variant === 'top2_3') {
     const isRank2 = item.rank === 2;
-    const accentBorder = isRank2 ? 'border-sky-500/30 hover:border-sky-500/60' : 'border-amber-500/30 hover:border-amber-500/60';
-    const numColor = isRank2 ? 'text-sky-600 dark:text-sky-400' : 'text-amber-600 dark:text-amber-400';
+
+    // Spot 2: Vibrant Azure / Ice Blue Theme
+    // Spot 3: Vibrant Sunset Amber Theme
+    const theme = isRank2
+      ? {
+          bg: 'bg-[var(--bento-blue)]',
+          border: 'border-blue-300/80 dark:border-blue-700/60',
+          text: 'text-blue-950 dark:text-blue-100',
+          subtext: 'text-blue-900/75 dark:text-blue-200/75',
+          rankColor: 'text-blue-600 dark:text-blue-400',
+          badge: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-400/30',
+          btn: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+          priceColor: 'text-blue-600 dark:text-blue-400',
+        }
+      : {
+          bg: 'bg-[var(--bento-yellow)]',
+          border: 'border-amber-300/80 dark:border-amber-700/60',
+          text: 'text-amber-950 dark:text-amber-100',
+          subtext: 'text-amber-900/75 dark:text-amber-200/75',
+          rankColor: 'text-amber-600 dark:text-amber-400',
+          badge: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-400/30',
+          btn: 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm',
+          priceColor: 'text-amber-600 dark:text-amber-400',
+        };
 
     return (
       <div ref={containerRef} className="group relative">
-        <Card className={`rounded-[18px] border ${accentBorder} bg-card p-4 sm:p-5 shadow-[var(--shadow-1)] hover:shadow-md transition-all duration-200 overflow-hidden`}>
+        <div className={`rounded-[20px] border ${theme.border} ${theme.bg} p-4 sm:p-5 shadow-[var(--shadow-1)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden`}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 min-w-0 flex-1">
-              <span className={`font-mono text-xl sm:text-2xl font-bold shrink-0 mt-0.5 ${numColor}`}>
+              <span className={`font-mono text-xl sm:text-2xl font-black shrink-0 mt-0.5 ${theme.rankColor}`}>
                 #{item.rank}
               </span>
               <a
@@ -200,7 +226,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 onClick={handleClick}
                 className="shrink-0"
               >
-                <div className="size-12 sm:size-14 rounded-[12px] bg-muted/80 p-1.5 border border-border/80 shadow-sm flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                <div className="size-12 sm:size-14 rounded-[14px] bg-background/90 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
                   <Image
                     src={favicon}
                     alt={item.name}
@@ -218,22 +244,25 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className="font-bold text-base sm:text-lg text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                    className={`font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 ${theme.text}`}
                   >
                     <span className="truncate">{title}</span>
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
+                    {isRank2 ? 'PODIUM #2' : 'PODIUM #3'}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${theme.subtext}`}>
                   {description}
                 </p>
                 <div className="flex items-center gap-3 mt-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium text-[11px]">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium text-[11px] ${theme.badge}`}>
                     <Sparkles className="size-3" />
                     {item.clicks.toLocaleString()} clicks
                   </span>
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Clock className="size-3 text-muted-foreground/70" />
+                  <span className={`text-[11px] flex items-center gap-1 ${theme.subtext}`}>
+                    <Clock className="size-3 opacity-70" />
                     {item.time}
                   </span>
                 </div>
@@ -242,19 +271,19 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
             {/* Price & CTA */}
             <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className="font-mono font-bold text-xl sm:text-2xl text-sky-500 tracking-tight">
+              <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight ${theme.priceColor}`}>
                 {formatBid(item.bid)}
               </div>
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all"
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs shadow-xs active:scale-95 transition-all ${theme.btn}`}
               >
                 Take this spot
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }

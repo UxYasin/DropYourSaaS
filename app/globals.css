@@ -155,10 +155,34 @@
   body {
     @apply bg-background text-foreground;
     }
-  button:not(:disabled), [role="button"]:not(:disabled) {
-    cursor: pointer;
-    }
   html {
     @apply font-sans;
-    }
+  }
+}
+
+@keyframes rainbow-glow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rainbow-glow {
+  background: linear-gradient(
+    90deg,
+    #ff007a,
+    #9600ff,
+    #00bfff,
+    #00ffaa,
+    #ffea00,
+    #ff5e00,
+    #ff007a
+  );
+  background-size: 300% 300%;
+  animation: rainbow-glow 6s ease infinite;
 }
