@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist_Mono, Inter } from 'next/font/google';
+import { Geist_Mono, Inconsolata, Inter } from 'next/font/google';
 
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -14,11 +14,23 @@ export const metadata: Metadata = {
   },
 };
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 const fontMono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+});
+
+const inconsolata = Inconsolata({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
 });
 
 export default function RootLayout({
@@ -30,9 +42,15 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn('antialiased', fontMono.variable, 'font-sans', inter.variable)}
+      className={cn(
+        'antialiased',
+        fontMono.variable,
+        inter.variable,
+        inconsolata.variable,
+        'font-body'
+      )}
     >
-      <body>
+      <body className="font-body">
         <ThemeProvider>{children}</ThemeProvider>
         <UmamiAnalytics />
       </body>

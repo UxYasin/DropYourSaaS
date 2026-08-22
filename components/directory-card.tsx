@@ -106,16 +106,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className="font-bold text-lg sm:text-xl text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                    className="font-mono font-black text-lg sm:text-xl text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
                   >
                     <span className="truncate">{title}</span>
                     <ExternalLink className="size-4 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
-                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
+                  <span className="font-sans text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
                     TOP SPOT #1
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
+                <p className="font-body text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
                   {description}
                 </p>
               </div>
@@ -137,12 +137,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           </div>
 
           {/* Stats Bar */}
-          <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium text-[11px]">
+          <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground font-sans">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium text-[11px] font-sans">
               <Sparkles className="size-3" />
               {item.clicks.toLocaleString()} clicks
             </span>
-            <span className="flex items-center gap-1 text-[11px]">
+            <span className="flex items-center gap-1 text-[11px] font-sans">
               <Clock className="size-3 text-muted-foreground/70" />
               {item.time}
             </span>
@@ -168,7 +168,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-2">
-                    <span className="text-[10px] text-white/90 font-mono bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-white/90 font-sans bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
                       View
                     </span>
                   </div>
@@ -244,24 +244,24 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className={`font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 ${theme.text}`}
+                    className={`font-mono font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 ${theme.text}`}
                   >
                     <span className="truncate">{title}</span>
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
+                  <span className={`font-sans text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
                     {isRank2 ? 'PODIUM #2' : 'PODIUM #3'}
                   </span>
                 </div>
-                <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${theme.subtext}`}>
+                <p className={`font-body text-xs mt-1 line-clamp-2 leading-relaxed ${theme.subtext}`}>
                   {description}
                 </p>
-                <div className="flex items-center gap-3 mt-3">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium text-[11px] ${theme.badge}`}>
+                <div className="flex items-center gap-3 mt-3 font-sans">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium text-[11px] font-sans ${theme.badge}`}>
                     <Sparkles className="size-3" />
                     {item.clicks.toLocaleString()} clicks
                   </span>
-                  <span className={`text-[11px] flex items-center gap-1 ${theme.subtext}`}>
+                  <span className={`text-[11px] font-sans flex items-center gap-1 ${theme.subtext}`}>
                     <Clock className="size-3 opacity-70" />
                     {item.time}
                   </span>
@@ -374,16 +374,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className={`font-bold text-xs sm:text-sm hover:underline transition-colors truncate ${currentStyle.text}`}
+                    className={`font-mono font-bold text-xs sm:text-sm hover:underline transition-colors truncate ${currentStyle.text}`}
                   >
                     {title}
                   </a>
                 </div>
-                <p className={`text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
+                <p className={`font-body text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
                   {description}
                 </p>
-                <div className="flex items-center gap-2.5 mt-1.5 text-[10px]">
-                  <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full ${currentStyle.badge}`}>
+                <div className="flex items-center gap-2.5 mt-1.5 text-[10px] font-sans">
+                  <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full font-sans ${currentStyle.badge}`}>
                     <Sparkles className="size-2.5" />
                     {item.clicks.toLocaleString()} clicks
                   </span>
@@ -401,7 +401,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all"
+                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
               >
                 Take spot
               </button>
@@ -420,7 +420,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
       <Card className="rounded-[12px] border border-border/70 bg-card p-2.5 sm:p-3 shadow-none hover:bg-muted/30 hover:border-border transition-all duration-150">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <span className="font-mono text-xs font-medium text-muted-foreground w-6 shrink-0 text-center">
+            <span className="font-mono text-xs font-bold text-muted-foreground w-6 shrink-0 text-center">
               #{item.rank}
             </span>
             <a
@@ -448,28 +448,28 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   target="_blank"
                   rel="sponsored noopener noreferrer"
                   onClick={handleClick}
-                  className="font-medium text-xs text-foreground hover:text-primary transition-colors truncate"
+                  className="font-mono font-bold text-xs text-foreground hover:text-primary transition-colors truncate"
                 >
                   {title}
                 </a>
               </div>
-              <p className="text-[11px] text-muted-foreground line-clamp-1">
+              <p className="font-body text-[11px] text-muted-foreground line-clamp-1">
                 {description}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="text-[10px] text-muted-foreground font-mono hidden sm:inline">
+          <div className="flex items-center gap-3 shrink-0 font-sans">
+            <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
               {item.clicks.toLocaleString()} clicks
             </span>
-            <div className="font-mono font-semibold text-xs sm:text-sm text-sky-500">
+            <div className="font-mono font-black text-xs sm:text-sm text-sky-500">
               {formatBid(item.bid)}
             </div>
             <button
               type="button"
               onClick={() => onClaimClick(item.rank, item.bid + 1)}
-              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all"
+              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
             >
               Claim
             </button>
