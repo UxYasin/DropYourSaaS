@@ -10,7 +10,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/server';
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const url: string | undefined = body?.url;
-  const name: string | undefined = body?.name;
+  const name: string | undefined = body?.title || body?.name;
   const bid: number | undefined = body?.bid;
 
   if (!url || !bid || bid < 1) {

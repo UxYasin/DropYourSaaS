@@ -3,9 +3,10 @@
 import { useState, forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Globe, Minus, Plus } from 'lucide-react';
+import { Globe, Minus, Plus, Loader2 } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { LiveStatsPill } from '@/components/live-stats-pill';
+import { SubmissionModal, type ScrapedData } from '@/components/submission-modal';
 
 const XIcon = ({ className, ...props }: React.ComponentProps<'svg'>) => (
   <svg
@@ -34,32 +35,58 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const [bid, setBid] = useState(selectedBid || 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleClaim = async () => {
     if (!url.trim()) {
-      setError('Enter a URL or @handle first');
+      setError('Enter a SaaS website link or App store link first');
       return;
     }
-    const normalizedUrl = /^https?:\/\//.test(url) ? url : `https://${url.replace(/^@/, '')}`;
-
-    trackEvent('checkout_started', { url: normalizedUrl, bid });
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url.trim() : `https://${url.trim().replace(/^@/, '')}`;
 
     setIsSubmitting(true);
     setError(null);
+
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/metadata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: normalizedUrl, bid }),
+        body: JSON.stringify({ url: normalizedUrl }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong');
-        return;
+
+      const result = await res.json();
+      if (result?.success && result?.data) {
+        setScrapedData(result.data);
+      } else {
+        let hostname = '';
+        try {
+          hostname = new URL(normalizedUrl).hostname;
+        } catch {}
+        setScrapedData({
+          title: hostname || normalizedUrl,
+          description: '',
+          favicon: `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`,
+          screenshotUrl: `https://api.microlink.io/?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
+          url: normalizedUrl,
+          hostname,
+        });
       }
-      window.location.href = data.checkoutUrl;
+      setIsModalOpen(true);
     } catch {
-      setError('Something went wrong');
+      let hostname = '';
+      try {
+        hostname = new URL(normalizedUrl).hostname;
+      } catch {}
+      setScrapedData({
+        title: hostname || normalizedUrl,
+        description: '',
+        favicon: `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`,
+        screenshotUrl: `https://api.microlink.io/?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
+        url: normalizedUrl,
+        hostname,
+      });
+      setIsModalOpen(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -158,8 +185,17 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               onClick={handleClaim}
               disabled={isSubmitting}
             >
-              <Plus className="size-3.5 sm:size-4" />
-              <span>{isSubmitting ? 'Redirecting…' : selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-3.5 sm:size-4 animate-spin" />
+                  <span>Fetching...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="size-3.5 sm:size-4" />
+                  <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -170,6 +206,15 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           Already listed? Drop in the same link to push your tier higher — you&apos;re only charged the difference.
         </p>
       </div>
+
+      <SubmissionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={scrapedData}
+        bid={bid}
+        selectedRank={displayRank}
+      />
     </section>
   );
 });
+
