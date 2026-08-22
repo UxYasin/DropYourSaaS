@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { ProfileMenu } from '@/components/profile-menu';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -95,6 +96,7 @@ export function Header() {
           </nav>
           <LiveStatsPill compact />
           <ThemeToggle />
+          <ProfileMenu />
         </div>
       </div>
     </header>
