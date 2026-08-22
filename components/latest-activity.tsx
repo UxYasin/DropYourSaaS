@@ -8,31 +8,22 @@ import { LatestActivitySkeleton } from '@/components/latest-activity-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 
-const fallbackActivity = [
-  { name: 'nippy.host', rank: 132, amount: '$14', time: 'just now', url: 'https://nippy.host' },
-  { name: 'maltacasino.se', rank: 169, amount: '$7', time: 'just now', url: 'https://maltacasino.se' },
-  { name: 'jobfast.co', rank: 233, amount: '$5', time: '2 minutes ago', url: 'https://jobfast.co' },
-  { name: 'outrank.so', rank: 1, amount: '$12,052', time: '3 minutes ago', url: 'https://outrank.so' },
-  { name: 'aiapply.co', rank: 131, amount: '$14', time: '4 minutes ago', url: 'https://aiapply.co' },
-];
-
 export function LatestActivity() {
-  const [items, setItems] = useState<typeof fallbackActivity>(fallbackActivity);
+  const [items, setItems] = useState<{ name: string; rank: number; amount: string; time: string; url: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     const fetchLatest = async () => {
       try {
-        const res = await fetch('/api/leaderboard');
+        const res = await fetch('/api/leaderboard?type=recent');
         if (res.ok) {
           const data = await res.json();
-          if (active && Array.isArray(data.items) && data.items.length > 0) {
-            // Take the first 5 active items
-            const mapped = data.items.slice(0, 5).map((it: LeaderboardItem) => ({
+          if (active && Array.isArray(data.items)) {
+            const mapped = data.items.map((it: LeaderboardItem) => ({
               name: it.name,
               rank: it.rank,
-              amount: `$${it.bid.toLocaleString()}`,
+              amount: `$${(it.bid || 0).toLocaleString()}`,
               time: it.time,
               url: it.url,
             }));
@@ -40,7 +31,7 @@ export function LatestActivity() {
           }
         }
       } catch {
-        // Fallback
+        // Handle error
       } finally {
         if (active) setIsLoading(false);
       }
@@ -69,48 +60,54 @@ export function LatestActivity() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="space-y-1.5">
-          {items.map((item, i) => {
-            const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=recent&utm_campaign=listings`;
+        {items.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground font-mono">
+            No recent submissions yet
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {items.map((item, i) => {
+              const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=recent&utm_campaign=listings`;
 
-            return (
-              <a
-                key={item.name + i}
-                href={href}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={() => {
-                  trackEvent('outbound_click', { url: item.url, source: 'recent_submissions' });
-                  fetch('/api/click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: item.url }),
-                  }).catch(() => {});
-                }}
-                className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
-              >
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <Image
-                    src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
-                    alt={item.name}
-                    width={14}
-                    height={14}
-                    className="rounded flex-shrink-0"
-                    unoptimized
-                  />
-                  <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
-                    {item.name}
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono">
-                    #{item.rank}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
-                </div>
-                <span className="text-[10px] text-muted-foreground font-sans shrink-0">{item.time}</span>
-              </a>
-            );
-          })}
-        </div>
+              return (
+                <a
+                  key={item.name + i}
+                  href={href}
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                  onClick={() => {
+                    trackEvent('outbound_click', { url: item.url, source: 'recent_submissions' });
+                    fetch('/api/click', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ url: item.url }),
+                    }).catch(() => {});
+                  }}
+                  className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <Image
+                      src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
+                      alt={item.name}
+                      width={14}
+                      height={14}
+                      className="rounded flex-shrink-0"
+                      unoptimized
+                    />
+                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
+                      {item.name}
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono">
+                      #{item.rank}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-sans shrink-0">{item.time}</span>
+                </a>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

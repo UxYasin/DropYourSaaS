@@ -19,6 +19,7 @@ export interface ScrapedData {
   category?: string;
   isForSale?: boolean;
   askingPrice?: string;
+  email?: string;
 }
 
 interface SubmissionModalProps {
@@ -45,7 +46,7 @@ export function SubmissionModal({
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [category, setCategory] = useState('SaaS');
   const [isForSale, setIsForSale] = useState(false);
-  const [askingPrice, setAskingPrice] = useState('');
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +59,7 @@ export function SubmissionModal({
       setScreenshotUrl(initialData.screenshotUrl || '');
       setCategory(initialData.category || 'SaaS');
       setIsForSale(Boolean(initialData.isForSale));
-      setAskingPrice(initialData.askingPrice || '');
+      setEmail(initialData.email || '');
     }
   }, [initialData]);
 
@@ -257,36 +258,38 @@ export function SubmissionModal({
               <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
                 Marketplace
               </label>
-              <button
-                type="button"
-                onClick={() => setIsForSale(!isForSale)}
-                className={`w-full h-10 px-3 rounded-xl border text-xs font-sans font-medium flex items-center justify-between transition-colors ${
-                  isForSale
-                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <span>List for Sale?</span>
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                  isForSale ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'
-                }`}>
-                  {isForSale ? 'YES' : 'NO'}
-                </span>
-              </button>
+              <div className="w-full h-10 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-sans font-medium flex items-center justify-between">
+                <span className="text-zinc-300">List for Sale?</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isForSale}
+                  onClick={() => setIsForSale(!isForSale)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isForSale ? 'bg-emerald-500' : 'bg-zinc-700'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      isForSale ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Asking Price if For Sale */}
+          {/* Email input if For Sale */}
           {isForSale && (
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150">
               <label className="block text-xs font-medium text-amber-300 mb-1 font-sans">
-                Asking Price / Valuation
+                Your Email
               </label>
               <Input
-                type="text"
-                value={askingPrice}
-                onChange={(e) => setAskingPrice(e.target.value)}
-                placeholder="e.g. $5,000 or Open to Offers"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
                 className="bg-zinc-950/80 border-amber-500/40 text-white font-sans text-xs h-9 rounded-lg"
               />
               <p className="text-[10px] text-amber-300/80 mt-1 font-body">

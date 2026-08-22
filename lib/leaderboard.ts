@@ -6,20 +6,102 @@ const CACHE_KEY = 'leaderboard:v1';
 const CACHE_TTL_SECONDS = 30;
 
 // Cache-aside: serve from Redis when possible so the leaderboard page
-// (read constantly) doesn't hit Postgres on every request. The cache is
-// invalidated the moment a bid is paid, so it's never more than
-// CACHE_TTL_SECONDS stale even without an explicit invalidation.
+// (read constantly) doesn't hit Postgres on every request.
 export async function getLeaderboard(): Promise<LeaderboardItem[]> {
-  const cached = await redis.get<LeaderboardItem[]>(CACHE_KEY);
-  if (cached) return cached;
+  try {
+    const cached = await redis.get<LeaderboardItem[]>(CACHE_KEY);
+    if (cached) return cached;
+  } catch {
+    // Graceful fallback if Redis is unavailable or unconfigured
+  }
 
   const items = await fetchLeaderboardFromDatabase();
-  await redis.set(CACHE_KEY, items, { ex: CACHE_TTL_SECONDS });
+  try {
+    await redis.set(CACHE_KEY, items, { ex: CACHE_TTL_SECONDS });
+  } catch {}
+  return items;
+}
+
+export async function getTrendingLeaderboard(limit = 5): Promise<LeaderboardItem[]> {
+  const cacheKey = `leaderboard:trending:v1:${limit}`;
+  try {
+    const cached = await redis.get<LeaderboardItem[]>(cacheKey);
+    if (cached) return cached;
+  } catch {}
+
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('leaderboard_entries')
+    .select('url, name, bid_cents, clicks, claimed_at')
+    .order('clicks', { ascending: false })
+    .order('claimed_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  const items: LeaderboardItem[] = (data ?? []).map((row, index) => ({
+    rank: index + 1,
+    name: row.name,
+    bid: row.bid_cents / 100,
+    url: row.url,
+    clicks: row.clicks ?? 0,
+    time: formatRelativeTime(row.claimed_at),
+  }));
+
+  try {
+    await redis.set(cacheKey, items, { ex: CACHE_TTL_SECONDS });
+  } catch {}
+
+  return items;
+}
+
+export async function getRecentSubmissions(limit = 5): Promise<LeaderboardItem[]> {
+  const cacheKey = `leaderboard:recent:v1:${limit}`;
+  try {
+    const cached = await redis.get<LeaderboardItem[]>(cacheKey);
+    if (cached) return cached;
+  } catch {}
+
+  const supabase = getSupabaseServerClient();
+
+  const { data: allEntries, error: allErr } = await supabase
+    .from('leaderboard_entries')
+    .select('url, name, bid_cents, clicks, claimed_at')
+    .order('bid_cents', { ascending: false });
+
+  if (allErr) throw allErr;
+
+  const rankMap = new Map<string, number>();
+  (allEntries ?? []).forEach((row, idx) => {
+    rankMap.set(row.url, idx + 1);
+  });
+
+  const recentRows = [...(allEntries ?? [])]
+    .sort((a, b) => new Date(b.claimed_at).getTime() - new Date(a.claimed_at).getTime())
+    .slice(0, limit);
+
+  const items: LeaderboardItem[] = recentRows.map((row) => ({
+    rank: rankMap.get(row.url) ?? 1,
+    name: row.name,
+    bid: row.bid_cents / 100,
+    url: row.url,
+    clicks: row.clicks ?? 0,
+    time: formatRelativeTime(row.claimed_at),
+  }));
+
+  try {
+    await redis.set(cacheKey, items, { ex: CACHE_TTL_SECONDS });
+  } catch {}
+
   return items;
 }
 
 export async function invalidateLeaderboardCache() {
-  await redis.del(CACHE_KEY);
+  try {
+    await redis.del(CACHE_KEY);
+    await redis.del('leaderboard:trending:v1:5');
+    await redis.del('leaderboard:recent:v1:5');
+  } catch {}
 }
 
 async function fetchLeaderboardFromDatabase(): Promise<LeaderboardItem[]> {
@@ -50,3 +132,4 @@ function formatRelativeTime(iso: string) {
   const days = Math.floor(hours / 24);
   return days === 1 ? 'yesterday' : `${days} days ago`;
 }
+

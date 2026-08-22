@@ -38,7 +38,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const [bid, setBid] = useState(selectedBid || 1);
   const [category, setCategory] = useState<string>('SaaS');
   const [isForSale, setIsForSale] = useState(false);
-  const [askingPrice, setAskingPrice] = useState('');
+  const [email, setEmail] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           ...result.data,
           category,
           isForSale,
-          askingPrice,
+          email,
         });
       } else {
         let hostname = '';
@@ -84,7 +84,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           hostname,
           category,
           isForSale,
-          askingPrice,
+          email,
         });
       }
       setIsModalOpen(true);
@@ -102,7 +102,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         hostname,
         category,
         isForSale,
-        askingPrice,
+        email,
       });
       setIsModalOpen(true);
     } finally {
@@ -275,30 +275,34 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
                       <button
                         type="button"
+                        role="switch"
+                        aria-checked={isForSale}
                         onClick={() => setIsForSale(!isForSale)}
-                        className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-colors border shrink-0 ${
-                          isForSale
-                            ? 'bg-amber-500 text-black border-amber-500'
-                            : 'bg-muted text-muted-foreground border-border/70 hover:text-foreground'
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isForSale ? 'bg-emerald-500' : 'bg-zinc-600'
                         }`}
                       >
-                        {isForSale ? 'YES' : 'NO'}
+                        <span
+                          className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                            isForSale ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Asking Price if For Sale is toggled on */}
+                {/* Email input if For Sale is toggled on */}
                 {isForSale && (
                   <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150 text-left">
                     <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
-                      Asking Price / Target Valuation
+                      Your Email
                     </label>
                     <input
-                      type="text"
-                      value={askingPrice}
-                      onChange={(e) => setAskingPrice(e.target.value)}
-                      placeholder="e.g. $5,000 or Open to Offers"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
                       className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
                     />
                   </div>

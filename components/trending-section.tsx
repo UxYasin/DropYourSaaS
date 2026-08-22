@@ -17,19 +17,15 @@ export function TrendingSection() {
     let active = true;
     const fetchTrending = async () => {
       try {
-        const res = await fetch('/api/leaderboard');
+        const res = await fetch('/api/leaderboard?type=trending');
         if (res.ok) {
           const data = await res.json();
           if (active && Array.isArray(data.items)) {
-            // Sort by clicks descending and take top 5
-            const sorted = [...data.items]
-              .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-              .slice(0, 5);
-            setItems(sorted);
+            setItems(data.items);
           }
         }
       } catch {
-        // Keep fallback
+        // Handle network error
       } finally {
         if (active) setIsLoading(false);
       }
@@ -43,14 +39,6 @@ export function TrendingSection() {
 
   if (isLoading) return <TrendingSkeleton />;
 
-  const displayItems = items.length > 0 ? items : [
-    { rank: 1, name: 'outrank.so', clicks: 0, bid: 12052, url: 'https://outrank.so', time: '3m ago' },
-    { rank: 2, name: 'orynth.dev', clicks: 0, bid: 12051, url: 'https://orynth.dev', time: '12m ago' },
-    { rank: 3, name: 'trycomp.ai', clicks: 0, bid: 10000, url: 'https://trycomp.ai', time: '1h ago' },
-    { rank: 4, name: 'lathire.com', clicks: 0, bid: 3100, url: 'https://lathire.com', time: '2h ago' },
-    { rank: 5, name: 'mytb.ai', clicks: 0, bid: 2999, url: 'https://mytb.ai', time: '3h ago' },
-  ];
-
   return (
     <Card className="p-3.5 border-border shadow-[var(--shadow-1)] bg-card rounded-xl">
       <CardHeader className="p-0 pb-3">
@@ -63,47 +51,53 @@ export function TrendingSection() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="space-y-1.5">
-          {displayItems.map((item, i) => {
-            const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=trending&utm_campaign=listings`;
+        {items.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground font-mono">
+            No trending submissions yet
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {items.map((item, i) => {
+              const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=trending&utm_campaign=listings`;
 
-            return (
-              <a
-                key={item.name + i}
-                href={href}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={() => {
-                  trackEvent('outbound_click', { url: item.url, source: 'trending' });
-                  fetch('/api/click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: item.url }),
-                  }).catch(() => {});
-                }}
-                className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="text-[10px] font-mono text-muted-foreground w-3.5">{i + 1}</span>
-                  <Image
-                    src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
-                    alt={item.name}
-                    width={14}
-                    height={14}
-                    className="rounded flex-shrink-0"
-                    unoptimized
-                  />
-                  <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
-                    {item.name}
-                  </span>
-                </div>
-                <Badge variant="secondary" className="text-[10px] font-mono font-normal px-2 py-0 h-4 bg-muted/80 text-muted-foreground shrink-0">
-                  {item.clicks.toLocaleString()} clicks
-                </Badge>
-              </a>
-            );
-          })}
-        </div>
+              return (
+                <a
+                  key={item.name + i}
+                  href={href}
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                  onClick={() => {
+                    trackEvent('outbound_click', { url: item.url, source: 'trending' });
+                    fetch('/api/click', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ url: item.url }),
+                    }).catch(() => {});
+                  }}
+                  className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-[10px] font-mono text-muted-foreground w-3.5">{i + 1}</span>
+                    <Image
+                      src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
+                      alt={item.name}
+                      width={14}
+                      height={14}
+                      className="rounded flex-shrink-0"
+                      unoptimized
+                    />
+                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
+                      {item.name}
+                    </span>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px] font-mono font-normal px-2 py-0 h-4 bg-muted/80 text-muted-foreground shrink-0">
+                    {(item.clicks || 0).toLocaleString()} clicks
+                  </Badge>
+                </a>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
