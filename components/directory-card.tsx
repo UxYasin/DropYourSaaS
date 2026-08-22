@@ -260,15 +260,70 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   }
 
   /* -------------------------------------------------------------
-     VARIANT 3: TOP 4 TO TOP 10 (0.7x Height of #2/#3, Compact-Medium)
+     VARIANT 3: TOP 4 TO TOP 10 (0.7x Height of #2/#3, Bento Pastel Colors)
      ------------------------------------------------------------- */
   if (variant === 'top4_10') {
+    // 6 bento pastel styles matching the side rails
+    const bentoStyles = [
+      {
+        bg: 'bg-[var(--bento-blue)]',
+        border: 'border-blue-200/60 dark:border-blue-800/40',
+        text: 'text-blue-950 dark:text-blue-100',
+        subtext: 'text-blue-900/70 dark:text-blue-200/70',
+        badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
+        btn: 'text-blue-900 dark:text-blue-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-blue-300/60 dark:border-blue-700/60',
+      },
+      {
+        bg: 'bg-[var(--bento-yellow)]',
+        border: 'border-amber-200/60 dark:border-amber-800/40',
+        text: 'text-amber-950 dark:text-amber-100',
+        subtext: 'text-amber-900/70 dark:text-amber-200/70',
+        badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+        btn: 'text-amber-900 dark:text-amber-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-amber-300/60 dark:border-amber-700/60',
+      },
+      {
+        bg: 'bg-[var(--bento-mint)]',
+        border: 'border-emerald-200/60 dark:border-emerald-800/40',
+        text: 'text-emerald-950 dark:text-emerald-100',
+        subtext: 'text-emerald-900/70 dark:text-emerald-200/70',
+        badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+        btn: 'text-emerald-900 dark:text-emerald-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-emerald-300/60 dark:border-emerald-700/60',
+      },
+      {
+        bg: 'bg-[var(--bento-pink)]',
+        border: 'border-pink-200/60 dark:border-pink-800/40',
+        text: 'text-pink-950 dark:text-pink-100',
+        subtext: 'text-pink-900/70 dark:text-pink-200/70',
+        badge: 'bg-pink-500/10 text-pink-700 dark:text-pink-300',
+        btn: 'text-pink-900 dark:text-pink-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-pink-300/60 dark:border-pink-700/60',
+      },
+      {
+        bg: 'bg-[var(--bento-lavender)]',
+        border: 'border-purple-200/60 dark:border-purple-800/40',
+        text: 'text-purple-950 dark:text-purple-100',
+        subtext: 'text-purple-900/70 dark:text-purple-200/70',
+        badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
+        btn: 'text-purple-900 dark:text-purple-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-purple-300/60 dark:border-purple-700/60',
+      },
+      {
+        bg: 'bg-[var(--bento-gray)]',
+        border: 'border-zinc-300/60 dark:border-zinc-700/40',
+        text: 'text-zinc-950 dark:text-zinc-100',
+        subtext: 'text-zinc-900/70 dark:text-zinc-300/70',
+        badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300',
+        btn: 'text-zinc-900 dark:text-zinc-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-zinc-300/60 dark:border-zinc-700/60',
+      },
+    ];
+
+    const styleIndex = (item.rank - 4) % bentoStyles.length;
+    const currentStyle = bentoStyles[Math.max(0, styleIndex)];
+
     return (
       <div ref={containerRef} className="group relative">
-        <Card className="rounded-[14px] border border-border/80 bg-card p-3 sm:p-3.5 shadow-[var(--shadow-1)] hover:border-border hover:shadow-sm transition-all duration-150">
+        <div className={`rounded-[16px] border ${currentStyle.border} ${currentStyle.bg} p-3.5 sm:p-4 shadow-[var(--shadow-1)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-150`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span className="font-mono text-sm sm:text-base font-bold text-muted-foreground/80 w-6 shrink-0 text-center">
+              <span className={`font-mono text-sm sm:text-base font-black shrink-0 w-6 text-center ${currentStyle.text}`}>
                 #{item.rank}
               </span>
               <a
@@ -278,13 +333,13 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 onClick={handleClick}
                 className="shrink-0"
               >
-                <div className="size-9 sm:size-10 rounded-[10px] bg-muted/60 p-1 border border-border/70 flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                <div className="size-10 sm:size-11 rounded-[12px] bg-background/80 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
                   <Image
                     src={favicon}
                     alt={item.name}
-                    width={40}
-                    height={40}
-                    className="size-full object-contain rounded-[6px]"
+                    width={44}
+                    height={44}
+                    className="size-full object-contain rounded-[8px]"
                     unoptimized
                   />
                 </div>
@@ -296,40 +351,40 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     onClick={handleClick}
-                    className="font-semibold text-xs sm:text-sm text-foreground hover:text-primary transition-colors truncate"
+                    className={`font-bold text-xs sm:text-sm hover:underline transition-colors truncate ${currentStyle.text}`}
                   >
                     {title}
                   </a>
                 </div>
-                <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                <p className={`text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
                   {description}
                 </p>
-                <div className="flex items-center gap-2.5 mt-1 text-[10px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1 text-primary font-medium">
+                <div className="flex items-center gap-2.5 mt-1.5 text-[10px]">
+                  <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full ${currentStyle.badge}`}>
                     <Sparkles className="size-2.5" />
                     {item.clicks.toLocaleString()} clicks
                   </span>
-                  <span>·</span>
-                  <span>{item.time}</span>
+                  <span className={currentStyle.subtext}>·</span>
+                  <span className={currentStyle.subtext}>{item.time}</span>
                 </div>
               </div>
             </div>
 
             {/* Price & CTA */}
-            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-              <div className="font-mono font-bold text-sm sm:text-base text-sky-500">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+              <div className={`font-mono font-black text-sm sm:text-base ${currentStyle.text}`}>
                 {formatBid(item.bid)}
               </div>
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-2.5 sm:px-3 py-1 rounded-full font-medium text-[11px] text-orange-700 dark:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 active:scale-95 transition-all"
+                className={`px-3 py-1.5 rounded-full font-bold text-[11px] border shadow-xs active:scale-95 transition-all ${currentStyle.btn}`}
               >
                 Take spot
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
