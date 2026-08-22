@@ -223,76 +223,86 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             {/* Expanded Content Section */}
             {isExpanded && (
               <div className="mt-4 pt-4 border-t border-border/60 space-y-4 animate-in fade-in-50 duration-200">
-                {/* Category Dropdown */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                      <Tag className="size-3 text-amber-500" />
-                      Select Category
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full h-11 rounded-xl bg-background/80 border border-border/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
-                    >
-                      {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                      <ChevronDown className="size-4" />
+                {/* Category & List for Sale Row (50% - 50%) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
+                  {/* Left: Category Dropdown (50%) */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                        <Tag className="size-3 text-amber-500" />
+                        Select Category
+                      </label>
                     </div>
-                  </div>
-                </div>
 
-                {/* List for Sale Option */}
-                <div className="p-3 rounded-2xl bg-muted/30 border border-border/70">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="size-4 text-amber-500" />
-                      <div>
-                        <div className="text-xs font-bold font-sans text-foreground">
-                          List for Sale?
-                        </div>
-                        <div className="text-[10px] font-body text-muted-foreground">
-                          Feature in the upcoming Buy/Sell Marketplace
-                        </div>
+                    <div className="relative flex-1 flex items-center">
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
+                      >
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <ChevronDown className="size-4" />
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsForSale(!isForSale)}
-                      className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-colors border ${
-                        isForSale
-                          ? 'bg-amber-500 text-black border-amber-500'
-                          : 'bg-muted text-muted-foreground border-border/70 hover:text-foreground'
-                      }`}
-                    >
-                      {isForSale ? 'YES' : 'NO'}
-                    </button>
                   </div>
 
-                  {isForSale && (
-                    <div className="mt-3 pt-3 border-t border-border/50 animate-in fade-in-0 duration-150">
-                      <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
-                        Asking Price / Target Valuation
+                  {/* Right: List for Sale (50%) */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                        <DollarSign className="size-3 text-amber-500" />
+                        Marketplace
                       </label>
-                      <input
-                        type="text"
-                        value={askingPrice}
-                        onChange={(e) => setAskingPrice(e.target.value)}
-                        placeholder="e.g. $5,000 or Open to Offers"
-                        className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
-                      />
                     </div>
-                  )}
+
+                    <div className="h-12 p-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold font-sans text-foreground truncate">
+                            List for Sale?
+                          </div>
+                          <div className="text-[10px] font-body text-muted-foreground truncate">
+                            Feature in Buy/Sell
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsForSale(!isForSale)}
+                        className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-colors border shrink-0 ${
+                          isForSale
+                            ? 'bg-amber-500 text-black border-amber-500'
+                            : 'bg-muted text-muted-foreground border-border/70 hover:text-foreground'
+                        }`}
+                      >
+                        {isForSale ? 'YES' : 'NO'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Asking Price if For Sale is toggled on */}
+                {isForSale && (
+                  <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150 text-left">
+                    <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
+                      Asking Price / Target Valuation
+                    </label>
+                    <input
+                      type="text"
+                      value={askingPrice}
+                      onChange={(e) => setAskingPrice(e.target.value)}
+                      placeholder="e.g. $5,000 or Open to Offers"
+                      className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
+                    />
+                  </div>
+                )}
 
                 {/* Expanded Action Buttons Row */}
                 <div className="flex items-center justify-between pt-1 gap-2">
