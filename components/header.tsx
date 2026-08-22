@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -16,27 +15,10 @@ export function Header() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { toggleSidebar } = useSidebar();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <header className="sticky top-3 z-40 px-4 w-full max-w-3xl mx-auto flex justify-center">
-      <div
-        className={cn(
-          'w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 transition-all duration-300',
-          scrolled
-            ? 'bg-background/75 backdrop-blur-2xl shadow-md border border-solid border-border/80'
-            : 'bg-background/45 backdrop-blur-md border border-transparent shadow-none'
-        )}
-      >
+      <div className="w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 bg-background/70 backdrop-blur-md border border-transparent shadow-none transition-colors">
         <div className="flex items-center gap-3">
           {isMobile && (
             <Button variant="ghost" size="icon-sm" onClick={toggleSidebar}>
