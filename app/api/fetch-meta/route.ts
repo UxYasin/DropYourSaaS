@@ -4,12 +4,13 @@ interface MetaData {
   favicon: string
   title: string
   description: string
+  image?: string
 }
 
 async function fetchMetaData(url: string): Promise<MetaData> {
   const hostname = new URL(url).hostname
   
-  const favicon = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`
+  const favicon = `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`
   
   try {
     const response = await fetch(url, {
@@ -26,9 +27,19 @@ async function fetchMetaData(url: string): Promise<MetaData> {
     
     const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
       || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i)
+      || html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
     const description = descMatch ? descMatch[1].trim() : ""
+
+    const imgMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
+    let image = imgMatch ? imgMatch[1].trim() : undefined
+    if (image && !image.startsWith("http")) {
+      try {
+        image = new URL(image, url).toString()
+      } catch {}
+    }
     
-    return { favicon, title, description }
+    return { favicon, title, description, image }
   } catch {
     return { favicon, title: hostname, description: "" }
   }
