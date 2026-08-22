@@ -231,37 +231,30 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             {/* Expanded Content Section */}
             {isExpanded && (
               <div className="mt-4 pt-4 border-t border-border/60 space-y-4 animate-in fade-in-50 duration-200">
-                {/* Categories List */}
+                {/* Category Dropdown */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
                       <Tag className="size-3 text-amber-500" />
                       Select Category
                     </label>
-                    <span className="text-[10px] font-sans text-muted-foreground">
-                      Selected: <strong className="text-primary font-mono">{category}</strong>
-                    </span>
                   </div>
 
-                  {/* 28 Categories Pill List */}
-                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                    {CATEGORIES.map((cat) => {
-                      const isSelected = category === cat;
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setCategory(cat)}
-                          className={`text-[11px] px-2.5 py-1 rounded-full border font-sans transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-amber-500 text-black font-bold border-amber-500 shadow-xs'
-                              : 'bg-muted/40 text-muted-foreground border-border/70 hover:bg-muted hover:text-foreground'
-                          }`}
-                        >
+                  <div className="relative">
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full h-11 rounded-xl bg-background/80 border border-border/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
+                    >
+                      {CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
                           {cat}
-                        </button>
-                      );
-                    })}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                      <ChevronDown className="size-4" />
+                    </div>
                   </div>
                 </div>
 
