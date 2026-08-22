@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Clock, MousePointerClick, ChevronRight, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
+import { trackEvent } from '@/lib/analytics';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
@@ -44,6 +45,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
+    trackEvent('outbound_click', { url: item.url, rank: item.rank });
     fetch('/api/click', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

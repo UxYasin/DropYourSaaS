@@ -4,6 +4,7 @@ import { useState, forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Globe, Minus, Plus } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 const XIcon = ({ className, ...props }: React.ComponentProps<'svg'>) => (
   <svg
@@ -39,6 +40,8 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       return;
     }
     const normalizedUrl = /^https?:\/\//.test(url) ? url : `https://${url.replace(/^@/, '')}`;
+
+    trackEvent('checkout_started', { url: normalizedUrl, bid });
 
     setIsSubmitting(true);
     setError(null);

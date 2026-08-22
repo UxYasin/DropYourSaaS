@@ -4,6 +4,7 @@ import { Geist_Mono, Inconsolata, Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { UmamiAnalytics } from '@/components/umami-analytics';
+import { DataFastAnalytics } from '@/components/datafast-analytics';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body className="font-body">
         <ThemeProvider>{children}</ThemeProvider>
         <UmamiAnalytics />
+        <DataFastAnalytics />
       </body>
     </html>
   );
