@@ -3,20 +3,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function LeaderboardCardSkeleton() {
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-3">
-        <Skeleton className="w-8 h-8 rounded-lg flex-shrink-0" />
-        <Skeleton className="w-12 h-12 rounded-lg flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-3 w-full mt-1.5" />
-          <div className="flex items-center gap-3 mt-2">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-3 w-20" />
+    <Card className="p-3.5 sm:p-4 rounded-xl border border-border bg-card">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <Skeleton className="size-7 rounded-lg shrink-0" />
+          <Skeleton className="size-9 rounded-lg shrink-0" />
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
           </div>
         </div>
-        <Skeleton className="h-6 w-20 flex-shrink-0" />
+        <div className="flex items-center gap-4 shrink-0">
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-4 w-16" />
+        </div>
       </div>
     </Card>
-  )
+  );
 }

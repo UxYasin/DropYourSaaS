@@ -78,23 +78,17 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const isHandle = url.startsWith('@');
 
   return (
-    <section className="text-center overflow-hidden">
-      <div className="inline-flex items-center gap-2 bg-muted px-2.5 py-1 rounded-full text-xs mb-6">
-        <span className="relative flex size-1.5">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-75"></span>
-          <span className="relative inline-flex size-1.5 rounded-full bg-green-500"></span>
-        </span>
-        2,934 online
-      </div>
-      <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+    <section className="text-center overflow-hidden pt-4 pb-2">
+      <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight max-w-2xl mx-auto">
         List Your SaaS for{' '}
         <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">
           <button
             type="button"
             onClick={handleDecrease}
-            className="inline-flex items-center justify-center size-8 sm:size-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+            className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+            aria-label="Decrease tier amount"
           >
-            <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
           <input
             type="text"
@@ -106,52 +100,59 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 onBidChange?.(num);
               }
             }}
-            className="bg-transparent border-none outline-none text-primary text-center font-bold text-3xl sm:text-5xl md:text-6xl p-0 focus:ring-0 w-auto min-w-0"
+            className="bg-transparent border-none outline-none text-primary text-center font-mono font-bold text-3xl sm:text-4xl md:text-5xl p-0 focus:ring-0 w-auto min-w-0"
             size={bidText.length}
           />
           <button
             type="button"
             onClick={handleIncrease}
-            className="inline-flex items-center justify-center size-8 sm:size-10 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+            className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+            aria-label="Increase tier amount"
           >
-            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
         </div>
       </h1>
-      <p className="text-muted-foreground mt-3 text-base sm:text-lg max-w-3xl mx-auto px-4">
+      <p className="text-muted-foreground mt-3 text-xs sm:text-sm max-w-[60ch] mx-auto leading-relaxed">
         Instant directory indexing starting at $1. Submit your project profile to be featured across
         our verified developer index.
       </p>
 
-      <div className="mt-8 max-w-lg mx-auto px-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 min-w-0">
+      <div className="mt-6 max-w-xl mx-auto px-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2.5">
+          <div className="relative flex-1 w-full min-w-0">
             {isHandle ? (
-              <XIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <XIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             ) : (
-              <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             )}
             <Input
               ref={ref}
-              placeholder="Your product's URL or @handle"
+              placeholder="e.g. &quot;https://yourproduct.com&quot; or @handle"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="pl-11 h-12 text-base rounded-full min-w-0"
+              className="pl-10 h-10 text-xs rounded-full border-border bg-card shadow-[var(--shadow-1)] focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           <Button
-            size="lg"
-            className="h-12 px-8 rounded-full shrink-0"
+            size="default"
+            className="h-10 px-5 rounded-full shrink-0 font-medium text-xs bg-foreground text-background hover:bg-foreground/90 transition-transform duration-150 active:scale-95 shadow-[var(--shadow-1)]"
             onClick={handleClaim}
             disabled={isSubmitting}
           >
+            <Plus className="size-3.5 mr-1" />
             {isSubmitting ? 'Redirecting…' : 'Submit SaaS'}
           </Button>
         </div>
-        {error && <p className="text-xs text-destructive mt-2">{error}</p>}
-        <p className="text-xs text-muted-foreground mt-2">
-          Already listed? Enter your product URL to boost your indexing tier and update your profile metadata.
-        </p>
+        {error && <p className="text-[11px] text-destructive mt-2 text-left sm:text-center">{error}</p>}
+        
+        <div className="flex items-center justify-center gap-2 mt-3 text-[11px] text-muted-foreground">
+          <span>Already listed?</span>
+          <span>·</span>
+          <span>Boost tier</span>
+          <span>·</span>
+          <span>Instant cache refresh</span>
+        </div>
       </div>
     </section>
   );

@@ -15,54 +15,60 @@ export function Header() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="py-3">
-      <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <header className="py-3 border-b border-border/80 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+      <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           {isMobile && (
             <Button variant="ghost" size="icon-sm" onClick={toggleSidebar}>
-              <Menu />
+              <Menu className="size-4" />
               <span className="sr-only">Toggle Sidebar</span>
             </Button>
           )}
-          <Link href="/" className="font-bold text-xl">
+          <Link href="/" className="font-semibold text-lg tracking-tight text-primary flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-primary inline-block" />
             DropYourSaaS
           </Link>
         </div>
-        <nav className={cn('flex items-center gap-4', isMobile && 'hidden')}>
-          <Link
-            href="/"
-            className={cn(
-              'text-sm transition-colors',
-              pathname === '/' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Directory
-          </Link>
-          <Link
-            href="/about"
-            className={cn(
-              'text-sm transition-colors',
-              pathname === '/about'
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            About
-          </Link>
-          <Link
-            href="/rules"
-            className={cn(
-              'text-sm transition-colors',
-              pathname === '/rules'
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Guidelines
-          </Link>
+        <div className="flex items-center gap-4">
+          <nav className={cn('flex items-center gap-4', isMobile && 'hidden')}>
+            <Link
+              href="/"
+              className={cn(
+                'text-xs font-medium transition-colors',
+                pathname === '/' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Directory
+            </Link>
+            <Link
+              href="/about"
+              className={cn(
+                'text-xs font-medium transition-colors',
+                pathname === '/about'
+                  ? 'text-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              About
+            </Link>
+            <Link
+              href="/rules"
+              className={cn(
+                'text-xs font-medium transition-colors',
+                pathname === '/rules'
+                  ? 'text-foreground font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Guidelines
+            </Link>
+          </nav>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-border bg-muted/50 text-[11px] text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            2,934 online
+          </div>
           <ThemeToggle />
-        </nav>
-        {isMobile && <ThemeToggle />}
+        </div>
       </div>
     </header>
   );

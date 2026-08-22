@@ -26,29 +26,33 @@ export function TrendingSection() {
   if (isLoading) return <TrendingSkeleton />;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Flame className="h-4 w-4 text-muted-foreground" />
-          Trending right now
+    <Card className="p-3.5 border-border shadow-[var(--shadow-1)] bg-card rounded-xl">
+      <CardHeader className="p-0 pb-3">
+        <CardTitle className="text-xs font-semibold flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-foreground">
+            <Flame className="size-3.5 text-amber-500" />
+            Trending Right Now
+          </div>
+          <span className="text-[10px] text-muted-foreground font-normal">Realtime signals</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
+      <CardContent className="p-0">
+        <div className="space-y-1.5">
           {trendingItems.map((item, i) => (
-            <div key={i} className="flex items-center justify-between text-sm min-w-0">
+            <div key={i} className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors">
               <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-mono text-muted-foreground w-3.5">{i + 1}</span>
                 <Image
                   src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
                   alt={item.name}
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   className="rounded flex-shrink-0"
                   unoptimized
                 />
-                <span className="font-medium truncate">{item.name}</span>
+                <span className="font-medium text-xs truncate">{item.name}</span>
               </div>
-              <Badge variant="secondary" className="text-xs flex-shrink-0">
+              <Badge variant="secondary" className="text-[10px] font-mono font-normal px-2 py-0 h-4 bg-muted/80 text-muted-foreground">
                 {item.clicks}
               </Badge>
             </div>

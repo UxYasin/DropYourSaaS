@@ -25,37 +25,39 @@ export function LatestActivity() {
   if (isLoading) return <LatestActivitySkeleton />;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75"></span>
-            <span className="relative inline-flex size-1.5 rounded-full bg-primary"></span>
-          </span>
-          Recent Submissions
+    <Card className="p-3.5 border-border shadow-[var(--shadow-1)] bg-card rounded-xl">
+      <CardHeader className="p-0 pb-3">
+        <CardTitle className="text-xs font-semibold flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-foreground">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex size-2 rounded-full bg-primary"></span>
+            </span>
+            Recent Submissions
+          </div>
+          <span className="text-[10px] text-muted-foreground font-normal">Live index</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
+      <CardContent className="p-0">
+        <div className="space-y-1.5">
           {latestActivity.map((item, i) => (
-            <div key={i} className="flex items-center justify-between text-sm min-w-0 gap-2">
-              <div className="flex items-center gap-1 min-w-0 flex-1">
+            <div key={i} className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
                 <Image
                   src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
                   alt={item.name}
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   className="rounded flex-shrink-0"
                   unoptimized
                 />
-                <span className="font-medium truncate">{item.name}</span>
-                <Badge variant="outline" className="text-xs flex-shrink-0">
-                  Tier #{item.rank}
-                </Badge>
-                <span className="text-xs text-muted-foreground flex-shrink-0">·</span>
-                <span className="text-xs text-muted-foreground flex-shrink-0">{item.amount}</span>
+                <span className="font-medium text-xs truncate">{item.name}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono">
+                  #{item.rank}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
               </div>
-              <span className="text-xs text-muted-foreground flex-shrink-0">{item.time}</span>
+              <span className="text-[10px] text-muted-foreground shrink-0">{item.time}</span>
             </div>
           ))}
         </div>

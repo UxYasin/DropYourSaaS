@@ -65,8 +65,17 @@ export function LeaderboardList({ onClaimClick }: LeaderboardListProps) {
   };
 
   return (
-    <div>
-      <div className="space-y-6">
+    <div className="mt-6">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Verified SaaS Directory
+        </h2>
+        <span className="text-[11px] text-muted-foreground font-mono">
+          Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, items.length)} of {items.length}
+        </span>
+      </div>
+
+      <div className="space-y-2.5">
         {isLoading
           ? Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
               <LeaderboardCardSkeleton key={i} />
@@ -76,12 +85,12 @@ export function LeaderboardList({ onClaimClick }: LeaderboardListProps) {
             ))}
       </div>
 
-      <Pagination className="mt-8">
-        <PaginationContent>
+      <Pagination className="mt-6">
+        <PaginationContent className="text-xs">
           <PaginationItem>
             <PaginationPrevious
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              className={currentPage === 1 ? 'pointer-events-none opacity-40 text-xs' : 'cursor-pointer text-xs'}
             />
           </PaginationItem>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -89,7 +98,7 @@ export function LeaderboardList({ onClaimClick }: LeaderboardListProps) {
               <PaginationLink
                 isActive={page === currentPage}
                 onClick={() => setCurrentPage(page)}
-                className="cursor-pointer"
+                className="cursor-pointer text-xs size-8 rounded-lg"
               >
                 {page}
               </PaginationLink>
@@ -99,7 +108,7 @@ export function LeaderboardList({ onClaimClick }: LeaderboardListProps) {
             <PaginationNext
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               className={
-                currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                currentPage === totalPages ? 'pointer-events-none opacity-40 text-xs' : 'cursor-pointer text-xs'
               }
             />
           </PaginationItem>
