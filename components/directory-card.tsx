@@ -129,7 +129,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md hover:shadow-lg active:scale-95 transition-all"
               >
                 Take this spot
               </button>
@@ -197,7 +197,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           subtext: 'text-blue-900/75 dark:text-blue-200/75',
           rankColor: 'text-blue-600 dark:text-blue-400',
           badge: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-400/30',
-          btn: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+          btn: 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-sm',
           priceColor: 'text-blue-600 dark:text-blue-400',
         }
       : {
@@ -207,7 +207,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           subtext: 'text-amber-900/75 dark:text-amber-200/75',
           rankColor: 'text-amber-600 dark:text-amber-400',
           badge: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-400/30',
-          btn: 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm',
+          btn: 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-sm',
           priceColor: 'text-amber-600 dark:text-amber-400',
         };
 
@@ -300,7 +300,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-blue-950 dark:text-blue-100',
         subtext: 'text-blue-900/70 dark:text-blue-200/70',
         badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-        btn: 'text-blue-900 dark:text-blue-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-blue-300/60 dark:border-blue-700/60',
       },
       {
         bg: 'bg-[var(--bento-yellow)]',
@@ -308,7 +307,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-amber-950 dark:text-amber-100',
         subtext: 'text-amber-900/70 dark:text-amber-200/70',
         badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-        btn: 'text-amber-900 dark:text-amber-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-amber-300/60 dark:border-amber-700/60',
       },
       {
         bg: 'bg-[var(--bento-mint)]',
@@ -316,7 +314,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-emerald-950 dark:text-emerald-100',
         subtext: 'text-emerald-900/70 dark:text-emerald-200/70',
         badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-        btn: 'text-emerald-900 dark:text-emerald-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-emerald-300/60 dark:border-emerald-700/60',
       },
       {
         bg: 'bg-[var(--bento-pink)]',
@@ -324,7 +321,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-pink-950 dark:text-pink-100',
         subtext: 'text-pink-900/70 dark:text-pink-200/70',
         badge: 'bg-pink-500/10 text-pink-700 dark:text-pink-300',
-        btn: 'text-pink-900 dark:text-pink-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-pink-300/60 dark:border-pink-700/60',
       },
       {
         bg: 'bg-[var(--bento-lavender)]',
@@ -332,7 +328,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-purple-950 dark:text-purple-100',
         subtext: 'text-purple-900/70 dark:text-purple-200/70',
         badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
-        btn: 'text-purple-900 dark:text-purple-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-purple-300/60 dark:border-purple-700/60',
       },
       {
         bg: 'bg-[var(--bento-gray)]',
@@ -340,7 +335,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
         text: 'text-zinc-950 dark:text-zinc-100',
         subtext: 'text-zinc-900/70 dark:text-zinc-300/70',
         badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300',
-        btn: 'text-zinc-900 dark:text-zinc-100 bg-white/70 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border-zinc-300/60 dark:border-zinc-700/60',
       },
     ];
 
@@ -407,7 +401,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className={`px-3 py-1.5 rounded-full font-bold text-[11px] border shadow-xs active:scale-95 transition-all ${currentStyle.btn}`}
+                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all"
               >
                 Take spot
               </button>
@@ -475,7 +469,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             <button
               type="button"
               onClick={() => onClaimClick(item.rank, item.bid + 1)}
-              className="px-2.5 py-0.5 rounded-full font-medium text-[10px] text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-colors"
+              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all"
             >
               Claim
             </button>
