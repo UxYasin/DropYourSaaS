@@ -51,18 +51,18 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
     }).catch(() => {});
   };
 
-  // Mock preview screenshots/cards for the #1 spot
-  const top1Previews = [
-    { title: 'Verified Product', subtitle: 'Live on SaaS Index' },
-    { title: 'Top Featured #1', subtitle: 'Highest tier placement' },
-    { title: 'Realtime Traffic', subtitle: `${item.clicks.toLocaleString()} clicks/mo` },
-    { title: 'Direct Canonical Link', subtitle: 'Developer indexed' },
-    { title: 'Priority Growth', subtitle: 'Max discoverability' },
-    { title: 'Global SaaS Reach', subtitle: 'Community verified' },
-  ];
+  // If item has uploaded images, use them; otherwise provide sample app screenshots
+  const displayImages = (meta?.image ? [meta.image] : []).concat([
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
+  ]).slice(0, 6);
 
   /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (2x Height of #2/#3, Rich Showcase Gallery)
+     VARIANT 1: #1 SPOT (2x Height of #2/#3, Pure Image Gallery)
      ------------------------------------------------------------- */
   if (variant === 'top1') {
     return (
@@ -144,24 +144,31 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </span>
           </div>
 
-          {/* Interactive / Visual App Preview Carousel Cards (2x Height Feature) */}
+          {/* Pure Image Container Gallery (No text blocks, pure screenshots/images) */}
           <div className="mt-5 pt-4 border-t border-border/60">
             <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
-              {top1Previews.map((p, idx) => (
-                <div
+              {displayImages.map((imgUrl, idx) => (
+                <a
                   key={idx}
-                  className="min-w-[130px] sm:min-w-[145px] h-40 sm:h-44 rounded-xl bg-zinc-900 text-white p-3.5 flex flex-col justify-between shrink-0 border border-zinc-800 shadow-sm snap-start hover:border-zinc-700 transition-colors"
+                  href={href}
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                  onClick={handleClick}
+                  className="min-w-[130px] sm:min-w-[155px] h-44 sm:h-52 rounded-2xl bg-zinc-900/90 border border-border/80 overflow-hidden shrink-0 shadow-sm snap-start hover:border-amber-500/60 hover:scale-[1.02] transition-all relative block group/img"
                 >
-                  <div className="space-y-1">
-                    <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-mono">
-                      Preview {idx + 1}
+                  <Image
+                    src={imgUrl}
+                    alt={`${item.name} screenshot ${idx + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover/img:scale-105"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-2">
+                    <span className="text-[10px] text-white/90 font-mono bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
+                      View
                     </span>
-                    <p className="font-bold text-xs leading-snug line-clamp-2">{p.title}</p>
                   </div>
-                  <div className="p-2 rounded-lg bg-zinc-800/80 text-[10px] text-zinc-300">
-                    {p.subtitle}
-                  </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>
