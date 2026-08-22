@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
@@ -50,6 +50,7 @@ export function SubmissionModal({
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -61,6 +62,8 @@ export function SubmissionModal({
       setCategory(initialData.category || 'SaaS');
       setIsForSale(Boolean(initialData.isForSale));
       setEmail(initialData.email || '');
+      setError(null);
+      setRateLimitError(null);
     }
   }, [initialData]);
 
@@ -75,6 +78,7 @@ export function SubmissionModal({
 
     setIsSubmitting(true);
     setError(null);
+    setRateLimitError(null);
 
     trackEvent('checkout_started', {
       url,
@@ -82,6 +86,45 @@ export function SubmissionModal({
       title,
       rank: selectedRank,
     });
+
+    if (IS_FREE_MODE) {
+      try {
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url,
+            title: title.trim() || undefined,
+            description: description.trim() || undefined,
+            category,
+            isForSale,
+            email: email.trim(),
+            bid,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.status === 429) {
+          setRateLimitError(data.message || 'You can only submit one free listing every 24 hours.');
+          return;
+        }
+
+        if (!res.ok) {
+          setError(data.error || 'Failed to submit listing');
+          return;
+        }
+
+        onSuccess?.();
+        onClose();
+        window.location.reload();
+      } catch {
+        setError('An unexpected error occurred. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
 
     try {
       const res = await fetch('/api/checkout', {
@@ -142,6 +185,13 @@ export function SubmissionModal({
             </p>
           </div>
         </div>
+
+        {rateLimitError && (
+          <div className="mb-4 p-3.5 rounded-xl bg-amber-950/40 border border-[#FF8B06] text-[#FF8B06] font-mono text-xs flex items-center gap-2.5 animate-in fade-in-50 duration-200">
+            <AlertCircle className="size-4 shrink-0 text-[#FF8B06]" />
+            <span className="font-semibold">{rateLimitError}</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-red-950/40 border border-red-800/60 text-red-400 text-xs font-sans">
@@ -326,8 +376,8 @@ export function SubmissionModal({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 rounded-full bg-white text-black hover:bg-zinc-200 font-sans font-bold text-xs sm:text-sm h-11 shadow-lg flex items-center justify-center gap-2"
+              disabled={isSubmitting || Boolean(rateLimitError)}
+              className="flex-1 rounded-full bg-white text-black hover:bg-zinc-200 disabled:opacity-50 font-sans font-bold text-xs sm:text-sm h-11 shadow-lg flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
