@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
 
+import { CATEGORIES } from '@/lib/categories';
+
 export interface ScrapedData {
   title: string;
   description: string;
@@ -14,6 +16,9 @@ export interface ScrapedData {
   screenshotUrl: string;
   url: string;
   hostname?: string;
+  category?: string;
+  isForSale?: boolean;
+  askingPrice?: string;
 }
 
 interface SubmissionModalProps {
@@ -38,6 +43,9 @@ export function SubmissionModal({
   const [url, setUrl] = useState('');
   const [favicon, setFavicon] = useState('');
   const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [category, setCategory] = useState('SaaS');
+  const [isForSale, setIsForSale] = useState(false);
+  const [askingPrice, setAskingPrice] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +56,9 @@ export function SubmissionModal({
       setUrl(initialData.url || '');
       setFavicon(initialData.favicon || '');
       setScreenshotUrl(initialData.screenshotUrl || '');
+      setCategory(initialData.category || 'SaaS');
+      setIsForSale(Boolean(initialData.isForSale));
+      setAskingPrice(initialData.askingPrice || '');
     }
   }, [initialData]);
 
@@ -223,6 +234,67 @@ export function SubmissionModal({
             </div>
           </div>
 
+          {/* Category & For Sale Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 text-white font-sans text-xs h-10 rounded-xl px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat} className="bg-zinc-950 text-white">
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
+                Marketplace
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsForSale(!isForSale)}
+                className={`w-full h-10 px-3 rounded-xl border text-xs font-sans font-medium flex items-center justify-between transition-colors ${
+                  isForSale
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <span>List for Sale?</span>
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                  isForSale ? 'bg-amber-500 text-black' : 'bg-zinc-800 text-zinc-400'
+                }`}>
+                  {isForSale ? 'YES' : 'NO'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Asking Price if For Sale */}
+          {isForSale && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150">
+              <label className="block text-xs font-medium text-amber-300 mb-1 font-sans">
+                Asking Price / Valuation
+              </label>
+              <Input
+                type="text"
+                value={askingPrice}
+                onChange={(e) => setAskingPrice(e.target.value)}
+                placeholder="e.g. $5,000 or Open to Offers"
+                className="bg-zinc-950/80 border-amber-500/40 text-white font-sans text-xs h-9 rounded-lg"
+              />
+              <p className="text-[10px] text-amber-300/80 mt-1 font-body">
+                ⭐ Your project will be indexed in both Directory and Buy/Sell Marketplace.
+              </p>
+            </div>
+          )}
+
           {/* Screenshot / OG Image preview banner */}
           {screenshotUrl && (
             <div className="pt-1">
@@ -230,7 +302,7 @@ export function SubmissionModal({
                 <ImageIcon className="size-3 text-zinc-400" />
                 Featured Preview
               </label>
-              <div className="relative h-28 w-full rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+              <div className="relative h-24 w-full rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
                 <Image
                   src={screenshotUrl}
                   alt="Website preview"

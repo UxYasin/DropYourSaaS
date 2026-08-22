@@ -8,6 +8,9 @@ import { trackEvent } from '@/lib/analytics';
 import { LiveStatsPill } from '@/components/live-stats-pill';
 import { SubmissionModal, type ScrapedData } from '@/components/submission-modal';
 
+import { CATEGORIES } from '@/lib/categories';
+import { Tag, Sparkles as SparklesIcon, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
+
 const XIcon = ({ className, ...props }: React.ComponentProps<'svg'>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -33,6 +36,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 ) {
   const [url, setUrl] = useState('');
   const [bid, setBid] = useState(selectedBid || 1);
+  const [category, setCategory] = useState<string>('SaaS');
+  const [isForSale, setIsForSale] = useState(false);
+  const [askingPrice, setAskingPrice] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
@@ -57,7 +64,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
       const result = await res.json();
       if (result?.success && result?.data) {
-        setScrapedData(result.data);
+        setScrapedData({
+          ...result.data,
+          category,
+          isForSale,
+          askingPrice,
+        });
       } else {
         let hostname = '';
         try {
@@ -70,6 +82,9 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           screenshotUrl: `https://api.microlink.io/?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
           url: normalizedUrl,
           hostname,
+          category,
+          isForSale,
+          askingPrice,
         });
       }
       setIsModalOpen(true);
@@ -85,6 +100,9 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         screenshotUrl: `https://api.microlink.io/?url=${encodeURIComponent(normalizedUrl)}&screenshot=true&meta=false&embed=screenshot.url`,
         url: normalizedUrl,
         hostname,
+        category,
+        isForSale,
+        askingPrice,
       });
       setIsModalOpen(true);
     } finally {
@@ -153,55 +171,181 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       </p>
 
       <div className="mt-7 max-w-xl mx-auto px-4">
-        {/* Glow wrapper */}
-        <div className="relative group/input">
-          {/* Subtle animated rainbow glow */}
-          <div className="absolute -inset-[2px] rounded-full animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm transition-all duration-300 pointer-events-none" />
-          <div className="absolute -inset-[1px] rounded-full animate-rainbow-glow opacity-55 pointer-events-none" />
+        {/* Glow wrapper with dynamic 24px radius */}
+        <div className="relative group/input text-left">
+          {/* Animated rainbow glow */}
+          <div
+            className={`absolute -inset-[2px] transition-all duration-300 pointer-events-none ${
+              isExpanded ? 'rounded-[26px]' : 'rounded-full'
+            } animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm`}
+          />
+          <div
+            className={`absolute -inset-[1px] transition-all duration-300 pointer-events-none ${
+              isExpanded ? 'rounded-[25px]' : 'rounded-full'
+            } animate-rainbow-glow opacity-55`}
+          />
 
-          {/* Unified larger capsule container */}
-          <div className="relative flex items-center bg-card rounded-full border border-border/80 p-1.5 sm:p-2 shadow-md transition-all">
-            <div className="relative flex-1 flex items-center min-w-0">
-              {isHandle ? (
-                <XIcon className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
-              ) : (
-                <Globe className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
-              )}
-              <input
-                ref={ref}
-                type="text"
-                placeholder="SaaS website link or App store link"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleClaim();
-                }}
-                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0"
-              />
-            </div>
-            <button
-              type="button"
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
-              onClick={handleClaim}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="size-3.5 sm:size-4 animate-spin" />
-                  <span>Fetching...</span>
-                </>
-              ) : (
-                <>
+          {/* Expanding Container with 24px border radius */}
+          <div
+            className={`relative bg-card border border-border/80 shadow-xl transition-all duration-300 ease-out overflow-hidden ${
+              isExpanded ? 'rounded-[24px] p-4 sm:p-5' : 'rounded-full p-1.5 sm:p-2'
+            }`}
+          >
+            {/* Top Input Row */}
+            <div className="flex items-center">
+              <div className="relative flex-1 flex items-center min-w-0">
+                {isHandle ? (
+                  <XIcon className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
+                ) : (
+                  <Globe className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
+                )}
+                <input
+                  ref={ref}
+                  type="text"
+                  placeholder="SaaS website link or App store link"
+                  value={url}
+                  onFocus={() => setIsExpanded(true)}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (!isExpanded) setIsExpanded(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleClaim();
+                  }}
+                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
+                />
+              </div>
+
+              {!isExpanded && (
+                <button
+                  type="button"
+                  className="h-10 sm:h-11 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
+                  onClick={() => setIsExpanded(true)}
+                >
                   <Plus className="size-3.5 sm:size-4" />
                   <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
-                </>
+                </button>
               )}
-            </button>
+            </div>
+
+            {/* Expanded Content Section */}
+            {isExpanded && (
+              <div className="mt-4 pt-4 border-t border-border/60 space-y-4 animate-in fade-in-50 duration-200">
+                {/* Categories List */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                      <Tag className="size-3 text-amber-500" />
+                      Select Category
+                    </label>
+                    <span className="text-[10px] font-sans text-muted-foreground">
+                      Selected: <strong className="text-primary font-mono">{category}</strong>
+                    </span>
+                  </div>
+
+                  {/* 28 Categories Pill List */}
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                    {CATEGORIES.map((cat) => {
+                      const isSelected = category === cat;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setCategory(cat)}
+                          className={`text-[11px] px-2.5 py-1 rounded-full border font-sans transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-amber-500 text-black font-bold border-amber-500 shadow-xs'
+                              : 'bg-muted/40 text-muted-foreground border-border/70 hover:bg-muted hover:text-foreground'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* List for Sale Option */}
+                <div className="p-3 rounded-2xl bg-muted/30 border border-border/70">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="size-4 text-amber-500" />
+                      <div>
+                        <div className="text-xs font-bold font-sans text-foreground">
+                          List for Sale?
+                        </div>
+                        <div className="text-[10px] font-body text-muted-foreground">
+                          Feature in the upcoming Buy/Sell Marketplace
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsForSale(!isForSale)}
+                      className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition-colors border ${
+                        isForSale
+                          ? 'bg-amber-500 text-black border-amber-500'
+                          : 'bg-muted text-muted-foreground border-border/70 hover:text-foreground'
+                      }`}
+                    >
+                      {isForSale ? 'YES' : 'NO'}
+                    </button>
+                  </div>
+
+                  {isForSale && (
+                    <div className="mt-3 pt-3 border-t border-border/50 animate-in fade-in-0 duration-150">
+                      <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
+                        Asking Price / Target Valuation
+                      </label>
+                      <input
+                        type="text"
+                        value={askingPrice}
+                        onChange={(e) => setAskingPrice(e.target.value)}
+                        placeholder="e.g. $5,000 or Open to Offers"
+                        className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Expanded Action Buttons Row */}
+                <div className="flex items-center justify-between pt-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-2 rounded-full hover:bg-muted/50 transition-colors inline-flex items-center gap-1"
+                  >
+                    <ChevronUp className="size-3.5" />
+                    Collapse
+                  </button>
+
+                  <button
+                    type="button"
+                    className="h-11 px-6 sm:px-8 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2"
+                    onClick={handleClaim}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Scraping & Indexing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="size-4" />
+                        <span>{selectedRank ? `Claim #${selectedRank} Spot` : 'Claim #1 Spot'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {error && <p className="text-xs text-destructive mt-2 text-center font-medium">{error}</p>}
-        
+
         <p className="mt-3.5 text-xs text-muted-foreground leading-relaxed text-center">
           Already listed? Drop in the same link to push your tier higher — you&apos;re only charged the difference.
         </p>
@@ -217,4 +361,5 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
     </section>
   );
 });
+
 
