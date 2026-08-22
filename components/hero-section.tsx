@@ -9,7 +9,7 @@ import { LiveStatsPill } from '@/components/live-stats-pill';
 import { SubmissionModal, type ScrapedData } from '@/components/submission-modal';
 
 import { CATEGORIES } from '@/lib/categories';
-import { Tag, Sparkles as SparklesIcon, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
+import { Tag, Sparkles as SparklesIcon, ChevronDown, ChevronUp, DollarSign, Mail } from 'lucide-react';
 
 const XIcon = ({ className, ...props }: React.ComponentProps<'svg'>) => (
   <svg
@@ -297,18 +297,24 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 </div>
 
                 {/* Your Email Input */}
-                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150 text-left">
-                  <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
-                    Your Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
-                    required
-                  />
+                <div className="flex flex-col text-left">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-mono font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                      <Mail className="size-3 text-amber-500" />
+                      Your Email
+                    </label>
+                  </div>
+
+                  <div className="relative flex-1 flex items-center">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
+                      required
+                    />
+                  </div>
                 </div>
 
                 {/* Expanded Action Buttons Row */}

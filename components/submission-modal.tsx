@@ -280,8 +280,8 @@ export function SubmissionModal({
           </div>
 
           {/* Email input (Required) */}
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150">
-            <label className="block text-xs font-medium text-amber-300 mb-1 font-sans">
+          <div>
+            <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
               Your Email
             </label>
             <Input
@@ -289,7 +289,7 @@ export function SubmissionModal({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="bg-zinc-950/80 border-amber-500/40 text-white font-sans text-xs h-9 rounded-lg"
+              className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-primary"
               required
             />
           </div>
