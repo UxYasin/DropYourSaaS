@@ -30,7 +30,7 @@ export function Header() {
     <header className="sticky top-3 z-40 px-4 w-full max-w-3xl mx-auto flex justify-center">
       <div
         className={cn(
-          'w-full px-3.5 sm:px-5 py-2 rounded-[24px] flex items-center justify-between gap-4 transition-all duration-300',
+          'w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 transition-all duration-300',
           scrolled
             ? 'bg-background/75 backdrop-blur-2xl shadow-md border border-solid border-border/80'
             : 'bg-background/45 backdrop-blur-md border border-transparent shadow-none'
