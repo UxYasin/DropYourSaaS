@@ -43,7 +43,7 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         rel="noopener noreferrer"
         title="View public analytics on DataFast"
         className={cn(
-          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-border/80 bg-muted/40 hover:bg-muted/70 text-[11px] text-muted-foreground transition-all duration-150 shadow-xs hover:border-emerald-500/40',
+          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-border/80 bg-muted/40 hover:bg-muted/70 text-[11px] text-muted-foreground transition-all duration-150 shadow-xs hover:border-emerald-500/40 whitespace-nowrap shrink-0',
           className
         )}
       >
