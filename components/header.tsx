@@ -16,8 +16,8 @@ export function Header() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="py-3 border-b border-border/80 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
+    <header className="sticky top-3 z-40 px-4 sm:px-6 w-full max-w-5xl mx-auto">
+      <div className="w-full px-4 sm:px-5 py-2.5 rounded-[8px] border border-solid border-border/80 bg-background/90 backdrop-blur-md shadow-[var(--shadow-1)] flex items-center justify-between transition-all">
         <div className="flex items-center gap-3">
           {isMobile && (
             <Button variant="ghost" size="icon-sm" onClick={toggleSidebar}>
@@ -29,28 +29,28 @@ export function Header() {
             <Image
               src="/logo-light.svg"
               alt="DropYourSaaS"
-              width={140}
-              height={46}
-              className="h-7 w-auto block dark:hidden"
+              width={170}
+              height={56}
+              className="h-9 sm:h-10 w-auto block dark:hidden transition-transform duration-150 group-hover:scale-[1.02]"
               priority
             />
             <Image
               src="/logo-dark.svg"
               alt="DropYourSaaS"
-              width={140}
-              height={46}
-              className="h-7 w-auto hidden dark:block"
+              width={170}
+              height={56}
+              className="h-9 sm:h-10 w-auto hidden dark:block transition-transform duration-150 group-hover:scale-[1.02]"
               priority
             />
           </Link>
         </div>
-        <div className="flex items-center gap-4">
-          <nav className={cn('flex items-center gap-4', isMobile && 'hidden')}>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <nav className={cn('flex items-center gap-3 sm:gap-4', isMobile && 'hidden')}>
             <Link
               href="/"
               className={cn(
-                'text-xs font-medium transition-colors',
-                pathname === '/' ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'
+                'text-xs font-medium transition-colors px-2 py-1 rounded-[6px]',
+                pathname === '/' ? 'text-foreground font-semibold bg-muted/60' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
               Directory
@@ -58,10 +58,10 @@ export function Header() {
             <Link
               href="/about"
               className={cn(
-                'text-xs font-medium transition-colors',
+                'text-xs font-medium transition-colors px-2 py-1 rounded-[6px]',
                 pathname === '/about'
-                  ? 'text-foreground font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-foreground font-semibold bg-muted/60'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
               About
@@ -69,18 +69,19 @@ export function Header() {
             <Link
               href="/rules"
               className={cn(
-                'text-xs font-medium transition-colors',
+                'text-xs font-medium transition-colors px-2 py-1 rounded-[6px]',
                 pathname === '/rules'
-                  ? 'text-foreground font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-foreground font-semibold bg-muted/60'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
               Guidelines
             </Link>
           </nav>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-border bg-muted/50 text-[11px] text-muted-foreground">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] border border-solid border-border/80 bg-muted/50 text-[11px] text-muted-foreground">
             <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            2,934 online
+            <span className="hidden sm:inline">2,934 online</span>
+            <span className="sm:hidden">Online</span>
           </div>
           <ThemeToggle />
         </div>
