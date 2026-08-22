@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Globe, Minus, Plus } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import { LiveStatsPill } from '@/components/live-stats-pill';
 
 const XIcon = ({ className, ...props }: React.ComponentProps<'svg'>) => (
   <svg
@@ -81,7 +82,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const isHandle = url.startsWith('@');
 
   return (
-    <section className="text-center overflow-hidden pt-4 pb-2">
+    <section className="text-center overflow-hidden pt-2 pb-2">
+      <div className="flex justify-center mb-4">
+        <LiveStatsPill />
+      </div>
       <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight max-w-2xl mx-auto">
         List Your SaaS for{' '}
         <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">

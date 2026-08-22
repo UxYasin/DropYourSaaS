@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { LiveStatsPill } from '@/components/live-stats-pill';
 import { cn } from '@/lib/utils';
 
 export function Header() {
@@ -96,11 +97,7 @@ export function Header() {
               Guidelines
             </Link>
           </nav>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-border/80 bg-muted/50 text-[11px] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="hidden sm:inline">2,934 online</span>
-            <span className="sm:hidden">Online</span>
-          </div>
+          <LiveStatsPill compact />
           <ThemeToggle />
         </div>
       </div>
