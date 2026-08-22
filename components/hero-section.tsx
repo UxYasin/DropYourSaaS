@@ -50,6 +50,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       setError('Enter a SaaS website link or App store link first');
       return;
     }
+    if (!email.trim()) {
+      setError('Enter your email address to continue');
+      return;
+    }
     const normalizedUrl = /^https?:\/\//i.test(url) ? url.trim() : `https://${url.trim().replace(/^@/, '')}`;
 
     setIsSubmitting(true);
@@ -292,21 +296,20 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   </div>
                 </div>
 
-                {/* Email input if For Sale is toggled on */}
-                {isForSale && (
-                  <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150 text-left">
-                    <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
-                      Your Email
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
-                    />
-                  </div>
-                )}
+                {/* Your Email Input */}
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150 text-left">
+                  <label className="block text-[11px] font-medium text-amber-400 mb-1 font-sans">
+                    Your Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full bg-background border border-amber-500/40 rounded-xl px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
+                    required
+                  />
+                </div>
 
                 {/* Expanded Action Buttons Row */}
                 <div className="flex items-center justify-between pt-1 gap-2">

@@ -279,24 +279,20 @@ export function SubmissionModal({
             </div>
           </div>
 
-          {/* Email input if For Sale */}
-          {isForSale && (
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150">
-              <label className="block text-xs font-medium text-amber-300 mb-1 font-sans">
-                Your Email
-              </label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="bg-zinc-950/80 border-amber-500/40 text-white font-sans text-xs h-9 rounded-lg"
-              />
-              <p className="text-[10px] text-amber-300/80 mt-1 font-body">
-                ⭐ Your project will be indexed in both Directory and Buy/Sell Marketplace.
-              </p>
-            </div>
-          )}
+          {/* Email input (Required) */}
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 animate-in fade-in-0 duration-150">
+            <label className="block text-xs font-medium text-amber-300 mb-1 font-sans">
+              Your Email
+            </label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="bg-zinc-950/80 border-amber-500/40 text-white font-sans text-xs h-9 rounded-lg"
+              required
+            />
+          </div>
 
           {/* Screenshot / OG Image preview banner */}
           {screenshotUrl && (
