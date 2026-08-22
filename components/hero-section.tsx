@@ -118,41 +118,50 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         our verified developer index.
       </p>
 
-      <div className="mt-6 max-w-xl mx-auto px-4">
-        <div className="flex flex-col sm:flex-row items-center gap-2.5">
-          <div className="relative flex-1 w-full min-w-0">
-            {isHandle ? (
-              <XIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            ) : (
-              <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            )}
-            <Input
-              ref={ref}
-              placeholder="e.g. &quot;https://yourproduct.com&quot; or @handle"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="pl-10 h-10 text-xs rounded-full border-border bg-card shadow-[var(--shadow-1)] focus-visible:ring-2 focus-visible:ring-ring"
-            />
+      <div className="mt-7 max-w-xl mx-auto px-4">
+        {/* Glow wrapper */}
+        <div className="relative group/input">
+          {/* Subtle animated rainbow glow */}
+          <div className="absolute -inset-[2px] rounded-full animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm transition-all duration-300 pointer-events-none" />
+          <div className="absolute -inset-[1px] rounded-full animate-rainbow-glow opacity-55 pointer-events-none" />
+
+          {/* Unified larger capsule container */}
+          <div className="relative flex items-center bg-card rounded-full border border-border/80 p-1.5 sm:p-2 shadow-md transition-all">
+            <div className="relative flex-1 flex items-center min-w-0">
+              {isHandle ? (
+                <XIcon className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
+              ) : (
+                <Globe className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
+              )}
+              <input
+                ref={ref}
+                type="text"
+                placeholder="App store link or App's Website link"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleClaim();
+                }}
+                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0"
+              />
+            </div>
+            <button
+              type="button"
+              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
+              onClick={handleClaim}
+              disabled={isSubmitting}
+            >
+              <Plus className="size-3.5 sm:size-4" />
+              <span>{isSubmitting ? 'Redirecting…' : selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
+            </button>
           </div>
-          <Button
-            size="default"
-            className="h-10 px-5 rounded-full shrink-0 font-medium text-xs bg-foreground text-background hover:bg-foreground/90 transition-transform duration-150 active:scale-95 shadow-[var(--shadow-1)]"
-            onClick={handleClaim}
-            disabled={isSubmitting}
-          >
-            <Plus className="size-3.5 mr-1" />
-            {isSubmitting ? 'Redirecting…' : 'Submit SaaS'}
-          </Button>
         </div>
-        {error && <p className="text-[11px] text-destructive mt-2 text-left sm:text-center">{error}</p>}
+
+        {error && <p className="text-xs text-destructive mt-2 text-center font-medium">{error}</p>}
         
-        <div className="flex items-center justify-center gap-2 mt-3 text-[11px] text-muted-foreground">
-          <span>Already listed?</span>
-          <span>·</span>
-          <span>Boost tier</span>
-          <span>·</span>
-          <span>Instant cache refresh</span>
-        </div>
+        <p className="mt-3.5 text-xs text-muted-foreground leading-relaxed text-center">
+          Already listed? Drop in the same link to push your tier higher — you&apos;re only charged the difference.
+        </p>
       </div>
     </section>
   );
