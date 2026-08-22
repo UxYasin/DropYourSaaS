@@ -136,7 +136,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               <input
                 ref={ref}
                 type="text"
-                placeholder="App store link or App's Website link"
+                placeholder="SaaS website link or App store link"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {
