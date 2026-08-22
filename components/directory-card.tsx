@@ -150,7 +150,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0"
+                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0"
               >
                 {siteCopy.feed.podiumButton}
               </button>
@@ -300,7 +300,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs shadow-xs active:scale-95 transition-all shrink-0 ${theme.btn}`}
+                className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0"
               >
                 {siteCopy.feed.podiumButton}
               </button>
@@ -426,7 +426,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
+                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0"
               >
                 {siteCopy.feed.podiumButton}
               </button>
@@ -496,7 +496,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             <button
               type="button"
               onClick={() => onClaimClick(item.rank, item.bid + 1)}
-              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-black hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all font-sans"
+              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0"
             >
               {siteCopy.feed.listingButton}
             </button>

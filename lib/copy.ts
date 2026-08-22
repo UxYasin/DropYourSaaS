@@ -1,4 +1,4 @@
-export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE !== 'false';
+export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE === 'true';
 
 export const siteCopy = {
   hero: {
