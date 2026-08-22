@@ -76,20 +76,10 @@ export async function GET() {
     }
   }
 
-  // Fallback baseline if API key is not yet set in environment
-  if (online === null) {
-    const hourVariance = Math.floor(Math.sin(Date.now() / 3600000) * 35);
-    online = Math.max(1, 883 + hourVariance);
-  }
-
-  if (visitors === null) {
-    const dayProgress = Math.floor((Date.now() - 1700000000000) / 120000);
-    visitors = 2644890 + dayProgress;
-  }
-
+  // If API returned real data or key is unset, ensure clean real numbers
   return NextResponse.json({
-    online,
-    visitors,
+    online: online ?? 0,
+    visitors: visitors ?? 0,
     shareUrl,
     isLive,
   });

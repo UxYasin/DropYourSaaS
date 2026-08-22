@@ -44,11 +44,11 @@ export function TrendingSection() {
   if (isLoading) return <TrendingSkeleton />;
 
   const displayItems = items.length > 0 ? items : [
-    { rank: 1, name: 'outrank.so', clicks: 3523, bid: 12052, url: 'https://outrank.so', time: '3m ago' },
-    { rank: 2, name: 'orynth.dev', clicks: 2190, bid: 8400, url: 'https://orynth.dev', time: '12m ago' },
-    { rank: 3, name: 'shows.farm', clicks: 1450, bid: 5120, url: 'https://shows.farm', time: '1h ago' },
-    { rank: 4, name: 'foundrlist.com', clicks: 980, bid: 3200, url: 'https://foundrlist.com', time: '2h ago' },
-    { rank: 5, name: 'redreplier.com', clicks: 840, bid: 2100, url: 'https://redreplier.com', time: '3h ago' },
+    { rank: 1, name: 'outrank.so', clicks: 0, bid: 12052, url: 'https://outrank.so', time: '3m ago' },
+    { rank: 2, name: 'orynth.dev', clicks: 0, bid: 12051, url: 'https://orynth.dev', time: '12m ago' },
+    { rank: 3, name: 'trycomp.ai', clicks: 0, bid: 10000, url: 'https://trycomp.ai', time: '1h ago' },
+    { rank: 4, name: 'lathire.com', clicks: 0, bid: 3100, url: 'https://lathire.com', time: '2h ago' },
+    { rank: 5, name: 'mytb.ai', clicks: 0, bid: 2999, url: 'https://mytb.ai', time: '3h ago' },
   ];
 
   return (
@@ -66,7 +66,6 @@ export function TrendingSection() {
         <div className="space-y-1.5">
           {displayItems.map((item, i) => {
             const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=trending&utm_campaign=listings`;
-            const hourlyRate = Math.max(12, Math.round(item.clicks / 4));
 
             return (
               <a
@@ -99,7 +98,7 @@ export function TrendingSection() {
                   </span>
                 </div>
                 <Badge variant="secondary" className="text-[10px] font-mono font-normal px-2 py-0 h-4 bg-muted/80 text-muted-foreground shrink-0">
-                  {hourlyRate} clicks/h
+                  {item.clicks.toLocaleString()} clicks
                 </Badge>
               </a>
             );

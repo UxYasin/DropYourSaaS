@@ -10,8 +10,8 @@ interface LiveStatsPillProps {
 
 export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps) {
   const [stats, setStats] = useState({
-    online: 883,
-    visitors: 2644890,
+    online: 0,
+    visitors: 0,
     shareUrl: 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
   });
 

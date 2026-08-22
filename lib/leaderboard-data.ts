@@ -22,7 +22,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'outrank.so',
     bid: 12052,
     url: 'https://outrank.so',
-    clicks: 3523,
+    clicks: 0,
     time: '3 minutes ago',
   },
   {
@@ -30,7 +30,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'orynth.dev',
     bid: 12051,
     url: 'https://orynth.dev',
-    clicks: 3153,
+    clicks: 0,
     time: '8 minutes ago',
   },
   {
@@ -38,7 +38,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'trycomp.ai',
     bid: 10000,
     url: 'https://trycomp.ai',
-    clicks: 989,
+    clicks: 0,
     time: '14 hours ago',
   },
   {
@@ -46,7 +46,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'lathire.com',
     bid: 3100,
     url: 'https://lathire.com',
-    clicks: 2017,
+    clicks: 0,
     time: '11 hours ago',
   },
   {
@@ -54,7 +54,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'mytb.ai',
     bid: 2999,
     url: 'https://mytb.ai',
-    clicks: 946,
+    clicks: 0,
     time: '12 hours ago',
   },
   {
@@ -62,7 +62,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'joinklover.com',
     bid: 2000,
     url: 'https://joinklover.com',
-    clicks: 1859,
+    clicks: 0,
     time: '15 hours ago',
   },
   {
@@ -70,7 +70,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'peptiprices.com',
     bid: 1275,
     url: 'https://peptiprices.com',
-    clicks: 431,
+    clicks: 0,
     time: '6 hours ago',
   },
   {
@@ -78,7 +78,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'evomarketing.co',
     bid: 1250,
     url: 'https://evomarketing.co',
-    clicks: 592,
+    clicks: 0,
     time: '12 hours ago',
   },
   {
@@ -86,7 +86,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'fiber.so',
     bid: 1029,
     url: 'https://fiber.so',
-    clicks: 787,
+    clicks: 0,
     time: '14 hours ago',
   },
   {
@@ -94,7 +94,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'prelint.com',
     bid: 1028,
     url: 'https://prelint.com',
-    clicks: 1836,
+    clicks: 0,
     time: '15 hours ago',
   },
   {
@@ -102,7 +102,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'neocam.app',
     bid: 1027,
     url: 'https://neocam.app',
-    clicks: 1103,
+    clicks: 0,
     time: '15 hours ago',
   },
   {
@@ -110,7 +110,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'trycodus.com',
     bid: 1026,
     url: 'https://trycodus.com',
-    clicks: 14218,
+    clicks: 0,
     time: '16 hours ago',
   },
   {
@@ -118,7 +118,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'ranked.ai',
     bid: 1025,
     url: 'https://ranked.ai',
-    clicks: 1427,
+    clicks: 0,
     time: '16 hours ago',
   },
   {
@@ -126,7 +126,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'limestonedigital.com',
     bid: 1024,
     url: 'https://limestonedigital.com',
-    clicks: 411,
+    clicks: 0,
     time: '16 hours ago',
   },
   {
@@ -134,7 +134,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'overskill.com',
     bid: 1023,
     url: 'https://overskill.com',
-    clicks: 566,
+    clicks: 0,
     time: '16 hours ago',
   },
   {
@@ -142,7 +142,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'startglobal.co',
     bid: 1022,
     url: 'https://startglobal.co',
-    clicks: 1276,
+    clicks: 0,
     time: '17 hours ago',
   },
   {
@@ -150,7 +150,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'capitalgurus.com',
     bid: 1021,
     url: 'https://capitalgurus.com',
-    clicks: 450,
+    clicks: 0,
     time: '17 hours ago',
   },
   {
@@ -158,7 +158,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'fuellog.ai',
     bid: 1012,
     url: 'https://fuellog.ai',
-    clicks: 632,
+    clicks: 0,
     time: '18 hours ago',
   },
   {
@@ -166,7 +166,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'myworkoutlogs.com',
     bid: 1007,
     url: 'https://myworkoutlogs.com',
-    clicks: 588,
+    clicks: 0,
     time: '19 hours ago',
   },
   {
@@ -174,16 +174,16 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'turingo.net',
     bid: 557,
     url: 'https://turingo.net',
-    clicks: 25,
+    clicks: 0,
     time: '1 hour ago',
   },
-  { rank: 21, name: 'olvy.co', bid: 556, url: 'https://olvy.co', clicks: 44, time: '2 hours ago' },
+  { rank: 21, name: 'olvy.co', bid: 556, url: 'https://olvy.co', clicks: 0, time: '2 hours ago' },
   {
     rank: 22,
     name: 'peptidebenchmark.com',
     bid: 555,
     url: 'https://peptidebenchmark.com',
-    clicks: 188,
+    clicks: 0,
     time: '14 hours ago',
   },
   {
@@ -191,7 +191,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'auraplusplus.com',
     bid: 501,
     url: 'https://auraplusplus.com',
-    clicks: 701,
+    clicks: 0,
     time: '20 hours ago',
   },
   {
@@ -199,7 +199,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'reactbits.dev',
     bid: 430,
     url: 'https://reactbits.dev',
-    clicks: 521,
+    clicks: 0,
     time: '20 hours ago',
   },
   {
@@ -207,7 +207,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'attentionfactory.com',
     bid: 421,
     url: 'https://attentionfactory.com',
-    clicks: 69,
+    clicks: 0,
     time: '8 hours ago',
   },
   {
@@ -215,7 +215,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'post-bridge.com',
     bid: 420,
     url: 'https://post-bridge.com',
-    clicks: 971,
+    clicks: 0,
     time: '21 hours ago',
   },
   {
@@ -223,7 +223,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'overround.pro',
     bid: 316,
     url: 'https://overround.pro',
-    clicks: 21,
+    clicks: 0,
     time: '3 hours ago',
   },
   {
@@ -231,7 +231,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'spinhire.us',
     bid: 315,
     url: 'https://spinhire.us',
-    clicks: 83,
+    clicks: 0,
     time: '15 hours ago',
   },
   {
@@ -239,7 +239,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'invofox.com',
     bid: 314,
     url: 'https://invofox.com',
-    clicks: 94,
+    clicks: 0,
     time: '17 hours ago',
   },
   {
@@ -247,7 +247,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'petecodes.io',
     bid: 308,
     url: 'https://petecodes.io',
-    clicks: 102,
+    clicks: 0,
     time: '17 hours ago',
   },
   {
@@ -255,7 +255,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'tinystartups.com',
     bid: 307,
     url: 'https://tinystartups.com',
-    clicks: 902,
+    clicks: 0,
     time: '21 hours ago',
   },
   {
@@ -263,7 +263,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'tolt.com',
     bid: 306,
     url: 'https://tolt.com',
-    clicks: 793,
+    clicks: 0,
     time: '22 hours ago',
   },
   {
@@ -271,7 +271,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'knoku.com',
     bid: 305,
     url: 'https://knoku.com',
-    clicks: 381,
+    clicks: 0,
     time: '22 hours ago',
   },
   {
@@ -279,7 +279,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'prospactive.nl',
     bid: 303,
     url: 'https://prospactive.nl',
-    clicks: 446,
+    clicks: 0,
     time: '23 hours ago',
   },
   {
@@ -287,16 +287,16 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'gathershot.com',
     bid: 303,
     url: 'https://gathershot.com',
-    clicks: 75,
+    clicks: 0,
     time: '13 hours ago',
   },
-  { rank: 36, name: 'shp.ee', bid: 302, url: 'https://shp.ee', clicks: 859, time: 'yesterday' },
+  { rank: 36, name: 'shp.ee', bid: 302, url: 'https://shp.ee', clicks: 0, time: 'yesterday' },
   {
     rank: 37,
     name: 'crashino.com',
     bid: 301,
     url: 'https://crashino.com',
-    clicks: 260,
+    clicks: 0,
     time: 'yesterday',
   },
   {
@@ -304,7 +304,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'tinkerer.club',
     bid: 300,
     url: 'https://tinkerer.club',
-    clicks: 289,
+    clicks: 0,
     time: 'yesterday',
   },
   {
@@ -312,7 +312,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'pump.fun',
     bid: 300,
     url: 'https://pump.fun',
-    clicks: 173,
+    clicks: 0,
     time: '4 hours ago',
   },
   {
@@ -320,7 +320,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'brian-grover',
     bid: 250,
     url: 'https://brian-grover.com',
-    clicks: 1006,
+    clicks: 0,
     time: '13 hours ago',
   },
   {
@@ -328,16 +328,16 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'founderstack.pro',
     bid: 203,
     url: 'https://founderstack.pro',
-    clicks: 118,
+    clicks: 0,
     time: 'yesterday',
   },
-  { rank: 42, name: 'wave.co', bid: 202, url: 'https://wave.co', clicks: 161, time: 'yesterday' },
+  { rank: 42, name: 'wave.co', bid: 202, url: 'https://wave.co', clicks: 0, time: 'yesterday' },
   {
     rank: 43,
     name: 'recovery.com',
     bid: 201,
     url: 'https://recovery.com',
-    clicks: 141,
+    clicks: 0,
     time: 'yesterday',
   },
   {
@@ -345,7 +345,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'queuebrick.com',
     bid: 200,
     url: 'https://queuebrick.com',
-    clicks: 116,
+    clicks: 0,
     time: 'yesterday',
   },
   {
@@ -353,7 +353,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'coachparin.com',
     bid: 151,
     url: 'https://coachparin.com',
-    clicks: 23,
+    clicks: 0,
     time: '1 hour ago',
   },
   {
@@ -361,7 +361,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'watchbid.lol',
     bid: 150,
     url: 'https://watchbid.lol',
-    clicks: 101,
+    clicks: 0,
     time: '4 hours ago',
   },
   {
@@ -369,7 +369,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'genlook.app',
     bid: 115,
     url: 'https://genlook.app',
-    clicks: 36,
+    clicks: 0,
     time: '1 hour ago',
   },
   {
@@ -377,7 +377,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'lowisa.dev',
     bid: 105,
     url: 'https://lowisa.dev',
-    clicks: 17,
+    clicks: 0,
     time: '5 hours ago',
   },
   {
@@ -385,7 +385,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'shopify.com',
     bid: 105,
     url: 'https://shopify.com',
-    clicks: 103,
+    clicks: 0,
     time: '28 minutes ago',
   },
   {
@@ -393,7 +393,7 @@ export const leaderboardItems: LeaderboardItem[] = [
     name: 'vantaswap.com',
     bid: 101,
     url: 'https://vantaswap.com',
-    clicks: 47,
+    clicks: 0,
     time: '11 hours ago',
   },
 ];
