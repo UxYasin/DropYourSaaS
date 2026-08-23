@@ -147,7 +147,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <ShieldCheck className="size-5" />
           </div>
           <div>
-            <h2 className="font-mono font-bold text-lg text-white">Developer Login</h2>
+            <h2 className="font-mono font-bold text-lg text-white">Log In</h2>
             <p className="font-body text-xs text-zinc-400">
               {step === 1 ? 'Enter your email to get started' : `Verification for ${email}`}
             </p>
@@ -172,7 +172,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <form onSubmit={handleContinue} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
-                Developer Email
+                Email Address
               </label>
               <div className="relative">
                 <Input
