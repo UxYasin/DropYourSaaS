@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Clock, MousePointerClick, ChevronRight, ExternalLink } from 'lucide-react';
+import { Sparkles, Clock, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 import { siteCopy } from '@/lib/copy';
@@ -47,17 +47,14 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   const title = meta?.title || item.name;
   const description = meta?.description || `Explore ${item.name} — verified software tools & developer services listed on DropYourSaaS.`;
   const favicon = meta?.favicon || `https://www.google.com/s2/favicons?domain=${item.name}&sz=128`;
+  const previewImageUrl = meta?.image || (item as any).preview_image_url || (item as any).og_image || null;
 
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
-    // 1. Optimistic immediate UI increment
     setClicks((prev) => prev + 1);
-
-    // 2. DataFast outbound click analytics
     trackEvent('outbound_click', { url: item.url, rank: item.rank, name: item.name });
 
-    // 3. Fire-and-forget background click counter to database
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
       const blob = new Blob([JSON.stringify({ url: item.url })], { type: 'application/json' });
       navigator.sendBeacon('/api/click', blob);
@@ -70,27 +67,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
     }
   };
 
-  // If item has uploaded images, use them; otherwise provide sample app screenshots
-  const displayImages = (meta?.image ? [meta.image] : []).concat([
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80',
-  ]).slice(0, 6);
-
   /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (2x Height of #2/#3, Slim Rainbow Glow)
+     VARIANT 1: #1 SPOT (Top Rank Card with Glow)
      ------------------------------------------------------------- */
   if (variant === 'top1') {
     return (
       <div ref={containerRef} className="group relative my-1.5">
-        {/* Subtle, slim animated rainbow ambient glow */}
+        {/* Subtle animated rainbow ambient glow */}
         <div className="absolute -inset-[2px] rounded-[24px] animate-rainbow-glow opacity-35 blur-xs group-hover:opacity-60 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
         <div className="absolute -inset-[1px] rounded-[23px] animate-rainbow-glow opacity-50 pointer-events-none" />
 
-        <Card className="relative rounded-[22px] border-none bg-card p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <Card className="relative rounded-[22px] border-none bg-card p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden text-foreground">
           {/* Subtle ambient internal accent */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl -z-10 pointer-events-none" />
 
@@ -169,34 +156,25 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </span>
           </div>
 
-          {/* Pure Image Container Gallery */}
-          <div className="mt-5 pt-4 border-t border-border/60">
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
-              {displayImages.map((imgUrl, idx) => (
-                <a
-                  key={idx}
-                  href={href}
-                  target="_blank"
-                  rel="sponsored noopener noreferrer"
-                  onClick={handleClick}
-                  className="min-w-[130px] sm:min-w-[155px] h-44 sm:h-52 rounded-2xl bg-zinc-900/90 border border-border/80 overflow-hidden shrink-0 shadow-sm snap-start hover:border-amber-500/60 hover:scale-[1.02] transition-all relative block group/img"
-                >
-                  <Image
-                    src={imgUrl}
-                    alt={`${item.name} screenshot ${idx + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover/img:scale-105"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-2">
-                    <span className="text-[10px] text-white/90 font-sans bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full">
-                      View
-                    </span>
-                  </div>
-                </a>
-              ))}
+          {/* Single Full-Width Preview Image Banner */}
+          {previewImageUrl ? (
+            <div className="mt-4 pt-3 border-t border-border/60">
+              <a
+                href={href}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                onClick={handleClick}
+                className="block relative w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-xl border border-border/80 bg-muted/40 group/preview shadow-xs"
+              >
+                <img
+                  src={previewImageUrl}
+                  alt={item.name}
+                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
+                  loading="lazy"
+                />
+              </a>
             </div>
-          </div>
+          ) : null}
         </Card>
       </div>
     );
@@ -208,8 +186,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   if (variant === 'top2_3') {
     const isRank2 = item.rank === 2;
 
-    // Spot 2: Vibrant Azure / Ice Blue Theme
-    // Spot 3: Vibrant Sunset Amber Theme
     const theme = isRank2
       ? {
           bg: 'bg-[var(--bento-blue)]',
@@ -306,16 +282,35 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </button>
             </div>
           </div>
+
+          {/* Single Full-Width Preview Image Banner */}
+          {previewImageUrl ? (
+            <div className="mt-4 pt-3 border-t border-black/10 dark:border-white/10">
+              <a
+                href={href}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                onClick={handleClick}
+                className="block relative w-full h-44 sm:h-52 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 group/preview shadow-xs"
+              >
+                <img
+                  src={previewImageUrl}
+                  alt={item.name}
+                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
+                  loading="lazy"
+                />
+              </a>
+            </div>
+          ) : null}
         </div>
       </div>
     );
   }
 
   /* -------------------------------------------------------------
-     VARIANT 3: TOP 4 TO TOP 10 (0.7x Height of #2/#3, Bento Pastel Colors)
+     VARIANT 3: TOP 4 TO TOP 10 (Bento Pastel Cards)
      ------------------------------------------------------------- */
   if (variant === 'top4_10') {
-    // 6 bento pastel styles matching the side rails
     const bentoStyles = [
       {
         bg: 'bg-[var(--bento-blue)]',
@@ -432,6 +427,26 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </button>
             </div>
           </div>
+
+          {/* Single Full-Width Preview Image Banner */}
+          {previewImageUrl ? (
+            <div className="mt-3 pt-2.5 border-t border-black/10 dark:border-white/10">
+              <a
+                href={href}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                onClick={handleClick}
+                className="block relative w-full h-36 sm:h-44 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 group/preview shadow-xs"
+              >
+                <img
+                  src={previewImageUrl}
+                  alt={item.name}
+                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
+                  loading="lazy"
+                />
+              </a>
+            </div>
+          ) : null}
         </div>
       </div>
     );
@@ -442,7 +457,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
      ------------------------------------------------------------- */
   return (
     <div ref={containerRef} className="group relative">
-      <Card className="rounded-[12px] border border-border/70 bg-card p-2.5 sm:p-3 shadow-none hover:bg-muted/30 hover:border-border transition-all duration-150">
+      <Card className="rounded-[12px] border border-border/70 bg-card p-2.5 sm:p-3 shadow-none hover:bg-muted/30 hover:border-border transition-all duration-150 text-foreground">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <span className="font-mono text-xs font-bold text-muted-foreground w-6 shrink-0 text-center">
@@ -502,6 +517,26 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </button>
           </div>
         </div>
+
+        {/* Single Full-Width Preview Image Banner */}
+        {previewImageUrl ? (
+          <div className="mt-2.5 pt-2 border-t border-border/50">
+            <a
+              href={href}
+              target="_blank"
+              rel="sponsored noopener noreferrer"
+              onClick={handleClick}
+              className="block relative w-full h-32 sm:h-40 overflow-hidden rounded-lg border border-border/60 bg-muted/40 group/preview shadow-xs"
+            >
+              <img
+                src={previewImageUrl}
+                alt={item.name}
+                className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
+                loading="lazy"
+              />
+            </a>
+          </div>
+        ) : null}
       </Card>
     </div>
   );
