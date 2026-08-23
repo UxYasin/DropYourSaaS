@@ -11,6 +11,20 @@ export interface PendingListing {
   askingPrice?: number;
   mrr?: number;
   ttmRevenue?: number;
+  last30DaysRevenue?: number;
+  activeSubscriptions?: number;
+  founderName?: string;
+  foundedYear?: string;
+  locationCountry?: string;
+  valueProposition?: string;
+  problemSolved?: string;
+  audience?: string;
+  pricingModel?: string;
+  teamSize?: string;
+  fundingStatus?: string;
+  techStack?: string;
+  marketingChannels?: string;
+  additionalInfo?: string;
   bid: number;
   createdAt: string;
 }

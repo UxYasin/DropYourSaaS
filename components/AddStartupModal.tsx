@@ -5,14 +5,17 @@ import { createPortal } from 'react-dom';
 import {
   X,
   Sparkles,
-  ExternalLink,
   CheckCircle2,
   Lock,
   Globe,
   Loader2,
   DollarSign,
-  ShieldCheck,
-  Zap,
+  Users,
+  Code2,
+  TrendingUp,
+  UserCheck,
+  Building,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,20 +25,55 @@ interface AddStartupModalProps {
   onSuccess?: () => void;
 }
 
-type PaymentProvider = 'Stripe' | 'LemonSqueezy' | 'Paddle';
 type UpsellOption = 'dofollow' | 'ai_boost' | 'sponsor_panel' | null;
 
+const MARKET_CATEGORIES = [
+  'SaaS',
+  'Mobile Apps',
+  'AI Tool',
+  'Developer Tool',
+  'E-commerce',
+  'Productivity',
+  'Marketing',
+];
+
+const TEAM_SIZES = ['1 Solo', '2-5 people', '6-10', '10+'];
+const FUNDING_STATUSES = ['Bootstrapped', 'Pre-seed', 'Seed', 'Series A+'];
+
 export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalProps) {
-  const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('Stripe');
-  const [apiKey, setApiKey] = useState('');
+  // Product & Basic info
+  const [url, setUrl] = useState('');
+  const [founderName, setFounderName] = useState('');
+  const [locationCountry, setLocationCountry] = useState('');
+  const [foundedYear, setFoundedYear] = useState('');
   const [xHandle, setXHandle] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [isForSale, setIsForSale] = useState(false);
-  const [email, setEmail] = useState('');
-  const [askingPrice, setAskingPrice] = useState('');
+
+  // Manual Financial Metrics
+  const [last30DaysRevenue, setLast30DaysRevenue] = useState('');
   const [mrr, setMrr] = useState('');
+  const [activeSubscriptions, setActiveSubscriptions] = useState('');
+
+  // Bento Box Product Details
+  const [valueProposition, setValueProposition] = useState('');
+  const [problemSolved, setProblemSolved] = useState('');
+  const [audience, setAudience] = useState('');
+  const [marketCategory, setMarketCategory] = useState('SaaS');
+  const [pricingModel, setPricingModel] = useState('');
+  const [teamSize, setTeamSize] = useState('1 Solo');
+  const [fundingStatus, setFundingStatus] = useState('Bootstrapped');
+  const [techStack, setTechStack] = useState('');
+  const [marketingChannels, setMarketingChannels] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState('');
+
+  // Buy/Sell Marketplace & Upsells
+  const [isForSale, setIsForSale] = useState(false);
+  const [askingPrice, setAskingPrice] = useState('');
   const [ttmRevenue, setTtmRevenue] = useState('');
+  const [email, setEmail] = useState('');
   const [selectedUpsell, setSelectedUpsell] = useState<UpsellOption>(null);
+
+  // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -44,6 +82,12 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!url.trim()) {
+      setError('Please enter your SaaS / Product URL.');
+      return;
+    }
+
     if (isForSale && !email.trim()) {
       setError('Please enter your email address to enable buyer contact inquiries.');
       return;
@@ -55,15 +99,30 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
     try {
       const endpoint = selectedUpsell ? '/api/checkout' : '/api/submit';
       const body = {
-        paymentProvider,
-        apiKey,
+        url: url.trim(),
+        founderName,
+        locationCountry,
+        foundedYear,
         xHandle,
         isAnonymous,
+        last30DaysRevenue,
+        mrr,
+        activeSubscriptions,
+        valueProposition,
+        problemSolved,
+        audience,
+        marketCategory,
+        category: marketCategory,
+        pricingModel,
+        teamSize,
+        fundingStatus,
+        techStack,
+        marketingChannels,
+        additionalInfo,
         isForSale,
-        email: isForSale ? email : undefined,
         askingPrice: isForSale ? askingPrice : undefined,
-        mrr: isForSale ? mrr : undefined,
         ttmRevenue: isForSale ? ttmRevenue : undefined,
+        email: email.trim(),
         selectedUpsell,
       };
 
@@ -82,10 +141,8 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
           setSuccess(false);
         }, 1500);
       } else if (data?.url) {
-        // Redirect to stripe checkout if provided
         window.location.href = data.url;
       } else {
-        // Fallback success for mock demo
         setSuccess(true);
         setTimeout(() => {
           onClose();
@@ -93,7 +150,6 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
         }, 1500);
       }
     } catch {
-      // Graceful fallback for demonstration mode
       setSuccess(true);
       setTimeout(() => {
         onClose();
@@ -105,8 +161,8 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white shadow-2xl transition-all my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white shadow-2xl transition-all my-auto">
         {/* Modal Close Button */}
         <button
           type="button"
@@ -117,109 +173,112 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
           <span className="sr-only">Close</span>
         </button>
 
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-          {/* Header & Revenue Verification */}
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-7">
+          {/* Header */}
+          <div className="space-y-2 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-[#08F9C9] text-xs font-mono font-bold">
               <Sparkles className="size-3.5" />
-              Verified Revenue Directory
+              Comprehensive Startup Profile
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
               Add your startup
             </h2>
             <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-              Showcase your verified revenue to 200,000+ monthly visitors. It&apos;s free!
+              Showcase your verified product details &amp; metrics to 200,000+ monthly visitors. It&apos;s free!
             </p>
           </div>
 
-          {/* Payment Provider & API Key Section */}
-          <div className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                Choose your payment provider
-              </label>
-              <select
-                value={paymentProvider}
-                onChange={(e) => setPaymentProvider(e.target.value as PaymentProvider)}
-                className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-sans text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
-              >
-                <option value="Stripe">Stripe</option>
-                <option value="LemonSqueezy">LemonSqueezy</option>
-                <option value="Paddle">Paddle</option>
-              </select>
-            </div>
+          {/* Section 1: Founder & Company Info */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <UserCheck className="size-4 text-blue-500" />
+              Section 1: Founder &amp; Company Info
+            </h3>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                {paymentProvider} API Key
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                SaaS / Product URL <span className="text-red-500">*</span>
               </label>
               <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={
-                  paymentProvider === 'Stripe'
-                    ? 'rk_live_51M...'
-                    : paymentProvider === 'LemonSqueezy'
-                    ? 'eyJhbGciOi...'
-                    : 'pdl_live_...'
-                }
-                className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-mono text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="url"
+                required
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://yourproject.com"
+                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
               />
             </div>
 
-            {/* Provider Instructions Helper Box */}
-            <div className="p-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200/60 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 space-y-1">
-              <div className="flex items-center justify-between font-semibold text-zinc-900 dark:text-zinc-200">
-                <span className="flex items-center gap-1.5">
-                  <Lock className="size-3.5 text-blue-500" />
-                  Read-Only Security Guarantee
-                </span>
-                <a
-                  href="https://stripe.com/docs/keys#limit-access-with-restricted-api-keys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-                >
-                  Provider Docs
-                  <ExternalLink className="size-3" />
-                </a>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Founder Name
+                </label>
+                <input
+                  type="text"
+                  value={founderName}
+                  onChange={(e) => setFounderName(e.target.value)}
+                  placeholder="e.g., Dogan"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
               </div>
-              <p className="leading-relaxed">
-                Create a restricted API key with read-only access for subscriptions &amp; metrics. Your credentials are encrypted end-to-end.
-              </p>
-            </div>
-          </div>
 
-          {/* Profile Details */}
-          <div className="space-y-4 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                X Handle (optional)
-              </label>
-              <input
-                type="text"
-                value={xHandle}
-                onChange={(e) => setXHandle(e.target.value)}
-                placeholder="@username"
-                className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-sans text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Country / Location
+                </label>
+                <input
+                  type="text"
+                  value={locationCountry}
+                  onChange={(e) => setLocationCountry(e.target.value)}
+                  placeholder="United States"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Founded Year
+                </label>
+                <input
+                  type="text"
+                  value={foundedYear}
+                  onChange={(e) => setFoundedYear(e.target.value)}
+                  placeholder="2024"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  X Handle (optional)
+                </label>
+                <input
+                  type="text"
+                  value={xHandle}
+                  onChange={(e) => setXHandle(e.target.value)}
+                  placeholder="@username"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+              </div>
             </div>
 
             {/* Anonymous Mode Toggle */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                   Anonymous mode
                   <span
-                    title="Hide your exact product name and founder details"
-                    className="cursor-help text-zinc-400 dark:text-zinc-500 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800"
+                    title="Hide your exact product name and founder details on public directory"
+                    className="cursor-help text-zinc-400 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800"
                   >
                     ?
                   </span>
                 </div>
                 <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Hide your exact product name and founder details on public directory
+                  Hide your exact product name and founder details from public index
                 </div>
               </div>
               <button
@@ -242,12 +301,224 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
             </div>
           </div>
 
-          {/* Paid Upsell Section */}
-          <div className="space-y-3 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                Boost Your Visibility (Optional Upsells)
+          {/* Section 2: Financial Metrics (Manual) */}
+          <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div>
+              <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <DollarSign className="size-4 text-emerald-500" />
+                Section 2: Financial Metrics (Manual)
+              </h3>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 italic">
+                Manually verify your current metrics. These will be displayed on your listing profile.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                  Last 30 Days Revenue ($)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={last30DaysRevenue}
+                  onChange={(e) => setLast30DaysRevenue(e.target.value)}
+                  placeholder="5400"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                  Current MRR ($)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={mrr}
+                  onChange={(e) => setMrr(e.target.value)}
+                  placeholder="1850"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                  Active Subscriptions
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={activeSubscriptions}
+                  onChange={(e) => setActiveSubscriptions(e.target.value)}
+                  placeholder="120"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Product Details (The Bento Box) */}
+          <div className="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <Building className="size-4 text-purple-500" />
+              Section 3: Product Details (The Bento Box)
+            </h3>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Value Proposition
               </label>
+              <textarea
+                rows={2}
+                value={valueProposition}
+                onChange={(e) => setValueProposition(e.target.value)}
+                placeholder="E.g., Uses AI to help users quickly identify gemstones..."
+                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Problem Solved
+              </label>
+              <textarea
+                rows={2}
+                value={problemSolved}
+                onChange={(e) => setProblemSolved(e.target.value)}
+                placeholder="E.g., People often cannot identify a gemstone without visiting an expert..."
+                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Target Audience
+              </label>
+              <input
+                type="text"
+                value={audience}
+                onChange={(e) => setAudience(e.target.value)}
+                placeholder="Jewelry owners, collectors, shoppers..."
+                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Market Category
+                </label>
+                <select
+                  value={marketCategory}
+                  onChange={(e) => setMarketCategory(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                >
+                  {MARKET_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Pricing Model
+                </label>
+                <input
+                  type="text"
+                  value={pricingModel}
+                  onChange={(e) => setPricingModel(e.target.value)}
+                  placeholder="Freemium, $15/mo, etc."
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Team Size
+                </label>
+                <select
+                  value={teamSize}
+                  onChange={(e) => setTeamSize(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                >
+                  {TEAM_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Funding
+                </label>
+                <select
+                  value={fundingStatus}
+                  onChange={(e) => setFundingStatus(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                >
+                  {FUNDING_STATUSES.map((fund) => (
+                    <option key={fund} value={fund}>
+                      {fund}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Tech Stack
+              </label>
+              <input
+                type="text"
+                value={techStack}
+                onChange={(e) => setTechStack(e.target.value)}
+                placeholder="Next.js, React Native, Supabase (comma separated)"
+                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Marketing Channels
+              </label>
+              <input
+                type="text"
+                value={marketingChannels}
+                onChange={(e) => setMarketingChannels(e.target.value)}
+                placeholder="Meta Ads, SEO, X/Twitter (comma separated)"
+                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Additional Info (Optional)
+              </label>
+              <textarea
+                rows={2}
+                value={additionalInfo}
+                onChange={(e) => setAdditionalInfo(e.target.value)}
+                placeholder="Expansion areas, ASO strategies, etc."
+                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Paid Upsell Section */}
+          <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <TrendingUp className="size-4 text-amber-500" />
+                Boost Your Visibility (Optional Upsells)
+              </h3>
               {selectedUpsell && (
                 <button
                   type="button"
@@ -285,7 +556,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                     Dofollow link · DA 69
                   </h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Build trust with a verified revenue profile &amp; permanent high-authority SEO backlink.
+                    Build trust with a verified revenue profile &amp; permanent SEO backlink.
                   </p>
                 </div>
               </div>
@@ -367,7 +638,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
 
           {/* Footer & Submission Actions */}
           <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
-            {/* List for Sale Toggle & Conditional Email */}
+            {/* List for Sale Toggle & Conditional Acquisition Inputs */}
             <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -397,11 +668,10 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 </button>
               </div>
 
-              {/* Conditional Financials & Email Fields when List for Sale is ON */}
+              {/* Conditional Acquisition Financials & Contact Email when List for Sale is ON */}
               {isForSale && (
                 <div className="pt-2 animate-in fade-in-50 duration-200 space-y-3">
-                  {/* Financial Inputs Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
                         Asking Price ($)
@@ -412,20 +682,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                         value={askingPrice}
                         onChange={(e) => setAskingPrice(e.target.value)}
                         placeholder="25000"
-                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
-                        Current MRR ($)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={mrr}
-                        onChange={(e) => setMrr(e.target.value)}
-                        placeholder="1850"
-                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                        className="w-full h-10 px-3.5 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                       />
                     </div>
                     <div className="space-y-1">
@@ -438,7 +695,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                         value={ttmRevenue}
                         onChange={(e) => setTtmRevenue(e.target.value)}
                         placeholder="19500"
-                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                        className="w-full h-10 px-3.5 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                       />
                     </div>
                   </div>
@@ -453,7 +710,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
                       required={isForSale}
-                      className="w-full h-10 px-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full h-10 px-3.5 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     />
                   </div>
                 </div>
