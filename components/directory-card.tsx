@@ -283,25 +283,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
           </div>
 
-          {/* Single Full-Width Preview Image Banner */}
-          {previewImageUrl ? (
-            <div className="mt-4 pt-3 border-t border-black/10 dark:border-white/10">
-              <a
-                href={href}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={handleClick}
-                className="block relative w-full h-44 sm:h-52 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 group/preview shadow-xs"
-              >
-                <img
-                  src={previewImageUrl}
-                  alt={item.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
-                  loading="lazy"
-                />
-              </a>
-            </div>
-          ) : null}
+
         </div>
       </div>
     );
@@ -428,25 +410,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
           </div>
 
-          {/* Single Full-Width Preview Image Banner */}
-          {previewImageUrl ? (
-            <div className="mt-3 pt-2.5 border-t border-black/10 dark:border-white/10">
-              <a
-                href={href}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={handleClick}
-                className="block relative w-full h-36 sm:h-44 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 group/preview shadow-xs"
-              >
-                <img
-                  src={previewImageUrl}
-                  alt={item.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
-                  loading="lazy"
-                />
-              </a>
-            </div>
-          ) : null}
+
         </div>
       </div>
     );
@@ -518,25 +482,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           </div>
         </div>
 
-        {/* Single Full-Width Preview Image Banner */}
-        {previewImageUrl ? (
-          <div className="mt-2.5 pt-2 border-t border-border/50">
-            <a
-              href={href}
-              target="_blank"
-              rel="sponsored noopener noreferrer"
-              onClick={handleClick}
-              className="block relative w-full h-32 sm:h-40 overflow-hidden rounded-lg border border-border/60 bg-muted/40 group/preview shadow-xs"
-            >
-              <img
-                src={previewImageUrl}
-                alt={item.name}
-                className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
-                loading="lazy"
-              />
-            </a>
-          </div>
-        ) : null}
+
       </Card>
     </div>
   );

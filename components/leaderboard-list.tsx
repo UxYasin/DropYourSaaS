@@ -49,11 +49,8 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
             <Skeleton className="h-9 w-28 rounded-full" />
           </div>
         </div>
-        <div className="mt-6 pt-4 border-t border-border flex gap-3 overflow-hidden">
-          <Skeleton className="w-36 h-44 rounded-xl shrink-0" />
-          <Skeleton className="w-36 h-44 rounded-xl shrink-0" />
-          <Skeleton className="w-36 h-44 rounded-xl shrink-0" />
-          <Skeleton className="w-36 h-44 rounded-xl shrink-0" />
+        <div className="mt-4 pt-3 border-t border-border">
+          <Skeleton className="w-full h-48 sm:h-56 md:h-64 rounded-xl" />
         </div>
       </Card>
     );
