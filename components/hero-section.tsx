@@ -124,13 +124,13 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         </p>
       </div>
 
-      {/* Claim Spot Card Form (Matching reference image sample) */}
+      {/* Unified Claim Form Container */}
       <div className="pt-2 max-w-xl mx-auto">
-        <div className="space-y-3 text-left">
-          {/* Sleek Pill Bar (Exact match to sample image) */}
-          <div className="relative flex items-center justify-between gap-3 h-13 sm:h-14 p-1.5 pl-4 sm:pl-5 rounded-full bg-[#e3e5e8] dark:bg-[#25282c] border border-border/40 shadow-xs focus-within:ring-2 focus-within:ring-sky-400/40 transition-all">
+        <div className="p-3 sm:p-4 rounded-[26px] bg-[#e3e5e8] dark:bg-[#25282c] border border-border/40 text-left shadow-xs space-y-3">
+          {/* Top Row: Input with Link2 Icon & Single Accent Orange Claim Button */}
+          <div className="flex items-center justify-between gap-3 h-12 sm:h-13 pl-2 sm:pl-3 pr-1">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Link2 className="size-5 text-slate-500 dark:text-slate-400 shrink-0" />
+              <Link2 className="size-5 text-slate-500 dark:text-slate-400 shrink-0 ml-1" />
               <input
                 ref={ref}
                 type="text"
@@ -144,21 +144,15 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleClaim();
                 }}
-                placeholder="App Store link or app name..."
+                placeholder="Your SaaS URL or X"
                 className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-foreground placeholder:text-slate-500/80 dark:placeholder:text-slate-400/70 focus:ring-0 font-sans"
               />
             </div>
 
             <button
               type="button"
-              className="h-10 sm:h-11 px-6 sm:px-7 rounded-full shrink-0 font-medium text-xs sm:text-sm text-white bg-[#6db5f3] hover:bg-[#5aa6e8] shadow-xs active:scale-95 transition-all flex items-center justify-center cursor-pointer"
-              onClick={() => {
-                if (!isExpanded) {
-                  setIsExpanded(true);
-                } else {
-                  handleClaim();
-                }
-              }}
+              className="h-10 sm:h-11 px-6 sm:px-7 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+              onClick={handleClaim}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -169,9 +163,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             </button>
           </div>
 
-          {/* Expandable Options Panel */}
+          {/* Expandable Section inside the SAME background fill */}
           {isExpanded && (
-            <div className="p-4 sm:p-5 rounded-[24px] bg-card border border-border/80 shadow-md space-y-3 animate-in fade-in-50 duration-200">
+            <div className="pt-2 space-y-3 animate-in fade-in-50 duration-200">
+              {/* Divider line */}
+              <div className="border-t border-slate-300/80 dark:border-slate-700/60 my-2" />
+
               {/* Row 1: Category & List for Sale Toggle */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
                 {/* Left: Category dropdown */}
@@ -179,7 +176,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-11 rounded-[16px] bg-muted/40 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-sky-400 focus:border-sky-400 transition-colors cursor-pointer shadow-xs"
+                    className="w-full h-11 rounded-[16px] bg-white/90 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-700/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors cursor-pointer shadow-xs"
                   >
                     {['SaaS', 'AI Tool', 'Mobile App', 'Developer Tool', 'Productivity', 'Marketing'].map((cat) => (
                       <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
@@ -193,7 +190,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 </div>
 
                 {/* Right: "List for Sale?" Switch / Toggle */}
-                <div className="h-11 px-3.5 py-2 rounded-[16px] bg-muted/40 border border-border/70 flex items-center justify-between gap-2 flex-1">
+                <div className="h-11 px-3.5 py-2 rounded-[16px] bg-white/90 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-700/80 flex items-center justify-between gap-2 flex-1">
                   <div className="min-w-0 text-left">
                     <div className="text-xs font-bold font-sans text-foreground truncate">
                       List for Sale?
@@ -223,7 +220,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
               {/* Row 2: Conditional Email Field */}
               {isForSale && (
-                <div className="mt-2 space-y-1 text-left">
+                <div className="space-y-1 text-left">
                   <div className="relative flex-1 flex items-center">
                     <input
                       type="email"
@@ -233,7 +230,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                         if (error) setError(null);
                       }}
                       placeholder="you@example.com"
-                      className="w-full h-11 rounded-[16px] bg-muted/40 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-sky-400 focus:border-sky-400 transition-colors shadow-xs"
+                      className="w-full h-11 rounded-[16px] bg-white/90 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-700/80 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-xs"
                       required={isForSale}
                     />
                   </div>
@@ -243,33 +240,15 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 </div>
               )}
 
-              {/* Row 3: Footer Actions */}
-              <div className="flex items-center justify-between pt-2 gap-2">
-                {/* Left: Collapse button */}
+              {/* Row 3: Footer Actions (Collapse only - single claim button is in top bar) */}
+              <div className="flex items-center justify-between pt-1">
                 <button
                   type="button"
                   onClick={() => setIsExpanded(false)}
-                  className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-1.5 rounded-full hover:bg-muted/50 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors inline-flex items-center gap-1 cursor-pointer"
                 >
                   <ChevronUp className="size-3.5" />
                   ^ Collapse
-                </button>
-
-                {/* Right: Sky blue pill action button */}
-                <button
-                  type="button"
-                  className="h-9 px-6 sm:px-7 rounded-full font-medium text-xs sm:text-sm text-white bg-[#6db5f3] hover:bg-[#5aa6e8] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                  onClick={handleClaim}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="size-3.5 animate-spin" />
-                      Fetching SaaS Meta...
-                    </>
-                  ) : (
-                    <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
-                  )}
                 </button>
               </div>
             </div>
@@ -280,12 +259,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               {error}
             </p>
           )}
-
-          {/* Helper Note Below Card */}
-          <p className="text-xs font-body text-muted-foreground text-center pt-1">
-            Already listed? Re-submit your project link after 24 hours to refresh your placement.
-          </p>
         </div>
+
+        {/* Helper Note Below Card */}
+        <p className="text-xs font-body text-muted-foreground text-center mt-3">
+          Already listed? Re-submit your project link after 24 hours to refresh your placement.
+        </p>
       </div>
 
       {/* Submission Modal */}
