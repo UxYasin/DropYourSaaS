@@ -69,3 +69,73 @@ begin
   where url = entry_url;
 end;
 $$ language plpgsql;
+
+-- ======================================================
+-- VOTING SYSTEM & HOT/DECAY SCORE ENGINE MIGRATION
+-- ======================================================
+
+-- 1. Add score columns to leaderboard_entries and listings tables
+ALTER TABLE leaderboard_entries 
+ADD COLUMN IF NOT EXISTS upvotes INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS downvotes INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS net_score INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS hot_score FLOAT DEFAULT 0;
+
+ALTER TABLE listings 
+ADD COLUMN IF NOT EXISTS upvotes INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS downvotes INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS net_score INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS hot_score FLOAT DEFAULT 0;
+
+-- 2. Create vote tracking table supporting anonymous & logged-in users
+CREATE TABLE IF NOT EXISTS listing_votes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID REFERENCES leaderboard_entries(id) ON DELETE CASCADE,
+  voter_token TEXT NOT NULL,
+  vote_type SMALLINT NOT NULL CHECK (vote_type IN (-1, 1)),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (listing_id, voter_token)
+);
+
+-- Index for fast lookups
+CREATE INDEX IF NOT EXISTS idx_listing_votes_token_listing ON listing_votes(voter_token, listing_id);
+CREATE INDEX IF NOT EXISTS idx_leaderboard_entries_hot_score ON leaderboard_entries(hot_score DESC);
+CREATE INDEX IF NOT EXISTS idx_leaderboard_entries_net_score ON leaderboard_entries(net_score DESC);
+
+-- 3. Trigger/Function to automatically recalculate net & hot scores on vote
+CREATE OR REPLACE FUNCTION update_leaderboard_vote_counts()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_upvotes INT;
+  v_downvotes INT;
+  v_age_hours FLOAT;
+BEGIN
+  SELECT 
+    COALESCE(COUNT(*) FILTER (WHERE vote_type = 1), 0),
+    COALESCE(COUNT(*) FILTER (WHERE vote_type = -1), 0)
+  INTO v_upvotes, v_downvotes
+  FROM listing_votes
+  WHERE listing_id = COALESCE(NEW.listing_id, OLD.listing_id);
+
+  SELECT EXTRACT(EPOCH FROM (now() - claimed_at)) / 3600.0
+  INTO v_age_hours
+  FROM leaderboard_entries
+  WHERE id = COALESCE(NEW.listing_id, OLD.listing_id);
+
+  UPDATE leaderboard_entries
+  SET 
+    upvotes = v_upvotes,
+    downvotes = v_downvotes,
+    net_score = (v_upvotes - v_downvotes),
+    hot_score = (v_upvotes - v_downvotes) / POWER(COALESCE(v_age_hours, 0) + 2, 1.5)
+  WHERE id = COALESCE(NEW.listing_id, OLD.listing_id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_update_leaderboard_votes ON listing_votes;
+CREATE TRIGGER trg_update_leaderboard_votes
+AFTER INSERT OR UPDATE OR DELETE ON listing_votes
+FOR EACH ROW EXECUTE FUNCTION update_leaderboard_vote_counts();
+

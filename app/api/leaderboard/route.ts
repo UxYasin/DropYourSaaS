@@ -10,9 +10,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || searchParams.get('sort');
   const category = searchParams.get('category') || undefined;
+  const sortByParam = searchParams.get('sortBy') as 'rank' | 'hot' | 'top' | 'recent' | null;
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
   const limitParam = parseInt(searchParams.get('limit') || '50', 10);
 
+  const sortBy = ['rank', 'hot', 'top', 'recent'].includes(sortByParam || '')
+    ? (sortByParam as 'rank' | 'hot' | 'top' | 'recent')
+    : 'rank';
   const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
   const limit = isNaN(limitParam) || limitParam < 1 ? 50 : limitParam;
 
@@ -27,8 +31,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ items });
     }
 
-    // Default: Paginated leaderboard query with category filter support
-    const result = await getPaginatedLeaderboard(page, limit, category);
+    const result = await getPaginatedLeaderboard(page, limit, category, sortBy);
     return NextResponse.json(result);
   } catch (err: any) {
     console.error('Leaderboard fetch error:', err);

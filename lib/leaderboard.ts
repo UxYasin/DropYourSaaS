@@ -1,20 +1,24 @@
 import { redis } from '@/lib/redis';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { leaderboardItems as seedLeaderboardItems, type LeaderboardItem } from '@/lib/leaderboard-data';
+import { cookies } from 'next/headers';
 
-const CACHE_KEY = 'leaderboard:v4';
-const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for ultra-fast live real-time updates
+const CACHE_KEY = 'leaderboard:v5';
+const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for real-time responsiveness
 
-export async function getLeaderboard(category?: string): Promise<LeaderboardItem[]> {
-  const cacheKey = category && category !== 'All' ? `${CACHE_KEY}:${category.toLowerCase()}` : CACHE_KEY;
+export async function getLeaderboard(
+  category?: string,
+  sortBy: 'rank' | 'hot' | 'top' | 'recent' = 'rank'
+): Promise<LeaderboardItem[]> {
+  const cacheKey = `${CACHE_KEY}:${sortBy}:${(category || 'all').toLowerCase()}`;
   try {
     const cached = await redis.get<LeaderboardItem[]>(cacheKey);
     if (cached && Array.isArray(cached) && cached.length > 0) return cached;
   } catch {
-    // Fallback if Redis is unconfigured or offline
+    // Fallback if Redis is offline
   }
 
-  const items = await fetchLeaderboardFromDatabase(category);
+  const items = await fetchLeaderboardFromDatabase(category, sortBy);
   try {
     await redis.set(cacheKey, items, { ex: CACHE_TTL_SECONDS });
   } catch {}
@@ -22,37 +26,11 @@ export async function getLeaderboard(category?: string): Promise<LeaderboardItem
 }
 
 export async function getTrendingLeaderboard(limit = 5): Promise<LeaderboardItem[]> {
-  const cacheKey = `leaderboard:trending:v4:${limit}`;
-  try {
-    const cached = await redis.get<LeaderboardItem[]>(cacheKey);
-    if (cached && Array.isArray(cached) && cached.length > 0) return cached;
-  } catch {}
-
-  const items = await fetchLeaderboardFromDatabase();
-  const trending = [...items].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)).slice(0, limit);
-
-  try {
-    await redis.set(cacheKey, trending, { ex: CACHE_TTL_SECONDS });
-  } catch {}
-
-  return trending;
+  return getLeaderboard(undefined, 'hot').then((items) => items.slice(0, limit));
 }
 
 export async function getRecentSubmissions(limit = 5): Promise<LeaderboardItem[]> {
-  const cacheKey = `leaderboard:recent:v4:${limit}`;
-  try {
-    const cached = await redis.get<LeaderboardItem[]>(cacheKey);
-    if (cached && Array.isArray(cached) && cached.length > 0) return cached;
-  } catch {}
-
-  const items = await fetchLeaderboardFromDatabase();
-  const recent = [...items].slice(0, limit);
-
-  try {
-    await redis.set(cacheKey, recent, { ex: CACHE_TTL_SECONDS });
-  } catch {}
-
-  return recent;
+  return getLeaderboard(undefined, 'recent').then((items) => items.slice(0, limit));
 }
 
 export async function invalidateLeaderboardCache() {
@@ -61,13 +39,17 @@ export async function invalidateLeaderboardCache() {
     await redis.del('leaderboard:v1');
     await redis.del('leaderboard:v2');
     await redis.del('leaderboard:v3');
-    await redis.del('leaderboard:trending:v4:5');
-    await redis.del('leaderboard:recent:v4:5');
+    await redis.del('leaderboard:v4');
   } catch {}
 }
 
-export async function getPaginatedLeaderboard(page = 1, limit = 50, category?: string) {
-  const items = await getLeaderboard(category);
+export async function getPaginatedLeaderboard(
+  page = 1,
+  limit = 50,
+  category?: string,
+  sortBy: 'rank' | 'hot' | 'top' | 'recent' = 'rank'
+) {
+  const items = await getLeaderboard(category, sortBy);
   const start = (page - 1) * limit;
   const end = start + limit;
   const paginated = items.slice(start, end);
@@ -82,8 +64,34 @@ export async function getPaginatedLeaderboard(page = 1, limit = 50, category?: s
   };
 }
 
-export async function fetchLeaderboardFromDatabase(category?: string): Promise<LeaderboardItem[]> {
+export async function fetchLeaderboardFromDatabase(
+  category?: string,
+  sortBy: 'rank' | 'hot' | 'top' | 'recent' = 'rank'
+): Promise<LeaderboardItem[]> {
   const supabase = getSupabaseServerClient();
+
+  // Try to get voter_token cookie if available to attach user_vote
+  let voterToken: string | undefined;
+  try {
+    const cookieStore = await cookies();
+    voterToken = cookieStore.get('voter_token')?.value;
+  } catch {}
+
+  let userVotesMap = new Map<string, 1 | -1>();
+  if (voterToken) {
+    try {
+      const { data: votes } = await supabase
+        .from('listing_votes')
+        .select('listing_id, vote_type')
+        .eq('voter_token', voterToken);
+
+      if (votes) {
+        votes.forEach((v) => {
+          userVotesMap.set(v.listing_id, v.vote_type as 1 | -1);
+        });
+      }
+    } catch {}
+  }
 
   let dbEntries: any[] = [];
   try {
@@ -96,36 +104,55 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
       query = query.ilike('category', `%${category}%`);
     }
 
-    // Order strictly by rank ascending, then claimed_at descending
-    const { data: entryData } = await query
-      .order('rank', { ascending: true, nullsFirst: false })
-      .order('claimed_at', { ascending: false });
+    // Apply exact sorting engine
+    if (sortBy === 'hot') {
+      query = query.order('hot_score', { ascending: false, nullsFirst: false }).order('net_score', { ascending: false });
+    } else if (sortBy === 'top') {
+      query = query.order('net_score', { ascending: false, nullsFirst: false }).order('upvotes', { ascending: false });
+    } else if (sortBy === 'recent') {
+      query = query.order('claimed_at', { ascending: false });
+    } else {
+      // Default 'rank': Order strictly by rank ascending
+      query = query.order('rank', { ascending: true, nullsFirst: false }).order('claimed_at', { ascending: false });
+    }
 
+    const { data: entryData } = await query;
     if (entryData && entryData.length > 0) {
       dbEntries = entryData;
-    } else {
-      let listingQuery = supabase
-        .from('listings')
-        .select('*')
-        .neq('status', 'rejected');
-
-      if (category && category !== 'All') {
-        listingQuery = listingQuery.ilike('category', `%${category}%`);
-      }
-
-      const { data: listingData } = await listingQuery
-        .order('rank', { ascending: true, nullsFirst: false })
-        .order('claimed_at', { ascending: false });
-
-      if (listingData && listingData.length > 0) {
-        dbEntries = listingData;
-      }
     }
   } catch (err) {
     console.warn('Error loading live Supabase listings:', err);
   }
 
-  // Build a map of items by their assigned rank
+  // If DB entries exist and sorting is not default 'rank', return directly ordered by score!
+  if (dbEntries.length > 0 && sortBy !== 'rank') {
+    return dbEntries.map((row, idx) => {
+      let hostname = 'SaaS Product';
+      try {
+        hostname = row.url ? new URL(row.url).hostname.replace(/^www\./, '') : 'SaaS Product';
+      } catch {
+        hostname = row.url || 'SaaS Product';
+      }
+      return {
+        id: row.id,
+        rank: idx + 1,
+        name: row.name || row.title || hostname,
+        bid: (row.bid_cents || 0) / 100,
+        url: row.url,
+        clicks: row.clicks || 0,
+        time: formatRelativeTime(row.claimed_at || row.created_at || new Date().toISOString()),
+        upvotes: row.upvotes || 0,
+        downvotes: row.downvotes || 0,
+        net_score: row.net_score || 0,
+        hot_score: row.hot_score || 0,
+        user_vote: userVotesMap.get(row.id) || 0,
+        category: row.category || 'SaaS',
+        claimed_at: row.claimed_at || row.created_at,
+      };
+    });
+  }
+
+  // Default 'rank' building with seed item fallback
   const realItemsMap = new Map<number, LeaderboardItem>();
   const realUrlSet = new Set<string>();
   const unrankedItems: LeaderboardItem[] = [];
@@ -140,12 +167,20 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
 
     const assignedRank = Number(row.rank || row.target_rank) || 0;
     const item: LeaderboardItem = {
+      id: row.id,
       rank: assignedRank,
       name: row.name || row.title || hostname,
       bid: (row.bid_cents || 0) / 100,
       url: row.url,
       clicks: row.clicks || 0,
       time: formatRelativeTime(row.claimed_at || row.created_at || new Date().toISOString()),
+      upvotes: row.upvotes || 0,
+      downvotes: row.downvotes || 0,
+      net_score: row.net_score || 0,
+      hot_score: row.hot_score || 0,
+      user_vote: userVotesMap.get(row.id) || 0,
+      category: row.category || 'SaaS',
+      claimed_at: row.claimed_at || row.created_at,
     };
 
     if (row.url) {
@@ -182,6 +217,11 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
           result.push({
             ...seed,
             rank: r,
+            upvotes: 0,
+            downvotes: 0,
+            net_score: 0,
+            hot_score: 0,
+            user_vote: 0,
           });
           realUrlSet.add(seedNorm);
           break;
@@ -196,7 +236,6 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
     unrankedIdx++;
   }
 
-  // Return clean sequential ranks 1..N
   return result.map((item, idx) => ({
     ...item,
     rank: idx + 1,

@@ -6,7 +6,7 @@ import { DirectoryCard } from '@/components/directory-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Tag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Tag, Flame, Trophy, Clock, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORIES } from '@/lib/categories';
 import { CategoryFilterBar } from '@/components/category-filter-bar';
@@ -18,8 +18,6 @@ import {
 interface DirectoryListProps {
   onClaimClick?: (rank: number, bid: number) => void;
 }
-
-const CATEGORY_TOPICS = ['All', ...CATEGORIES];
 
 function SectionDivider({ title, count }: { title: string; count?: string }) {
   return (
@@ -69,7 +67,7 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
             <Skeleton className="size-7 rounded-lg" />
             <Skeleton className="size-14 rounded-[12px]" />
             <div className="space-y-2 flex-1">
-              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-5 w-36" />
               <Skeleton className="h-4 w-full" />
             </div>
           </div>
@@ -84,18 +82,18 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
 
   if (variant === 'top4_10') {
     return (
-      <Card className="rounded-[14px] border border-border bg-card p-3.5">
+      <Card className="rounded-[16px] border border-border bg-card p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1">
             <Skeleton className="size-6 rounded-md" />
-            <Skeleton className="size-10 rounded-[10px]" />
+            <Skeleton className="size-11 rounded-[12px]" />
             <div className="space-y-1.5 flex-1">
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-3 w-56" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-3/4" />
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Skeleton className="h-5 w-14" />
+            <Skeleton className="h-6 w-14" />
             <Skeleton className="h-7 w-20 rounded-full" />
           </div>
         </div>
@@ -110,11 +108,14 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
           <Skeleton className="size-5 rounded-md" />
           <Skeleton className="size-8 rounded-lg" />
           <div className="space-y-1 flex-1">
-            <Skeleton className="h-3.5 w-32" />
-            <Skeleton className="h-3 w-48" />
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-3 w-1/2" />
           </div>
         </div>
-        <Skeleton className="h-4 w-12" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-12" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
       </div>
     </Card>
   );
@@ -124,6 +125,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState<'rank' | 'hot' | 'top' | 'recent'>('rank');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
   const [totalPages, setTotalPages] = useState(1);
@@ -135,7 +137,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     setIsLoading(true);
 
     const catParam = selectedCategory !== 'All' ? `&category=${encodeURIComponent(selectedCategory)}` : '';
-    fetch(`/api/leaderboard?page=${page}&limit=50${catParam}&t=${Date.now()}`)
+    fetch(`/api/leaderboard?page=${page}&limit=50&sortBy=${sortBy}${catParam}&t=${Date.now()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
@@ -154,7 +156,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     return () => {
       cancelled = true;
     };
-  }, [page, selectedCategory, isVerified]);
+  }, [page, selectedCategory, sortBy, isVerified]);
 
   const handleClaimClick = (rank: number, bid: number) => {
     if (onClaimClick) {
@@ -167,7 +169,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     setPage(1);
   };
 
-  const isFirstPage = page === 1 && selectedCategory === 'All';
+  const isFirstPage = page === 1 && selectedCategory === 'All' && sortBy === 'rank';
   const item1 = isFirstPage ? items[0] : null;
   const items2_3 = isFirstPage ? items.slice(1, 3) : [];
   const items4_10 = isFirstPage ? items.slice(3, 10) : [];
@@ -181,6 +183,71 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
         />
+      </div>
+
+      {/* Reddit-Style Sort Engine Controls (Hot, Top, Recent, Rank) */}
+      <div className="flex items-center justify-between gap-3 px-1 py-2 flex-wrap border-b border-border/40 pb-3">
+        <div className="flex items-center gap-1 bg-zinc-900/60 dark:bg-zinc-900/80 p-1 rounded-full border border-zinc-800/80">
+          <button
+            type="button"
+            onClick={() => { setSortBy('hot'); setPage(1); }}
+            className={cn(
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              sortBy === 'hot'
+                ? 'bg-[#FF4500] text-white shadow-xs'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+            )}
+          >
+            <Flame className="size-3.5" />
+            <span>Hot</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSortBy('top'); setPage(1); }}
+            className={cn(
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              sortBy === 'top'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+            )}
+          >
+            <Trophy className="size-3.5" />
+            <span>Top</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSortBy('recent'); setPage(1); }}
+            className={cn(
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              sortBy === 'recent'
+                ? 'bg-emerald-500 text-white shadow-xs'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+            )}
+          >
+            <Clock className="size-3.5" />
+            <span>Recent</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setSortBy('rank'); setPage(1); }}
+            className={cn(
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              sortBy === 'rank'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+            )}
+          >
+            <BarChart2 className="size-3.5" />
+            <span>Rank / Bids</span>
+          </button>
+        </div>
+
+        <div className="text-xs font-mono text-muted-foreground">
+          Showing <span className="text-foreground font-bold">{items.length}</span> SaaS products
+        </div>
       </div>
 
       {isFirstPage ? (
@@ -198,7 +265,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             <div className="space-y-3.5">
               {item1 && (
                 <DirectoryCard
-                  key={item1.rank}
+                  key={item1.id || item1.rank}
                   item={item1}
                   variant="top1"
                   onClaimClick={handleClaimClick}
@@ -206,7 +273,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
               )}
               {items2_3.map((item) => (
                 <DirectoryCard
-                  key={item.rank}
+                  key={item.id || item.rank}
                   item={item}
                   variant="top2_3"
                   onClaimClick={handleClaimClick}
@@ -215,12 +282,12 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             </div>
           )}
 
-          {/* SECTION 2: TOP 10 (4th to 10th spot) */}
-          <SectionDivider title="Top 10" />
+          {/* SECTION 2: TOP 4 TO 10 */}
+          <SectionDivider title="Top 4 – 10" />
 
           {isLoading ? (
             <div className="space-y-2.5">
-              {Array.from({ length: 7 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <DirectorySkeleton key={i} variant="top4_10" />
               ))}
             </div>
@@ -228,7 +295,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             <div className="space-y-2.5">
               {items4_10.map((item) => (
                 <DirectoryCard
-                  key={item.rank}
+                  key={item.id || item.rank}
                   item={item}
                   variant="top4_10"
                   onClaimClick={handleClaimClick}
@@ -237,8 +304,8 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             </div>
           )}
 
-          {/* SECTION 3: TOP 20 & BEYOND (11th+ spot) */}
-          <SectionDivider title="Index Feed" count={`${totalCount} total`} />
+          {/* SECTION 3: ALL OTHER LISTINGS */}
+          <SectionDivider title="Leaderboard Feed" count={`${totalCount} Total`} />
 
           {isLoading ? (
             <div className="space-y-2">
@@ -250,7 +317,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             <div className="space-y-2">
               {remainingItems.map((item) => (
                 <DirectoryCard
-                  key={item.rank}
+                  key={item.id || item.rank}
                   item={item}
                   variant="top11_20"
                   onClaimClick={handleClaimClick}
@@ -260,64 +327,51 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
           )}
         </>
       ) : (
-        <>
-          <SectionDivider
-            title={selectedCategory !== 'All' ? `${selectedCategory}` : `Page ${page}`}
-            count={`${totalCount} total`}
-          />
+        <div className="space-y-2">
           {isLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 15 }).map((_, i) => (
+              {Array.from({ length: 10 }).map((_, i) => (
                 <DirectorySkeleton key={i} variant="top11_20" />
               ))}
             </div>
           ) : (
-            <div className="space-y-2">
-              {items.map((item) => (
-                <DirectoryCard
-                  key={item.rank}
-                  item={item}
-                  variant="top11_20"
-                  onClaimClick={handleClaimClick}
-                />
-              ))}
-            </div>
+            items.map((item) => (
+              <DirectoryCard
+                key={item.id || item.rank}
+                item={item}
+                variant="top11_20"
+                onClaimClick={handleClaimClick}
+              />
+            ))
           )}
-        </>
+        </div>
       )}
 
-      {/* PAGINATION CONTROLS */}
-      {(totalPages > 1 || totalCount > 50) && (
-        <div className="mt-8 pt-4 border-t border-border flex items-center justify-between font-mono text-xs text-muted-foreground">
-          <div>
-            Showing <span className="font-bold text-foreground">{(page - 1) * 50 + 1}</span>-
-            <span className="font-bold text-foreground">{Math.min(page * 50, totalCount)}</span> of{' '}
-            <span className="font-bold text-foreground">{totalCount}</span> listings
+      {/* Pagination Bar */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-6 border-t border-border/80">
+          <div className="text-xs font-mono text-muted-foreground">
+            Page <span className="text-foreground font-bold">{page}</span> of{' '}
+            <span className="text-foreground font-bold">{totalPages}</span>
           </div>
+
           <div className="flex items-center gap-2">
             <Button
-              type="button"
               variant="outline"
               size="sm"
-              disabled={page <= 1 || isLoading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="h-8 px-3 rounded-lg text-xs font-sans flex items-center gap-1"
+              disabled={page === 1 || isLoading}
+              className="h-8 gap-1 text-xs cursor-pointer"
             >
               <ChevronLeft className="size-3.5" />
               Previous
             </Button>
-
-            <span className="px-2 font-bold text-foreground text-xs">
-              {page} / {totalPages}
-            </span>
-
             <Button
-              type="button"
               variant="outline"
               size="sm"
-              disabled={page >= totalPages || isLoading}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="h-8 px-3 rounded-lg text-xs font-sans flex items-center gap-1"
+              disabled={page === totalPages || isLoading}
+              className="h-8 gap-1 text-xs cursor-pointer"
             >
               Next
               <ChevronRight className="size-3.5" />

@@ -7,6 +7,7 @@ import { Sparkles, Clock, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 import { siteCopy } from '@/lib/copy';
+import { VotePill } from '@/components/VotePill';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
@@ -68,20 +69,17 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   };
 
   /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (Top Rank Card with Glow)
+     VARIANT 1: #1 SPOT (Top Rank Card with Glow & VotePill)
      ------------------------------------------------------------- */
   if (variant === 'top1') {
     return (
       <div ref={containerRef} className="group relative my-1.5">
-        {/* Subtle animated rainbow ambient glow */}
         <div className="absolute -inset-[2px] rounded-[24px] animate-rainbow-glow opacity-35 blur-xs group-hover:opacity-60 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
         <div className="absolute -inset-[1px] rounded-[23px] animate-rainbow-glow opacity-50 pointer-events-none" />
 
         <Card className="relative rounded-[22px] border-none bg-card p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden text-foreground">
-          {/* Subtle ambient internal accent */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl -z-10 pointer-events-none" />
 
-          {/* Main info header */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
               <span className="font-mono text-xl sm:text-2xl font-black text-foreground shrink-0 mt-1">
@@ -127,24 +125,29 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </div>
             </div>
 
-            {/* Price & CTA */}
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+            {/* Voting Pill, Price & CTA */}
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+              <VotePill
+                listingId={item.id || ''}
+                initialScore={item.net_score || 0}
+                initialUserVote={item.user_vote || 0}
+                size="md"
+              />
               {siteCopy.feed.showPrices && (
-                <div className="font-mono font-black text-2xl sm:text-3xl text-sky-500 tracking-tight shrink-0">
+                <div className="font-mono font-black text-xl sm:text-2xl text-sky-500 tracking-tight shrink-0">
                   {formatBid(item.bid)}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0"
+                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer"
               >
                 {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
 
-          {/* Stats Bar */}
           <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground font-sans">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium text-[11px] font-sans">
               <Sparkles className="size-3" />
@@ -156,7 +159,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </span>
           </div>
 
-          {/* Single Full-Width Preview Image Banner */}
           {previewImageUrl ? (
             <div className="mt-4 pt-3 border-t border-border/60">
               <a
@@ -181,11 +183,10 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   }
 
   /* -------------------------------------------------------------
-     VARIANT 2: TOP 2 & TOP 3 (Prominent Colored Podium Cards)
+     VARIANT 2: TOP 2 & TOP 3 (Podium Cards with VotePill)
      ------------------------------------------------------------- */
   if (variant === 'top2_3') {
     const isRank2 = item.rank === 2;
-
     const theme = isRank2
       ? {
           bg: 'bg-[var(--bento-blue)]',
@@ -194,7 +195,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           subtext: 'text-blue-900/75 dark:text-blue-200/75',
           rankColor: 'text-blue-600 dark:text-blue-400',
           badge: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-400/30',
-          btn: 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-sm',
           priceColor: 'text-blue-600 dark:text-blue-400',
         }
       : {
@@ -204,7 +204,6 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           subtext: 'text-amber-900/75 dark:text-amber-200/75',
           rankColor: 'text-amber-600 dark:text-amber-400',
           badge: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-400/30',
-          btn: 'bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-sm',
           priceColor: 'text-amber-600 dark:text-amber-400',
         };
 
@@ -266,76 +265,43 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </div>
             </div>
 
-            {/* Price & CTA */}
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
+              <VotePill
+                listingId={item.id || ''}
+                initialScore={item.net_score || 0}
+                initialUserVote={item.user_vote || 0}
+                size="sm"
+              />
               {siteCopy.feed.showPrices && (
-                <div className={`font-mono font-black text-xl sm:text-2xl tracking-tight shrink-0 ${theme.priceColor}`}>
+                <div className={`font-mono font-black text-lg sm:text-xl tracking-tight shrink-0 ${theme.priceColor}`}>
                   {formatBid(item.bid)}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0"
+                className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
               >
                 {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
-
-
         </div>
       </div>
     );
   }
 
   /* -------------------------------------------------------------
-     VARIANT 3: TOP 4 TO TOP 10 (Bento Pastel Cards)
+     VARIANT 3: TOP 4 TO TOP 10 (Bento Pastel Cards with VotePill)
      ------------------------------------------------------------- */
   if (variant === 'top4_10') {
     const bentoStyles = [
-      {
-        bg: 'bg-[var(--bento-blue)]',
-        border: 'border-blue-200/60 dark:border-blue-800/40',
-        text: 'text-blue-950 dark:text-blue-100',
-        subtext: 'text-blue-900/70 dark:text-blue-200/70',
-        badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-      },
-      {
-        bg: 'bg-[var(--bento-yellow)]',
-        border: 'border-amber-200/60 dark:border-amber-800/40',
-        text: 'text-amber-950 dark:text-amber-100',
-        subtext: 'text-amber-900/70 dark:text-amber-200/70',
-        badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-      },
-      {
-        bg: 'bg-[var(--bento-mint)]',
-        border: 'border-emerald-200/60 dark:border-emerald-800/40',
-        text: 'text-emerald-950 dark:text-emerald-100',
-        subtext: 'text-emerald-900/70 dark:text-emerald-200/70',
-        badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-      },
-      {
-        bg: 'bg-[var(--bento-pink)]',
-        border: 'border-pink-200/60 dark:border-pink-800/40',
-        text: 'text-pink-950 dark:text-pink-100',
-        subtext: 'text-pink-900/70 dark:text-pink-200/70',
-        badge: 'bg-pink-500/10 text-pink-700 dark:text-pink-300',
-      },
-      {
-        bg: 'bg-[var(--bento-lavender)]',
-        border: 'border-purple-200/60 dark:border-purple-800/40',
-        text: 'text-purple-950 dark:text-purple-100',
-        subtext: 'text-purple-900/70 dark:text-purple-200/70',
-        badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
-      },
-      {
-        bg: 'bg-[var(--bento-gray)]',
-        border: 'border-zinc-300/60 dark:border-zinc-700/40',
-        text: 'text-zinc-950 dark:text-zinc-100',
-        subtext: 'text-zinc-900/70 dark:text-zinc-300/70',
-        badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300',
-      },
+      { bg: 'bg-[var(--bento-blue)]', border: 'border-blue-200/60 dark:border-blue-800/40', text: 'text-blue-950 dark:text-blue-100', subtext: 'text-blue-900/70 dark:text-blue-200/70', badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300' },
+      { bg: 'bg-[var(--bento-yellow)]', border: 'border-amber-200/60 dark:border-amber-800/40', text: 'text-amber-950 dark:text-amber-100', subtext: 'text-amber-900/70 dark:text-amber-200/70', badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300' },
+      { bg: 'bg-[var(--bento-mint)]', border: 'border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-950 dark:text-emerald-100', subtext: 'text-emerald-900/70 dark:text-emerald-200/70', badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' },
+      { bg: 'bg-[var(--bento-pink)]', border: 'border-pink-200/60 dark:border-pink-800/40', text: 'text-pink-950 dark:text-pink-100', subtext: 'text-pink-900/70 dark:text-pink-200/70', badge: 'bg-pink-500/10 text-pink-700 dark:text-pink-300' },
+      { bg: 'bg-[var(--bento-lavender)]', border: 'border-purple-200/60 dark:border-purple-800/40', text: 'text-purple-950 dark:text-purple-100', subtext: 'text-purple-900/70 dark:text-purple-200/70', badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300' },
+      { bg: 'bg-[var(--bento-gray)]', border: 'border-zinc-300/60 dark:border-zinc-700/40', text: 'text-zinc-950 dark:text-zinc-100', subtext: 'text-zinc-900/70 dark:text-zinc-300/70', badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300' },
     ];
 
     const styleIndex = (item.rank - 4) % bentoStyles.length;
@@ -393,31 +359,34 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </div>
             </div>
 
-            {/* Price & CTA */}
-            <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <VotePill
+                listingId={item.id || ''}
+                initialScore={item.net_score || 0}
+                initialUserVote={item.user_vote || 0}
+                size="sm"
+              />
               {siteCopy.feed.showPrices && (
-                <div className={`font-mono font-black text-sm sm:text-base ${currentStyle.text}`}>
+                <div className={`font-mono font-black text-xs sm:text-sm ${currentStyle.text}`}>
                   {formatBid(item.bid)}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0"
+                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
               >
                 {siteCopy.feed.podiumButton}
               </button>
             </div>
           </div>
-
-
         </div>
       </div>
     );
   }
 
   /* -------------------------------------------------------------
-     VARIANT 4: TOP 11 TO TOP 20 (Sleek, Clean Compact Rows)
+     VARIANT 4: TOP 11 TO TOP 20 (Sleek Compact Rows with VotePill)
      ------------------------------------------------------------- */
   return (
     <div ref={containerRef} className="group relative">
@@ -463,26 +432,27 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0 font-sans">
-            <span className="text-[10px] text-muted-foreground font-sans hidden sm:inline">
-              {clicks.toLocaleString()} clicks
-            </span>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 font-sans">
+            <VotePill
+              listingId={item.id || ''}
+              initialScore={item.net_score || 0}
+              initialUserVote={item.user_vote || 0}
+              size="sm"
+            />
             {siteCopy.feed.showPrices && (
-              <div className="font-mono font-black text-xs sm:text-sm text-sky-500">
+              <div className="font-mono font-black text-xs text-sky-500">
                 {formatBid(item.bid)}
               </div>
             )}
             <button
               type="button"
               onClick={() => onClaimClick(item.rank, item.bid + 1)}
-              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0"
+              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
             >
               {siteCopy.feed.listingButton}
             </button>
           </div>
         </div>
-
-
       </Card>
     </div>
   );

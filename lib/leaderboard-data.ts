@@ -6,12 +6,20 @@ export interface MetaData {
 }
 
 export interface LeaderboardItem {
+  id?: string;
   rank: number;
   name: string;
   bid: number;
   url: string;
   clicks: number;
   time: string;
+  upvotes?: number;
+  downvotes?: number;
+  net_score?: number;
+  hot_score?: number;
+  user_vote?: 1 | -1 | 0;
+  category?: string;
+  claimed_at?: string;
 }
 
 // Seed data for `supabase/seed.sql` / local development when no database is
