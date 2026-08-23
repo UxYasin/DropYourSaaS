@@ -49,14 +49,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Generate verification_token & dynamic baseUrl resolution
-    const verificationToken = crypto.randomUUID();
+    const verification_token = crypto.randomUUID();
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
-    const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
+    const verifyUrl = `${baseUrl}/api/verify?token=${verification_token}`;
 
     // Always register token in shared in-memory fallback store
-    savePendingToken(verificationToken, {
+    savePendingToken(verification_token, {
       url,
       name: entryName,
       email,
@@ -74,38 +74,62 @@ export async function POST(request: NextRequest) {
       category: category || 'SaaS',
       for_sale: !!isForSale,
       bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
-      verification_token: verificationToken,
+      verification_token: verification_token,
       status: 'pending_verification',
       is_verified: false,
       claimed_at: new Date().toISOString(),
     };
 
-    try {
-      const { error: dbError } = await supabaseAdmin
-        .from('leaderboard_entries')
-        .upsert(recordPayload, { onConflict: 'url' });
+    let insertedSuccessfully = false;
 
-      if (dbError) {
-        console.warn('Primary leaderboard_entries upsert warning, attempting listings table:', dbError);
-        try {
-          await supabaseAdmin
-            .from('listings')
-            .upsert(
-              {
-                title: entryName,
-                url,
-                submitter_email: email,
-                email,
-                verification_token: verificationToken,
-                is_verified: false,
-                status: 'pending_verification',
-              },
-              { onConflict: 'url' }
-            );
-        } catch {}
+    // Primary table: leaderboard_entries
+    try {
+      const { data: insertedData, error: dbError } = await supabaseAdmin
+        .from('leaderboard_entries')
+        .upsert(recordPayload, { onConflict: 'url' })
+        .select('id, verification_token')
+        .maybeSingle();
+
+      if (!dbError && insertedData) {
+        console.log('Successfully inserted leaderboard_entries record with token:', insertedData.verification_token);
+        insertedSuccessfully = true;
+      } else if (dbError) {
+        console.warn('Primary leaderboard_entries insert warning:', dbError);
       }
-    } catch (dbException) {
-      console.warn('Database upsert non-blocking exception:', dbException);
+    } catch (e) {
+      console.warn('leaderboard_entries upsert exception:', e);
+    }
+
+    // Secondary table fallback: listings
+    if (!insertedSuccessfully) {
+      try {
+        const { data: listingsData, error: listingsErr } = await supabaseAdmin
+          .from('listings')
+          .upsert(
+            {
+              title: entryName,
+              name: entryName,
+              url,
+              submitter_email: email,
+              email,
+              verification_token: verification_token,
+              is_verified: false,
+              status: 'pending_verification',
+            },
+            { onConflict: 'url' }
+          )
+          .select('id, verification_token')
+          .maybeSingle();
+
+        if (!listingsErr && listingsData) {
+          console.log('Successfully inserted listings record with token:', listingsData.verification_token);
+          insertedSuccessfully = true;
+        } else if (listingsErr) {
+          console.error('Listings insert error:', listingsErr);
+        }
+      } catch (e) {
+        console.warn('Listings upsert exception:', e);
+      }
     }
 
     // 3. Dispatch transactional email via Resend

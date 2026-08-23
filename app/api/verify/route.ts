@@ -14,34 +14,44 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/?error=missing_token', baseUrl));
   }
 
+  const cleanToken = token.trim();
+  console.log('Initiating token lookup for verification:', cleanToken);
+
   try {
     const supabaseAdmin = getSupabaseServerClient();
     let listing: any = null;
     let targetTable = 'leaderboard_entries';
 
     // 1. Check in-memory fallback store first for instant match
-    const pendingFallback = getPendingToken(token);
+    const pendingFallback = getPendingToken(cleanToken);
 
-    // 2. Fetch matching pending listing from Supabase leaderboard_entries or listings
+    // 2. Fetch matching pending listing from Supabase leaderboard_entries or listings (bypassing RLS via Service Role)
     try {
-      const { data: entryData } = await supabaseAdmin
+      const { data: entryData, error: entryErr } = await supabaseAdmin
         .from('leaderboard_entries')
         .select('*')
-        .eq('verification_token', token)
+        .eq('verification_token', cleanToken)
         .maybeSingle();
 
       if (entryData) {
         listing = entryData;
         targetTable = 'leaderboard_entries';
+        console.log('Found matching token in leaderboard_entries table for ID:', listing.id);
       } else {
-        const { data: listingsData } = await supabaseAdmin
+        if (entryErr) console.warn('leaderboard_entries lookup error:', entryErr);
+
+        const { data: listingsData, error: listingsErr } = await supabaseAdmin
           .from('listings')
           .select('*')
-          .eq('verification_token', token)
+          .eq('verification_token', cleanToken)
           .maybeSingle();
+
         if (listingsData) {
           listing = listingsData;
           targetTable = 'listings';
+          console.log('Found matching token in listings table for ID:', listing.id);
+        } else if (listingsErr) {
+          console.warn('listings lookup error:', listingsErr);
         }
       }
     } catch (fetchErr) {
@@ -50,17 +60,18 @@ export async function GET(request: NextRequest) {
 
     // Fallback to in-memory pending token if database query returned null
     if (!listing && pendingFallback) {
+      console.log('Using in-memory pending token fallback for:', pendingFallback.name);
       listing = {
         url: pendingFallback.url,
         name: pendingFallback.name,
         email: pendingFallback.email,
         submitter_email: pendingFallback.email,
-        verification_token: token,
+        verification_token: cleanToken,
       };
     }
 
     if (!listing) {
-      console.error(`Verification error: Token ${token} not found in database or memory store`);
+      console.error(`CRITICAL: Token lookup failed for token: "${cleanToken}". Zero matching rows in database or memory store.`);
       return NextResponse.redirect(new URL('/?error=invalid_token', baseUrl));
     }
 
@@ -73,28 +84,30 @@ export async function GET(request: NextRequest) {
           status: 'published',
           claimed_at: new Date().toISOString(),
         })
-        .eq('verification_token', token);
+        .eq('verification_token', cleanToken);
 
-      if (updateError && pendingFallback) {
-        // Publish to leaderboard_entries if record was pending
-        try {
-          await supabaseAdmin
-            .from('leaderboard_entries')
-            .upsert(
-              {
-                url: pendingFallback.url,
-                name: pendingFallback.name,
-                email: pendingFallback.email,
-                submitter_email: pendingFallback.email,
-                verification_token: token,
-                is_verified: true,
-                status: 'published',
-                bid_cents: Math.round((pendingFallback.bid || 0) * 100),
-                claimed_at: new Date().toISOString(),
-              },
-              { onConflict: 'url' }
-            );
-        } catch {}
+      if (updateError) {
+        console.warn(`Update error on ${targetTable}:`, updateError);
+        if (pendingFallback) {
+          try {
+            await supabaseAdmin
+              .from('leaderboard_entries')
+              .upsert(
+                {
+                  url: pendingFallback.url,
+                  name: pendingFallback.name,
+                  email: pendingFallback.email,
+                  submitter_email: pendingFallback.email,
+                  verification_token: cleanToken,
+                  is_verified: true,
+                  status: 'published',
+                  bid_cents: Math.round((pendingFallback.bid || 0) * 100),
+                  claimed_at: new Date().toISOString(),
+                },
+                { onConflict: 'url' }
+              );
+          } catch {}
+        }
       }
     } catch (dbUpdateException) {
       console.warn('Database verify update exception:', dbUpdateException);
@@ -122,7 +135,7 @@ export async function GET(request: NextRequest) {
             await supabaseAdmin
               .from(targetTable)
               .update({ user_id: user.id })
-              .eq('verification_token', token);
+              .eq('verification_token', cleanToken);
           } catch {}
         }
       } catch (authErr) {
@@ -132,7 +145,7 @@ export async function GET(request: NextRequest) {
 
     // Cleanup memory store token
     if (pendingFallback) {
-      removePendingToken(token);
+      removePendingToken(cleanToken);
     }
 
     // Invalidate Redis caches
