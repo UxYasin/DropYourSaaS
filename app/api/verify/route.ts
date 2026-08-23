@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 import { getPendingToken, removePendingToken } from '@/lib/token-store';
@@ -76,38 +77,35 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/?error=invalid_token', baseUrl));
     }
 
-    // 3. Mark verified and published in Supabase database
-    try {
-      const { error: updateError } = await supabaseAdmin
-        .from(targetTable)
-        .update({
-          is_verified: true,
-          status: 'published',
-          claimed_at: new Date().toISOString(),
-        })
-        .eq('verification_token', cleanToken);
+    // 3. Live Atomic Rank Shifting & Activation via RPC claim_listing_spot
+    const targetRank = listing.target_rank || listing.requestedRank || 1;
 
-      if (updateError) {
-        console.warn(`Update error on ${targetTable}:`, updateError);
-        if (pendingFallback) {
-          try {
-            await supabaseAdmin
-              .from('leaderboard_entries')
-              .upsert(
-                {
-                  url: pendingFallback.url,
-                  name: pendingFallback.name,
-                  email: pendingFallback.email,
-                  submitter_email: pendingFallback.email,
-                  verification_token: cleanToken,
-                  is_verified: true,
-                  status: 'published',
-                  bid_cents: Math.round((pendingFallback.bid || 0) * 100),
-                  claimed_at: new Date().toISOString(),
-                },
-                { onConflict: 'url' }
-              );
-          } catch {}
+    try {
+      if (listing.id) {
+        const { error: rpcError } = await supabaseAdmin.rpc('claim_listing_spot', {
+          target_listing_id: listing.id,
+          target_rank: targetRank,
+        });
+
+        if (rpcError) {
+          console.warn('RPC Rank shift failed, executing fallback rank shift:', rpcError);
+          // Fallback: shift ranks manually
+          await supabaseAdmin
+            .from(targetTable)
+            .update({ rank: (listing.rank || 0) + 1 })
+            .gte('rank', targetRank)
+            .eq('is_verified', true);
+
+          await supabaseAdmin
+            .from(targetTable)
+            .update({
+              rank: targetRank,
+              target_rank: targetRank,
+              is_verified: true,
+              status: 'published',
+              claimed_at: new Date().toISOString(),
+            })
+            .eq('id', listing.id);
         }
       }
     } catch (dbUpdateException) {
@@ -131,12 +129,12 @@ export async function GET(request: NextRequest) {
           user = newUser?.user ?? undefined;
         }
 
-        if (user) {
+        if (user && listing.id) {
           try {
             await supabaseAdmin
               .from(targetTable)
               .update({ user_id: user.id })
-              .eq('verification_token', cleanToken);
+              .eq('id', listing.id);
           } catch {}
         }
       } catch (authErr) {
@@ -149,7 +147,12 @@ export async function GET(request: NextRequest) {
       removePendingToken(cleanToken);
     }
 
-    // Invalidate Redis caches
+    // Immediate Cache Revalidation
+    try {
+      revalidatePath('/', 'page');
+      revalidatePath('/[category]', 'page');
+    } catch {}
+
     await invalidateLeaderboardCache().catch(() => {});
 
     // 5. Auto-login session generation via Supabase Admin magiclink redirect

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, Suspense } from "react"
 import { CheckCircle2, X } from "lucide-react"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
@@ -82,10 +82,12 @@ export default function Home() {
         <Footer />
       </div>
 
-      <CongratulationsModal
-        isOpen={showCongratsModal}
-        onClose={() => setShowCongratsModal(false)}
-      />
+      <Suspense fallback={null}>
+        <CongratulationsModal
+          isOpen={showCongratsModal}
+          onClose={() => setShowCongratsModal(false)}
+        />
+      </Suspense>
     </MobileLayout>
   )
 }

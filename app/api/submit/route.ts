@@ -8,7 +8,7 @@ import { savePendingToken } from '@/lib/token-store';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
-    const { url, title, name, email, category, isForSale, bid } = body || {};
+    const { url, title, name, email, category, isForSale, bid, requestedRank, selectedRank } = body || {};
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -19,27 +19,30 @@ export async function POST(request: NextRequest) {
     }
 
     const entryName = title || name || new URL(url).hostname;
+    const targetRank = requestedRank || selectedRank || 1;
     const supabaseAdmin = getSupabaseServerClient();
 
-    // 1. Maintain 24-Hour Cooldown Logic for Free Mode
+    // 1. Dual 24-Hour Cooldown (by Email and Domain)
+    let parsedDomain = '';
+    try {
+      parsedDomain = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      parsedDomain = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+    }
+
     if (IS_FREE_MODE) {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
       try {
-        const { data: recentSubmissions } = await supabaseAdmin
+        const { data: recentEntries } = await supabaseAdmin
           .from('leaderboard_entries')
-          .select('claimed_at')
-          .eq('email', email)
-          .gte('claimed_at', twentyFourHoursAgo)
-          .order('claimed_at', { ascending: false })
-          .limit(1);
+          .select('id, email, submitter_email, url, claimed_at')
+          .or(`email.eq.${email},submitter_email.eq.${email},url.ilike.%${parsedDomain}%`)
+          .gte('claimed_at', twentyFourHoursAgo);
 
-        if (recentSubmissions && recentSubmissions.length > 0) {
+        if (recentEntries && recentEntries.length > 0) {
           return NextResponse.json(
-            {
-              error: 'Rate limited',
-              message: 'You can only submit one free listing every 24 hours.',
-            },
+            { error: 'Rate limited. You can only submit 1 product or domain every 24 hours.' },
             { status: 429 }
           );
         }
@@ -51,6 +54,7 @@ export async function POST(request: NextRequest) {
     // 2. Generate verification_token & dynamic baseUrl resolution
     const verification_token = crypto.randomUUID();
     const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
     const verifyUrl = `${baseUrl}/api/verify?token=${verification_token}`;
@@ -74,6 +78,7 @@ export async function POST(request: NextRequest) {
       category: category || 'SaaS',
       for_sale: !!isForSale,
       bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+      target_rank: targetRank,
       verification_token: verification_token,
       status: 'pending_verification',
       is_verified: false,
@@ -101,6 +106,7 @@ export async function POST(request: NextRequest) {
           url,
           name: entryName,
           bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+          target_rank: targetRank,
           claimed_at: new Date().toISOString(),
         };
 
@@ -131,6 +137,7 @@ export async function POST(request: NextRequest) {
               url,
               submitter_email: email,
               email,
+              target_rank: targetRank,
               verification_token: verification_token,
               is_verified: false,
               status: 'pending_verification',
