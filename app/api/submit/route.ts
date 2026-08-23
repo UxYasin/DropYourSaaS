@@ -18,13 +18,13 @@ export async function POST(request: NextRequest) {
     }
 
     const entryName = title || name || new URL(url).hostname;
-    const supabase = getSupabaseServerClient();
+    const supabaseAdmin = getSupabaseServerClient();
 
     // 1. Maintain 24-Hour Cooldown Logic for Free Mode
     if (IS_FREE_MODE) {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-      const { data: recentSubmissions } = await supabase
+      const { data: recentSubmissions } = await supabaseAdmin
         .from('leaderboard_entries')
         .select('claimed_at')
         .eq('email', email)
@@ -48,41 +48,62 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
     const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
 
-    // Save listing into database
-    const { error: dbError } = await supabase
+    // Explicitly insert into leaderboard_entries (bypassing RLS via Service Role)
+    const recordPayload = {
+      url,
+      name: entryName,
+      email,
+      submitter_email: email,
+      category: category || 'SaaS',
+      for_sale: !!isForSale,
+      bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+      verification_token: verificationToken,
+      status: 'pending_verification',
+      is_verified: false,
+      claimed_at: new Date().toISOString(),
+    };
+
+    let { error: dbError } = await supabaseAdmin
       .from('leaderboard_entries')
-      .upsert(
-        {
-          url,
-          name: entryName,
-          email,
-          category: category || 'SaaS',
-          for_sale: !!isForSale,
-          bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
-          verification_token: verificationToken,
-          status: 'pending_verification',
-          is_verified: false,
-          claimed_at: new Date().toISOString(),
-        },
-        { onConflict: 'url' }
-      );
+      .upsert(recordPayload, { onConflict: 'url' });
 
     if (dbError) {
-      // Fallback for legacy database schemas
-      await supabase
-        .from('leaderboard_entries')
+      console.warn('Primary leaderboard_entries upsert warning, attempting listings table:', dbError);
+      const { error: listingsErr } = await supabaseAdmin
+        .from('listings')
         .upsert(
           {
+            title: entryName,
             url,
-            name: entryName,
-            bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
-            claimed_at: new Date().toISOString(),
+            submitter_email: email,
+            email,
+            verification_token: verificationToken,
+            is_verified: false,
+            status: 'pending_verification',
           },
           { onConflict: 'url' }
         );
+
+      if (listingsErr) {
+        console.error('Database insert error across all tables:', listingsErr);
+        // Ensure verification_token is never lost
+        await supabaseAdmin
+          .from('leaderboard_entries')
+          .upsert(
+            {
+              url,
+              name: entryName,
+              email,
+              verification_token: verificationToken,
+              bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+              claimed_at: new Date().toISOString(),
+            },
+            { onConflict: 'url' }
+          );
+      }
     }
 
-    // 3. Dispatch transactional email via Resend (Clean Light Mode Layout)
+    // 3. Dispatch transactional email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);

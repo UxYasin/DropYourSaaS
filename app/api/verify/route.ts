@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 
 export async function GET(request: NextRequest) {
@@ -11,21 +11,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/?error=missing_token', baseUrl));
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return NextResponse.redirect(new URL('/?verified=true', baseUrl));
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
   try {
-    // 1. Fetch matching pending listing from leaderboard_entries or listings
+    const supabaseAdmin = getSupabaseServerClient();
+
+    // 1. Fetch matching pending listing from leaderboard_entries or listings (bypassing RLS via Service Role)
     let listing: any = null;
     let targetTable = 'leaderboard_entries';
 
-    const { data: entryData } = await supabase
+    const { data: entryData, error: entryErr } = await supabaseAdmin
       .from('leaderboard_entries')
       .select('*')
       .eq('verification_token', token)
@@ -35,7 +28,7 @@ export async function GET(request: NextRequest) {
       listing = entryData;
       targetTable = 'leaderboard_entries';
     } else {
-      const { data: listingsData } = await supabase
+      const { data: listingsData } = await supabaseAdmin
         .from('listings')
         .select('*')
         .eq('verification_token', token)
@@ -47,12 +40,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (!listing) {
-      console.error('Verification error: Token not found');
+      console.error(`Verification error: Token ${token} not found across tables`);
       return NextResponse.redirect(new URL('/?error=invalid_token', baseUrl));
     }
 
     // 2. Mark verified and published
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from(targetTable)
       .update({
         is_verified: true,
@@ -69,13 +62,13 @@ export async function GET(request: NextRequest) {
     // 3. Auto-link/provision user if service role key is present
     const submitterEmail = listing.email || listing.submitter_email;
 
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY && submitterEmail) {
+    if (submitterEmail) {
       try {
-        const { data: usersData } = await supabase.auth.admin.listUsers();
+        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
         let user = usersData?.users?.find((u) => u.email === submitterEmail);
 
         if (!user) {
-          const { data: newUser } = await supabase.auth.admin.createUser({
+          const { data: newUser } = await supabaseAdmin.auth.admin.createUser({
             email: submitterEmail,
             email_confirm: true,
             user_metadata: { source: 'verified_submission' },
@@ -84,7 +77,7 @@ export async function GET(request: NextRequest) {
         }
 
         if (user) {
-          await supabase
+          await supabaseAdmin
             .from(targetTable)
             .update({ user_id: user.id })
             .eq('verification_token', token);
@@ -98,9 +91,9 @@ export async function GET(request: NextRequest) {
     await invalidateLeaderboardCache().catch(() => {});
 
     // 4. Auto-login session generation via Supabase Admin magiclink redirect if available
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY && submitterEmail) {
+    if (submitterEmail) {
       try {
-        const { data: linkData } = await supabase.auth.admin.generateLink({
+        const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
           type: 'magiclink',
           email: submitterEmail,
           options: {
@@ -118,7 +111,7 @@ export async function GET(request: NextRequest) {
 
     // Clean redirect to homepage with verified flag
     return NextResponse.redirect(new URL('/?verified=true', baseUrl));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Unhandled verification error:', error);
     return NextResponse.redirect(new URL('/?error=server_error', baseUrl));
   }
