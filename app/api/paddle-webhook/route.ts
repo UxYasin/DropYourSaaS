@@ -1,23 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { Environment, LogLevel, Paddle, EventName } from '@paddle/paddle-node-sdk';
+import crypto from 'crypto';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 
 export const dynamic = 'force-dynamic';
 
-function getPaddleInstance() {
-  const apiKey = process.env.PADDLE_API_KEY || process.env.PADDLE_SANDBOX_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing PADDLE_API_KEY environment variable');
+/**
+ * Pure Node.js crypto signature verification for Paddle v2 webhooks.
+ * Header format: ts=1690000000;h1=hash_hex
+ */
+function verifyPaddleSignature(rawBody: string, signatureHeader: string, secret: string): boolean {
+  if (!signatureHeader || !secret) return false;
+
+  try {
+    const parts = signatureHeader.split(';').reduce((acc: Record<string, string>, item) => {
+      const [key, value] = item.split('=');
+      if (key && value) acc[key.trim()] = value.trim();
+      return acc;
+    }, {});
+
+    const ts = parts['ts'];
+    const h1 = parts['h1'];
+
+    if (!ts || !h1) return false;
+
+    const payload = `${ts}:${rawBody}`;
+    const expectedHmac = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
+    return crypto.timingSafeEqual(Buffer.from(expectedHmac, 'utf-8'), Buffer.from(h1, 'utf-8'));
+  } catch (err) {
+    console.error('Signature verification error:', err);
+    return false;
   }
-
-  const env = (process.env.NEXT_PUBLIC_PADDLE_ENV as Environment) || Environment.sandbox;
-
-  return new Paddle(apiKey, {
-    environment: env,
-    logLevel: LogLevel.error,
-  });
 }
 
 export async function POST(request: NextRequest) {
@@ -33,27 +48,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing signature or body' }, { status: 400 });
   }
 
-  let eventData: any = null;
-
-  // 2. Unmarshal RAW Body & Verify Signature
-  try {
-    const paddle = getPaddleInstance();
-    eventData = await paddle.webhooks.unmarshal(rawBody, secret, signature);
-  } catch (err: any) {
-    console.error('❌ Paddle webhook signature verification error:', err?.message || err);
-    // Return non-2xx status so Paddle retries if secret was rotated or transient error
-    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 401 });
+  // 2. Signature Verification (In production/sandbox if secret is set)
+  if (secret) {
+    const isValid = verifyPaddleSignature(rawBody, signature, secret);
+    if (!isValid) {
+      console.warn('⚠️ Paddle webhook signature mismatch or invalid header.');
+      // Return 401 on invalid signature so Paddle retries if secret rotated
+      return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 401 });
+    }
   }
 
-  if (!eventData) {
-    return NextResponse.json({ error: 'Invalid event payload' }, { status: 400 });
+  let eventData: any = null;
+  try {
+    eventData = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
   }
 
   const eventType = eventData.eventType || eventData.event_type;
-  console.log(`🔔 Received verified Paddle webhook: ${eventType} (Event ID: ${eventData.eventId})`);
+  console.log(`🔔 Received verified Paddle webhook: ${eventType} (Event ID: ${eventData.eventId || eventData.event_id})`);
 
   // 3. Route Events — Safely ignore non-transaction events
-  if (eventType !== EventName.TransactionCompleted && eventType !== 'transaction.completed') {
+  if (eventType !== 'transaction.completed') {
     return NextResponse.json({ received: true, status: 'ignored_event_type' }, { status: 200 });
   }
 
