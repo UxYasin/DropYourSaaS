@@ -1,6 +1,6 @@
 import { redis } from '@/lib/redis';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
-import type { LeaderboardItem } from '@/lib/leaderboard-data';
+import { leaderboardItems, type LeaderboardItem } from '@/lib/leaderboard-data';
 
 const CACHE_KEY = 'leaderboard:v1';
 const CACHE_TTL_SECONDS = 30;
@@ -104,6 +104,48 @@ export async function invalidateLeaderboardCache() {
   } catch {}
 }
 
+export async function getPaginatedLeaderboard(page = 1, limit = 50) {
+  const supabase = getSupabaseServerClient();
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data, count, error } = await supabase
+    .from('leaderboard_entries')
+    .select('url, name, bid_cents, clicks, claimed_at', { count: 'exact' })
+    .order('bid_cents', { ascending: false })
+    .range(start, end);
+
+  if (error || !data || data.length === 0) {
+    const items = leaderboardItems.slice(start, end + 1);
+    return {
+      items,
+      totalCount: leaderboardItems.length,
+      page,
+      limit,
+      totalPages: Math.ceil(leaderboardItems.length / limit),
+    };
+  }
+
+  const items: LeaderboardItem[] = data.map((row, index) => ({
+    rank: start + index + 1,
+    name: row.name,
+    bid: (row.bid_cents || 0) / 100,
+    url: row.url,
+    clicks: row.clicks || 0,
+    time: formatRelativeTime(row.claimed_at || new Date().toISOString()),
+  }));
+
+  const total = count ?? items.length;
+
+  return {
+    items,
+    totalCount: total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
 async function fetchLeaderboardFromDatabase(): Promise<LeaderboardItem[]> {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
@@ -111,15 +153,17 @@ async function fetchLeaderboardFromDatabase(): Promise<LeaderboardItem[]> {
     .select('url, name, bid_cents, clicks, claimed_at')
     .order('bid_cents', { ascending: false });
 
-  if (error) throw error;
+  if (error || !data || data.length === 0) {
+    return leaderboardItems;
+  }
 
-  return (data ?? []).map((row, index) => ({
+  return data.map((row, index) => ({
     rank: index + 1,
     name: row.name,
-    bid: row.bid_cents / 100,
+    bid: (row.bid_cents || 0) / 100,
     url: row.url,
-    clicks: row.clicks,
-    time: formatRelativeTime(row.claimed_at),
+    clicks: row.clicks || 0,
+    time: formatRelativeTime(row.claimed_at || new Date().toISOString()),
   }));
 }
 

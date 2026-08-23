@@ -185,10 +185,15 @@ export function SubmissionModal({
           <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
             <Sparkles className="size-5" />
           </div>
-          <div>
-            <h2 className="font-mono font-bold text-lg text-white">Preview & Confirm SaaS</h2>
-            <p className="font-body text-xs text-zinc-400">
-              Verified metadata fetched via live Cheerio scraper. Edit details before listing.
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-mono font-bold text-lg text-white truncate">Preview &amp; Confirm SaaS</h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-mono font-bold shrink-0">
+                Spot #{selectedRank}
+              </span>
+            </div>
+            <p className="font-body text-xs text-zinc-400 mt-0.5">
+              Verified metadata fetched via live Cheerio scraper. Confirm details to feature in Spot #{selectedRank}.
             </p>
           </div>
         </div>

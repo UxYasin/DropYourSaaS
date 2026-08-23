@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { DirectoryCard } from '@/components/directory-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   leaderboardItems as seedLeaderboardItems,
   type LeaderboardItem,
@@ -118,26 +120,34 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
 export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/leaderboard')
+    setIsLoading(true);
+
+    fetch(`/api/leaderboard?page=${page}&limit=50`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
-        if (!cancelled && Array.isArray(data.items) && data.items.length > 0) {
+        if (!cancelled && Array.isArray(data.items)) {
           setItems(data.items);
+          if (typeof data.totalCount === 'number') setTotalCount(data.totalCount);
+          if (typeof data.totalPages === 'number') setTotalPages(data.totalPages);
         }
       })
       .catch(() => {})
       .finally(() => {
         if (!cancelled) {
-          setTimeout(() => setIsLoading(false), 300);
+          setIsLoading(false);
         }
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [page]);
 
   const handleClaimClick = (rank: number, bid: number) => {
     if (onClaimClick) {
@@ -145,86 +155,151 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     }
   };
 
-  // Divide items into Top 3, Top 10 (4-10), and Top 20 (11-20)
-  const top20Items = items.slice(0, 20);
-  const item1 = top20Items[0];
-  const items2_3 = top20Items.slice(1, 3);
-  const items4_10 = top20Items.slice(3, 10);
-  const items11_20 = top20Items.slice(10, 20);
+  const isFirstPage = page === 1;
+  const item1 = isFirstPage ? items[0] : null;
+  const items2_3 = isFirstPage ? items.slice(1, 3) : [];
+  const items4_10 = isFirstPage ? items.slice(3, 10) : [];
+  const remainingItems = isFirstPage ? items.slice(10) : items;
 
   return (
     <div className="mt-8 space-y-4">
-      {/* SECTION 1: TOP 3 */}
-      <SectionDivider title="Top 3" />
+      {isFirstPage ? (
+        <>
+          {/* SECTION 1: TOP 3 */}
+          <SectionDivider title="Top 3" />
 
-      {isLoading ? (
-        <div className="space-y-3.5">
-          <DirectorySkeleton variant="top1" />
-          <DirectorySkeleton variant="top2_3" />
-          <DirectorySkeleton variant="top2_3" />
-        </div>
-      ) : (
-        <div className="space-y-3.5">
-          {item1 && (
-            <DirectoryCard
-              key={item1.rank}
-              item={item1}
-              variant="top1"
-              onClaimClick={handleClaimClick}
-            />
+          {isLoading ? (
+            <div className="space-y-3.5">
+              <DirectorySkeleton variant="top1" />
+              <DirectorySkeleton variant="top2_3" />
+              <DirectorySkeleton variant="top2_3" />
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {item1 && (
+                <DirectoryCard
+                  key={item1.rank}
+                  item={item1}
+                  variant="top1"
+                  onClaimClick={handleClaimClick}
+                />
+              )}
+              {items2_3.map((item) => (
+                <DirectoryCard
+                  key={item.rank}
+                  item={item}
+                  variant="top2_3"
+                  onClaimClick={handleClaimClick}
+                />
+              ))}
+            </div>
           )}
-          {items2_3.map((item) => (
-            <DirectoryCard
-              key={item.rank}
-              item={item}
-              variant="top2_3"
-              onClaimClick={handleClaimClick}
-            />
-          ))}
-        </div>
+
+          {/* SECTION 2: TOP 10 (4th to 10th spot) */}
+          <SectionDivider title="Top 10" />
+
+          {isLoading ? (
+            <div className="space-y-2.5">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <DirectorySkeleton key={i} variant="top4_10" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {items4_10.map((item) => (
+                <DirectoryCard
+                  key={item.rank}
+                  item={item}
+                  variant="top4_10"
+                  onClaimClick={handleClaimClick}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* SECTION 3: TOP 20 & BEYOND (11th+ spot) */}
+          <SectionDivider title="Index Feed" count={`${totalCount} total`} />
+
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <DirectorySkeleton key={i} variant="top11_20" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {remainingItems.map((item) => (
+                <DirectoryCard
+                  key={item.rank}
+                  item={item}
+                  variant="top11_20"
+                  onClaimClick={handleClaimClick}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <SectionDivider title={`Page ${page}`} count={`${totalCount} total`} />
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 15 }).map((_, i) => (
+                <DirectorySkeleton key={i} variant="top11_20" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {items.map((item) => (
+                <DirectoryCard
+                  key={item.rank}
+                  item={item}
+                  variant="top11_20"
+                  onClaimClick={handleClaimClick}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      {/* SECTION 2: TOP 10 (4th to 10th spot) */}
-      <SectionDivider title="Top 10" />
+      {/* PAGINATION CONTROLS */}
+      {(totalPages > 1 || totalCount > 50) && (
+        <div className="mt-8 pt-4 border-t border-border flex items-center justify-between font-mono text-xs text-muted-foreground">
+          <div>
+            Showing <span className="font-bold text-foreground">{(page - 1) * 50 + 1}</span>-
+            <span className="font-bold text-foreground">{Math.min(page * 50, totalCount)}</span> of{' '}
+            <span className="font-bold text-foreground">{totalCount}</span> listings
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={page <= 1 || isLoading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="h-8 px-3 rounded-lg text-xs font-sans flex items-center gap-1"
+            >
+              <ChevronLeft className="size-3.5" />
+              Previous
+            </Button>
 
-      {isLoading ? (
-        <div className="space-y-2.5">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <DirectorySkeleton key={i} variant="top4_10" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {items4_10.map((item) => (
-            <DirectoryCard
-              key={item.rank}
-              item={item}
-              variant="top4_10"
-              onClaimClick={handleClaimClick}
-            />
-          ))}
-        </div>
-      )}
+            <span className="px-2 font-bold text-foreground text-xs">
+              {page} / {totalPages}
+            </span>
 
-      {/* SECTION 3: TOP 20 (11th to 20th spot) */}
-      <SectionDivider title="Top 20" />
-
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <DirectorySkeleton key={i} variant="top11_20" />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {items11_20.map((item) => (
-            <DirectoryCard
-              key={item.rank}
-              item={item}
-              variant="top11_20"
-              onClaimClick={handleClaimClick}
-            />
-          ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages || isLoading}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="h-8 px-3 rounded-lg text-xs font-sans flex items-center gap-1"
+            >
+              Next
+              <ChevronRight className="size-3.5" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
