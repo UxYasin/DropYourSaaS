@@ -7,6 +7,7 @@ import { trackEvent } from '@/lib/analytics';
 import { LiveStatsPill } from '@/components/live-stats-pill';
 import { SubmissionModal, type ScrapedData } from '@/components/submission-modal';
 import { siteCopy } from '@/lib/copy';
+import { CATEGORIES } from '@/lib/categories';
 
 interface HeroSectionProps {
   ref?: React.Ref<HTMLInputElement>;
@@ -186,7 +187,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full h-11 rounded-[16px] bg-white/90 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-700/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors cursor-pointer shadow-xs"
                   >
-                    {['SaaS', 'AI Tool', 'Mobile App', 'Developer Tool', 'Productivity', 'Marketing'].map((cat) => (
+                    {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
                         {cat}
                       </option>

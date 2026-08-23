@@ -10,6 +10,7 @@ import { AddStartupModal } from '@/components/AddStartupModal';
 import { BentoRails } from '@/components/bento-rails';
 import { Search, Plus, ExternalLink, Mail, Sparkles, Filter, TrendingUp, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CATEGORIES } from '@/lib/categories';
 
 export interface BuySellListing {
   id: string;
@@ -135,7 +136,7 @@ const MOCK_BUY_SELL_LISTINGS: BuySellListing[] = [
   },
 ];
 
-const CATEGORY_FILTERS = ['All', 'SaaS', 'AI Tool', 'Mobile App', 'Developer Tool', 'Productivity', 'Marketing'];
+const CATEGORY_FILTERS = ['All', ...CATEGORIES];
 
 function formatMoney(amount: number) {
   return `$${amount.toLocaleString()}`;

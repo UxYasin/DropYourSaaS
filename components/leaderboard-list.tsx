@@ -6,7 +6,9 @@ import { DirectoryCard } from '@/components/directory-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Tag } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CATEGORIES } from '@/lib/categories';
 import {
   leaderboardItems as seedLeaderboardItems,
   type LeaderboardItem,
@@ -15,6 +17,8 @@ import {
 interface DirectoryListProps {
   onClaimClick?: (rank: number, bid: number) => void;
 }
+
+const CATEGORY_TOPICS = ['All', ...CATEGORIES];
 
 function SectionDivider({ title, count }: { title: string; count?: string }) {
   return (
@@ -118,6 +122,7 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
 export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
   const [totalPages, setTotalPages] = useState(1);
@@ -128,7 +133,8 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     let cancelled = false;
     setIsLoading(true);
 
-    fetch(`/api/leaderboard?page=${page}&limit=50&t=${Date.now()}`)
+    const catParam = selectedCategory !== 'All' ? `&category=${encodeURIComponent(selectedCategory)}` : '';
+    fetch(`/api/leaderboard?page=${page}&limit=50${catParam}&t=${Date.now()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
@@ -147,7 +153,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     return () => {
       cancelled = true;
     };
-  }, [page, isVerified]);
+  }, [page, selectedCategory, isVerified]);
 
   const handleClaimClick = (rank: number, bid: number) => {
     if (onClaimClick) {
@@ -155,14 +161,56 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     }
   };
 
-  const isFirstPage = page === 1;
+  const handleCategorySelect = (cat: string) => {
+    setSelectedCategory(cat);
+    setPage(1);
+  };
+
+  const isFirstPage = page === 1 && selectedCategory === 'All';
   const item1 = isFirstPage ? items[0] : null;
   const items2_3 = isFirstPage ? items.slice(1, 3) : [];
   const items4_10 = isFirstPage ? items.slice(3, 10) : [];
   const remainingItems = isFirstPage ? items.slice(10) : items;
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-8 space-y-6">
+      {/* Category Topics Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1 text-xs font-mono text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-bold text-foreground">
+            <Tag className="size-3.5 text-orange-500" />
+            Category Topics ({CATEGORY_TOPICS.length - 1})
+          </span>
+          {selectedCategory !== 'All' && (
+            <button
+              type="button"
+              onClick={() => handleCategorySelect('All')}
+              className="text-orange-500 hover:underline cursor-pointer text-[11px]"
+            >
+              Reset to All
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 pt-1 no-scrollbar sm:flex-wrap">
+          {CATEGORY_TOPICS.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => handleCategorySelect(cat)}
+              className={cn(
+                'px-3 py-1.2 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer',
+                selectedCategory === cat
+                  ? 'bg-orange-500 text-white font-bold shadow-xs'
+                  : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800'
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {isFirstPage ? (
         <>
           {/* SECTION 1: TOP 3 */}
@@ -241,7 +289,10 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
         </>
       ) : (
         <>
-          <SectionDivider title={`Page ${page}`} count={`${totalCount} total`} />
+          <SectionDivider
+            title={selectedCategory !== 'All' ? `${selectedCategory}` : `Page ${page}`}
+            count={`${totalCount} total`}
+          />
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 15 }).map((_, i) => (

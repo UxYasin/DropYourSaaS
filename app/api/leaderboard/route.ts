@@ -9,6 +9,7 @@ import {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || searchParams.get('sort');
+  const category = searchParams.get('category') || undefined;
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
   const limitParam = parseInt(searchParams.get('limit') || '50', 10);
 
@@ -26,8 +27,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ items });
     }
 
-    // Default: Paginated leaderboard query
-    const result = await getPaginatedLeaderboard(page, limit);
+    // Default: Paginated leaderboard query with category filter support
+    const result = await getPaginatedLeaderboard(page, limit, category);
     return NextResponse.json(result);
   } catch (err: any) {
     console.error('Leaderboard fetch error:', err);

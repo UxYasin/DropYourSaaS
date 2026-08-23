@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SPONSOR_TIERS, type SponsorTier } from '@/lib/sponsor-tiers';
+import { CATEGORIES } from '@/lib/categories';
 
 interface AddStartupModalProps {
   isOpen: boolean;
@@ -29,15 +30,7 @@ interface AddStartupModalProps {
 
 type UpsellOption = 'dofollow' | 'ai_boost' | 'sponsor_panel' | null;
 
-const MARKET_CATEGORIES = [
-  'SaaS',
-  'Mobile Apps',
-  'AI Tool',
-  'Developer Tool',
-  'E-commerce',
-  'Productivity',
-  'Marketing',
-];
+const MARKET_CATEGORIES = CATEGORIES;
 
 const TEAM_SIZES = ['1 Solo', '2-5 people', '6-10', '10+'];
 const FUNDING_STATUSES = ['Bootstrapped', 'Pre-seed', 'Seed', 'Series A+'];
