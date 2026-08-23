@@ -129,11 +129,33 @@ export async function POST(request: NextRequest) {
         claimed_at: new Date().toISOString(),
       };
 
-      const { data: newListing } = await supabaseAdmin
+      let { data: newListing, error: upsertErr } = await supabaseAdmin
         .from('leaderboard_entries')
         .upsert(recordPayload, { onConflict: 'url' })
         .select('id')
         .maybeSingle();
+
+      if (upsertErr) {
+        console.warn('Extended columns upsert notice:', upsertErr.message);
+        // Fallback to core columns if remote table has not executed column additions yet
+        const corePayload = {
+          url,
+          name: entryName,
+          email: submitterEmail,
+          submitter_email: submitterEmail,
+          bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+          target_rank: targetRank,
+          is_verified: true,
+          status: 'published',
+          claimed_at: new Date().toISOString(),
+        };
+        const { data: fallbackListing } = await supabaseAdmin
+          .from('leaderboard_entries')
+          .upsert(corePayload, { onConflict: 'url' })
+          .select('id')
+          .maybeSingle();
+        newListing = fallbackListing;
+      }
 
       if (newListing?.id) {
         try {
