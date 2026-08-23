@@ -11,6 +11,7 @@ import { BentoRails } from '@/components/bento-rails';
 import { Search, Plus, ExternalLink, Mail, Sparkles, Filter, TrendingUp, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORIES } from '@/lib/categories';
+import { CategoryFilterBar } from '@/components/category-filter-bar';
 
 export interface BuySellListing {
   id: string;
@@ -233,23 +234,10 @@ export default function BuySellPage() {
                   </div>
 
                   {/* Filter Pills */}
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
-                    {CATEGORY_FILTERS.map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat)}
-                        className={cn(
-                          'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
-                          selectedCategory === cat
-                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs'
-                            : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800'
-                        )}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
+                  <CategoryFilterBar
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={(cat) => setSelectedCategory(cat.queryValue)}
+                  />
                 </div>
               </div>
 

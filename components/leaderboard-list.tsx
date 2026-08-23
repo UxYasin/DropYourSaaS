@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORIES } from '@/lib/categories';
+import { CategoryFilterBar } from '@/components/category-filter-bar';
 import {
   leaderboardItems as seedLeaderboardItems,
   type LeaderboardItem,
@@ -174,41 +175,12 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
 
   return (
     <div className="mt-8 space-y-6">
-      {/* Category Topics Bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1 text-xs font-mono text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-bold text-foreground">
-            <Tag className="size-3.5 text-orange-500" />
-            Category Topics ({CATEGORY_TOPICS.length - 1})
-          </span>
-          {selectedCategory !== 'All' && (
-            <button
-              type="button"
-              onClick={() => handleCategorySelect('All')}
-              className="text-orange-500 hover:underline cursor-pointer text-[11px]"
-            >
-              Reset to All
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 pt-1 no-scrollbar sm:flex-wrap">
-          {CATEGORY_TOPICS.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => handleCategorySelect(cat)}
-              className={cn(
-                'px-3 py-1.2 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer',
-                selectedCategory === cat
-                  ? 'bg-orange-500 text-white font-bold shadow-xs'
-                  : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800'
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      {/* Category Topics Filter Bar */}
+      <div className="py-1">
+        <CategoryFilterBar
+          selectedCategory={selectedCategory}
+          onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
+        />
       </div>
 
       {isFirstPage ? (
