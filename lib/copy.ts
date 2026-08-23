@@ -2,17 +2,11 @@ export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE === 'true';
 
 export const siteCopy = {
   hero: {
-    headline: IS_FREE_MODE
-      ? 'List Your SaaS for Free'
-      : 'List Your SaaS for Instant Indexing',
-    description: IS_FREE_MODE
-      ? 'Instant directory indexing. Submit your project profile for free to be featured across our verified developer index.'
-      : 'Instant directory indexing starting at $1. Submit your project profile to be featured across our verified developer index.',
-    subtext: IS_FREE_MODE
-      ? 'Already listed? Re-submit your project link after 24 hours to refresh your placement.'
-      : "Already listed? Drop in the same link to push your tier higher — you're only charged the difference.",
+    headline: 'New spots are FREE',
+    description: 'Paying zero dollar for the perfect spot. Get free audience.',
+    subtext: 'Already listed? Re-submit your project link after 24 hours to refresh your placement.',
     cta: 'Claim #1',
-    urlPlaceholder: 'yourproject.com or @twitter',
+    urlPlaceholder: 'Your SaaS URL or X',
   },
   feed: {
     podiumButton: 'Take this spot',
