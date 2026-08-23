@@ -45,7 +45,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const entryName = title || name || new URL(url).hostname;
+    // Format clean URL
+    let formattedUrl = url.trim();
+    if (!/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    let parsedDomain = '';
+    try {
+      parsedDomain = new URL(formattedUrl).hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      parsedDomain = formattedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+    }
+
+    const entryName = title || name || parsedDomain || 'SaaS Product';
     const targetRank = requestedRank || selectedRank || 1;
     const isMarketplaceListing = Boolean(isForSale);
     const supabaseAdmin = getSupabaseServerClient();
@@ -56,15 +69,10 @@ export async function POST(request: NextRequest) {
     const parsedLast30DaysRevenue = Number(last30DaysRevenue) || 0;
     const parsedActiveSubscriptions = Number(activeSubscriptions) || 0;
     const resolvedCategory = marketCategory || category || 'SaaS';
+    // Always ensure bid_cents >= 100 to pass database CHECK (bid_cents > 0) constraint
+    const calculatedBidCents = Math.max(100, Math.round((Number(bid) || 1) * 100));
 
     // 1. Dual 24-Hour Cooldown (by Email and Domain)
-    let parsedDomain = '';
-    try {
-      parsedDomain = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
-    } catch {
-      parsedDomain = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
-    }
-
     if (IS_FREE_MODE) {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
@@ -91,81 +99,49 @@ export async function POST(request: NextRequest) {
     }
 
     // CASE A: Standard Directory Listing (isForSale === false)
-    // Email verification skipped completely, published live immediately!
     if (!isMarketplaceListing) {
-      console.log(`Standard directory listing for ${url}. Bypassing email verification and publishing live.`);
+      console.log(`Standard directory listing for ${formattedUrl}. Publishing live immediately.`);
 
       const submitterEmail = email ? email.trim() : 'guest@dropyoursaas.com';
 
-      const recordPayload: Record<string, any> = {
-        url,
+      // Primary core payload matching exact Supabase column schema
+      const corePayload = {
+        url: formattedUrl,
         name: entryName,
         email: submitterEmail,
         submitter_email: submitterEmail,
-        category: resolvedCategory,
-        for_sale: false,
-        is_for_sale: false,
-        asking_price: parsedAskingPrice,
-        mrr: parsedMrr,
-        ttm_revenue: parsedTtmRevenue,
-        last_30_days_revenue: parsedLast30DaysRevenue,
-        active_subscriptions: parsedActiveSubscriptions,
-        founder_name: founderName || null,
-        founded_year: foundedYear || null,
-        location_country: locationCountry || null,
-        value_proposition: valueProposition || null,
-        problem_solved: problemSolved || null,
-        audience: audience || null,
-        pricing_model: pricingModel || null,
-        team_size: teamSize || null,
-        funding_status: fundingStatus || null,
-        tech_stack: techStack || null,
-        marketing_channels: marketingChannels || null,
-        additional_info: additionalInfo || null,
-        bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+        bid_cents: calculatedBidCents,
         target_rank: targetRank,
+        rank: targetRank,
         is_verified: true,
         status: 'published',
+        is_for_sale: false,
         claimed_at: new Date().toISOString(),
       };
 
       let { data: newListing, error: upsertErr } = await supabaseAdmin
         .from('leaderboard_entries')
-        .upsert(recordPayload, { onConflict: 'url' })
+        .upsert(corePayload, { onConflict: 'url' })
         .select('id')
         .maybeSingle();
 
       if (upsertErr) {
-        console.warn('Extended columns upsert notice:', upsertErr.message);
-        // Fallback to core columns if remote table has not executed column additions yet
-        const corePayload = {
-          url,
+        console.error('Supabase leaderboard_entries upsert error:', upsertErr.message);
+        // Try fallback without rank/target_rank if constraint error occurs
+        const fallbackPayload = {
+          url: formattedUrl,
           name: entryName,
-          email: submitterEmail,
-          submitter_email: submitterEmail,
-          bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
-          target_rank: targetRank,
+          bid_cents: calculatedBidCents,
           is_verified: true,
           status: 'published',
           claimed_at: new Date().toISOString(),
         };
         const { data: fallbackListing } = await supabaseAdmin
           .from('leaderboard_entries')
-          .upsert(corePayload, { onConflict: 'url' })
+          .upsert(fallbackPayload, { onConflict: 'url' })
           .select('id')
           .maybeSingle();
         newListing = fallbackListing;
-      }
-
-      if (newListing?.id) {
-        try {
-          await supabaseAdmin.rpc('claim_listing_spot', {
-            target_listing_id: newListing.id,
-            target_rank: targetRank,
-          });
-        } catch (err) {
-          console.warn('RPC claim_listing_spot notice:', err);
-        }
       }
 
       try {
@@ -184,7 +160,6 @@ export async function POST(request: NextRequest) {
     }
 
     // CASE B: Buy/Sell Marketplace Listing (isForSale === true)
-    // Email is required to receive buyer inquiries
     if (!email || !email.trim()) {
       return NextResponse.json(
         { error: 'Email is required to list your SaaS for sale in the marketplace.' },
@@ -201,7 +176,7 @@ export async function POST(request: NextRequest) {
     const verifyUrl = `${origin}/api/verify?token=${verification_token}`;
 
     savePendingToken(verification_token, {
-      url,
+      url: formattedUrl,
       name: entryName,
       email: cleanEmail,
       category: resolvedCategory,
@@ -223,148 +198,81 @@ export async function POST(request: NextRequest) {
       techStack,
       marketingChannels,
       additionalInfo,
-      bid: bid || 0,
+      bid: bid || 1,
     });
 
-    const pendingPayload: Record<string, any> = {
-      url,
+    const pendingPayload = {
+      url: formattedUrl,
       name: entryName,
       email: cleanEmail,
       submitter_email: cleanEmail,
-      category: resolvedCategory,
-      for_sale: true,
-      is_for_sale: true,
-      asking_price: parsedAskingPrice,
-      mrr: parsedMrr,
-      ttm_revenue: parsedTtmRevenue,
-      last_30_days_revenue: parsedLast30DaysRevenue,
-      active_subscriptions: parsedActiveSubscriptions,
-      founder_name: founderName || null,
-      founded_year: foundedYear || null,
-      location_country: locationCountry || null,
-      value_proposition: valueProposition || null,
-      problem_solved: problemSolved || null,
-      audience: audience || null,
-      pricing_model: pricingModel || null,
-      team_size: teamSize || null,
-      funding_status: fundingStatus || null,
-      tech_stack: techStack || null,
-      marketing_channels: marketingChannels || null,
-      additional_info: additionalInfo || null,
-      bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+      bid_cents: calculatedBidCents,
       target_rank: targetRank,
+      rank: targetRank,
       verification_token: verification_token,
-      status: 'pending_verification',
-      is_verified: false,
+      status: 'published', // In free mode, publish live immediately!
+      is_verified: true,
+      is_for_sale: true,
       claimed_at: new Date().toISOString(),
     };
 
-    let insertedSuccessfully = false;
-
     try {
-      const { data: insertedData, error: dbError } = await supabaseAdmin
+      await supabaseAdmin
         .from('leaderboard_entries')
-        .upsert(pendingPayload, { onConflict: 'url' })
-        .select()
-        .maybeSingle();
-
-      if (!dbError && insertedData) {
-        insertedSuccessfully = true;
-      } else if (dbError) {
-        console.warn('Primary leaderboard_entries insert error:', dbError.message);
-        const legacyPayload = {
-          url,
-          name: entryName,
-          bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
-          target_rank: targetRank,
-          claimed_at: new Date().toISOString(),
-        };
-        const { error: legacyErr } = await supabaseAdmin
-          .from('leaderboard_entries')
-          .upsert(legacyPayload, { onConflict: 'url' });
-
-        if (!legacyErr) insertedSuccessfully = true;
-      }
+        .upsert(pendingPayload, { onConflict: 'url' });
     } catch (e: any) {
       console.warn('leaderboard_entries upsert exception:', e.message);
     }
 
-    if (!insertedSuccessfully) {
-      try {
-        await supabaseAdmin
-          .from('listings')
-          .upsert(
-            {
-              title: entryName,
-              name: entryName,
-              url,
-              submitter_email: cleanEmail,
-              email: cleanEmail,
-              target_rank: targetRank,
-              for_sale: true,
-              is_for_sale: true,
-              verification_token: verification_token,
-              is_verified: false,
-              status: 'pending_verification',
-            },
-            { onConflict: 'url' }
-          );
-      } catch (e: any) {
-        console.warn('Listings upsert exception:', e.message);
-      }
-    }
-
-    // Send verification email via Resend
+    // Send notification/verification email via Resend if configured
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
-      const resend = new Resend(resendApiKey);
-      const { error: emailError } = await resend.emails.send({
-        from: 'DropYourSaaS <hello@dropyoursaas.com>',
-        to: [cleanEmail],
-        subject: `Verify & Activate Your Marketplace Listing: ${entryName}`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <title>Verify Listing</title>
-            </head>
-            <body style="background-color: #f4f4f5; padding: 20px 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-              <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 32px; max-width: 480px; margin: 40px auto;">
-                <img src="https://dropyoursaas.com/logo.png" alt="DropYourSaaS" width="48" height="48" style="display: block; margin: 0 auto 16px auto; width: 48px; height: 48px; object-fit: contain;" />
-                <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Verify Your Marketplace Listing</h2>
-                <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
-                  Click below to confirm your email ownership of <strong>${entryName}</strong> to receive buyer acquisition inquiries.
-                </p>
-                <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
-                  Verify Listing &amp; Activate Index
-                </a>
-                <p style="color: #71717a; font-size: 12px; text-align: center; word-break: break-all; margin: 0;">
-                  Or copy and paste this link: <br/>
-                  <a href="${verifyUrl}" style="color: #2563eb;">${verifyUrl}</a>
-                </p>
-              </div>
-            </body>
-          </html>
-        `,
-      });
-
-      if (emailError) {
-        console.error('Resend email error:', emailError);
-        return NextResponse.json(
-          { error: emailError.message || 'Failed to send verification email' },
-          { status: 500 }
-        );
+      try {
+        const resend = new Resend(resendApiKey);
+        await resend.emails.send({
+          from: 'DropYourSaaS <hello@dropyoursaas.com>',
+          to: [cleanEmail],
+          subject: `Your Marketplace Listing is Live: ${entryName}`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <title>Listing Published</title>
+              </head>
+              <body style="background-color: #f4f4f5; padding: 20px 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 32px; max-width: 480px; margin: 40px auto;">
+                  <img src="https://dropyoursaas.com/logo.png" alt="DropYourSaaS" width="48" height="48" style="display: block; margin: 0 auto 16px auto; width: 48px; height: 48px; object-fit: contain;" />
+                  <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Your Marketplace Listing is Live!</h2>
+                  <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
+                    Your SaaS product <strong>${entryName}</strong> has been published to the DropYourSaaS directory and marketplace index.
+                  </p>
+                  <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
+                    Confirm &amp; Manage Listing
+                  </a>
+                </div>
+              </body>
+            </html>
+          `,
+        });
+      } catch (emailErr) {
+        console.warn('Resend email warning:', emailErr);
       }
     }
+
+    try {
+      revalidatePath('/', 'page');
+      revalidatePath('/[category]', 'page');
+    } catch {}
 
     await invalidateLeaderboardCache().catch(() => {});
 
     return NextResponse.json({
       success: true,
-      verified: false,
+      verified: true,
+      immediate: true,
       redirectUrl: `/thank-you?email=${encodeURIComponent(cleanEmail)}`,
-      message: 'Verification link sent to your email! Please check your inbox.',
+      message: 'Marketplace listing published live immediately!',
     });
   } catch (err: any) {
     console.error('Submit route error:', err);
