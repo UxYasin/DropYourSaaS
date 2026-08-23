@@ -60,16 +60,13 @@ export function Header() {
             <Link
               href="/buy-sell"
               className={cn(
-                'text-xs font-medium transition-colors px-3 py-1.5 rounded-full inline-flex items-center gap-1.5',
+                'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
                 pathname === '/buy-sell'
                   ? 'text-foreground font-semibold bg-muted/70'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
               Buy/Sell
-              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30">
-                Soon
-              </span>
             </Link>
             <Link
               href="/about"

@@ -339,8 +339,28 @@ export default function BuySellPage() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-zinc-400 font-mono text-xs">
-                            No startups found matching your filter criteria.
+                          <td colSpan={5} className="py-16 text-center">
+                            <div className="space-y-3 max-w-sm mx-auto">
+                              <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center mx-auto text-zinc-400">
+                                <Sparkles className="size-5 text-amber-500" />
+                              </div>
+                              <div className="font-bold text-sm text-zinc-900 dark:text-white">
+                                No startups currently listed for sale
+                              </div>
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                                Be the first founder to list your SaaS for sale on the marketplace feed!
+                              </p>
+                              <div className="pt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setIsModalOpen(true)}
+                                  className="h-9 px-5 rounded-full font-bold text-xs text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Plus className="size-3.5" />
+                                  List Your SaaS for Sale
+                                </button>
+                              </div>
+                            </div>
                           </td>
                         </tr>
                       )}
