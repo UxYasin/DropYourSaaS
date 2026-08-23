@@ -142,8 +142,8 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           <div className="relative p-4 sm:p-5 rounded-[26px] bg-card border border-border/80 shadow-md">
             <div className="space-y-3">
               {/* Top Row: Full-width text input with globe icon */}
-              <div className="flex items-center gap-2.5 p-2 rounded-[20px] bg-muted/40 border border-border/60 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all">
-                <Globe className="size-5 text-muted-foreground shrink-0 ml-2" />
+              <div className="flex items-center gap-2.5 p-1.5 sm:p-2 rounded-full bg-muted/40 border border-border/60 focus-within:border-sky-400/80 focus-within:ring-2 focus-within:ring-sky-400/20 transition-all">
+                <Globe className="size-4 sm:size-5 text-muted-foreground shrink-0 ml-2.5" />
                 <input
                   ref={ref}
                   type="text"
@@ -157,17 +157,16 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleClaim();
                   }}
-                  placeholder="SaaS website link or App store link"
-                  className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
+                  placeholder="App Store link or SaaS website link..."
+                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
                 />
                 {!isExpanded && (
                   <button
                     type="button"
-                    className="h-10 px-5 rounded-[16px] shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
+                    className="h-8 sm:h-9 px-6 sm:px-7 rounded-full shrink-0 font-medium text-xs sm:text-sm text-white bg-[#6db5f3] hover:bg-[#5aa6e8] shadow-xs active:scale-95 transition-all flex items-center justify-center cursor-pointer"
                     onClick={() => setIsExpanded(true)}
                   >
-                    <Plus className="size-4" />
-                    <span>{selectedRank ? `+ Claim #${selectedRank} Spot` : '+ Claim #1 Spot'}</span>
+                    <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
                   </button>
                 )}
               </div>
@@ -261,20 +260,20 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                       ^ Collapse
                     </button>
 
-                    {/* Right: Primary orange/vibrant action button */}
+                    {/* Right: Primary sky blue pill action button */}
                     <button
                       type="button"
-                      className="h-11 px-6 sm:px-8 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
+                      className="h-8 sm:h-9 px-6 sm:px-8 rounded-full font-medium text-xs sm:text-sm text-white bg-[#6db5f3] hover:bg-[#5aa6e8] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                       onClick={handleClaim}
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 className="size-4 animate-spin" />
+                          <Loader2 className="size-3.5 animate-spin" />
                           Fetching SaaS Meta...
                         </>
                       ) : (
-                        <span>+ Claim #{selectedRank ? selectedRank : '1'} Spot</span>
+                        <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
                       )}
                     </button>
                   </div>
