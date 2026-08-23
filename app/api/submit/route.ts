@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { Resend } from 'resend';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
@@ -51,7 +52,86 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Generate verification_token & dynamic baseUrl resolution
+    // 2. Authenticated & Previous Verification History Check
+    let isAlreadyVerified = false;
+
+    try {
+      const { data: verifiedHistory } = await supabaseAdmin
+        .from('leaderboard_entries')
+        .select('id')
+        .or(`email.eq.${email},submitter_email.eq.${email}`)
+        .eq('is_verified', true)
+        .limit(1);
+
+      if (verifiedHistory && verifiedHistory.length > 0) {
+        isAlreadyVerified = true;
+      } else {
+        const { data: listingsHistory } = await supabaseAdmin
+          .from('listings')
+          .select('id')
+          .or(`email.eq.${email},submitter_email.eq.${email}`)
+          .eq('is_verified', true)
+          .limit(1);
+
+        if (listingsHistory && listingsHistory.length > 0) {
+          isAlreadyVerified = true;
+        }
+      }
+    } catch (checkErr) {
+      console.warn('Verification check exception:', checkErr);
+    }
+
+    // CASE A: User is Logged In / Already Verified (isAlreadyVerified === true)
+    if (isAlreadyVerified) {
+      console.log(`User ${email} is already verified. Publishing listing directly without email verification.`);
+
+      const recordPayload: Record<string, any> = {
+        url,
+        name: entryName,
+        email,
+        submitter_email: email,
+        category: category || 'SaaS',
+        for_sale: !!isForSale,
+        bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+        target_rank: targetRank,
+        is_verified: true,
+        status: 'published',
+        claimed_at: new Date().toISOString(),
+      };
+
+      const { data: newListing } = await supabaseAdmin
+        .from('leaderboard_entries')
+        .upsert(recordPayload, { onConflict: 'url' })
+        .select('id')
+        .maybeSingle();
+
+      if (newListing?.id) {
+        try {
+          await supabaseAdmin.rpc('claim_listing_spot', {
+            target_listing_id: newListing.id,
+            target_rank: targetRank,
+          });
+        } catch (err) {
+          console.warn('RPC claim_listing_spot notice:', err);
+        }
+      }
+
+      try {
+        revalidatePath('/', 'page');
+        revalidatePath('/[category]', 'page');
+      } catch {}
+
+      await invalidateLeaderboardCache().catch(() => {});
+
+      return NextResponse.json({
+        success: true,
+        verified: true,
+        immediate: true,
+        message: 'Listing published immediately!',
+      });
+    }
+
+    // CASE B: Guest / First-time User (isAlreadyVerified === false)
     const verification_token = crypto.randomUUID();
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
@@ -59,7 +139,6 @@ export async function POST(request: NextRequest) {
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
     const verifyUrl = `${baseUrl}/api/verify?token=${verification_token}`;
 
-    // Always register token in shared in-memory fallback store
     savePendingToken(verification_token, {
       url,
       name: entryName,
@@ -69,8 +148,7 @@ export async function POST(request: NextRequest) {
       bid: bid || 0,
     });
 
-    // Explicitly insert into leaderboard_entries (bypassing RLS via Service Role)
-    const recordPayload: Record<string, any> = {
+    const pendingPayload: Record<string, any> = {
       url,
       name: entryName,
       email,
@@ -87,21 +165,17 @@ export async function POST(request: NextRequest) {
 
     let insertedSuccessfully = false;
 
-    // Primary table: leaderboard_entries
     try {
       const { data: insertedData, error: dbError } = await supabaseAdmin
         .from('leaderboard_entries')
-        .upsert(recordPayload, { onConflict: 'url' })
+        .upsert(pendingPayload, { onConflict: 'url' })
         .select()
         .maybeSingle();
 
       if (!dbError && insertedData) {
-        console.log('Successfully inserted leaderboard_entries record with token:', verification_token);
         insertedSuccessfully = true;
       } else if (dbError) {
         console.warn('Primary leaderboard_entries insert error:', dbError.message);
-
-        // Minimal payload fallback if optional columns missing
         const legacyPayload = {
           url,
           name: entryName,
@@ -109,26 +183,19 @@ export async function POST(request: NextRequest) {
           target_rank: targetRank,
           claimed_at: new Date().toISOString(),
         };
-
         const { error: legacyErr } = await supabaseAdmin
           .from('leaderboard_entries')
           .upsert(legacyPayload, { onConflict: 'url' });
 
-        if (!legacyErr) {
-          console.log('Fallback legacy leaderboard_entries upsert succeeded');
-          insertedSuccessfully = true;
-        } else {
-          console.warn('Legacy leaderboard_entries upsert error:', legacyErr.message);
-        }
+        if (!legacyErr) insertedSuccessfully = true;
       }
     } catch (e: any) {
       console.warn('leaderboard_entries upsert exception:', e.message);
     }
 
-    // Secondary table fallback: listings
     if (!insertedSuccessfully) {
       try {
-        const { data: listingsData, error: listingsErr } = await supabaseAdmin
+        await supabaseAdmin
           .from('listings')
           .upsert(
             {
@@ -143,22 +210,13 @@ export async function POST(request: NextRequest) {
               status: 'pending_verification',
             },
             { onConflict: 'url' }
-          )
-          .select()
-          .maybeSingle();
-
-        if (!listingsErr && listingsData) {
-          console.log('Successfully inserted listings record with token:', verification_token);
-          insertedSuccessfully = true;
-        } else if (listingsErr) {
-          console.warn('Listings insert notice:', listingsErr.message);
-        }
+          );
       } catch (e: any) {
         console.warn('Listings upsert exception:', e.message);
       }
     }
 
-    // 3. Dispatch transactional email via Resend
+    // Send verification email via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
@@ -206,8 +264,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      verified: false,
+      redirectUrl: `/thank-you?email=${encodeURIComponent(email)}`,
       message: 'Verification link sent to your email! Please check your inbox.',
-      verifyUrl,
     });
   } catch (err: any) {
     console.error('Submit route error:', err);

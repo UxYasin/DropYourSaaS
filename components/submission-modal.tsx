@@ -128,7 +128,11 @@ export function SubmissionModal({
 
         onSuccess?.();
         onClose();
-        router.push(`/thank-you?email=${encodeURIComponent(email.trim())}`);
+        if (data.immediate || data.verified) {
+          router.push('/?verified=true');
+        } else {
+          router.push(data.redirectUrl || `/thank-you?email=${encodeURIComponent(email.trim())}`);
+        }
       } catch (err: any) {
         console.error('Submission catch error:', err);
         setError('An unexpected network error occurred. Please try again.');
