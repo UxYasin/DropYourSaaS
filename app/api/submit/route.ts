@@ -9,7 +9,22 @@ import { savePendingToken } from '@/lib/token-store';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
-    const { url, title, name, email, category, isForSale, bid, requestedRank, selectedRank } = body || {};
+    const {
+      url,
+      title,
+      name,
+      email,
+      category,
+      isForSale,
+      askingPrice,
+      asking_price,
+      mrr,
+      ttmRevenue,
+      ttm_revenue,
+      bid,
+      requestedRank,
+      selectedRank,
+    } = body || {};
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -19,6 +34,10 @@ export async function POST(request: NextRequest) {
     const targetRank = requestedRank || selectedRank || 1;
     const isMarketplaceListing = Boolean(isForSale);
     const supabaseAdmin = getSupabaseServerClient();
+
+    const parsedAskingPrice = Number(askingPrice || asking_price) || 0;
+    const parsedMrr = Number(mrr) || 0;
+    const parsedTtmRevenue = Number(ttmRevenue || ttm_revenue) || 0;
 
     // 1. Dual 24-Hour Cooldown (by Email and Domain)
     let parsedDomain = '';
@@ -68,6 +87,9 @@ export async function POST(request: NextRequest) {
         category: category || 'SaaS',
         for_sale: false,
         is_for_sale: false,
+        asking_price: parsedAskingPrice,
+        mrr: parsedMrr,
+        ttm_revenue: parsedTtmRevenue,
         bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
         target_rank: targetRank,
         is_verified: true,
@@ -130,6 +152,9 @@ export async function POST(request: NextRequest) {
       email: cleanEmail,
       category: category || 'SaaS',
       isForSale: true,
+      askingPrice: parsedAskingPrice,
+      mrr: parsedMrr,
+      ttmRevenue: parsedTtmRevenue,
       bid: bid || 0,
     });
 
@@ -141,6 +166,9 @@ export async function POST(request: NextRequest) {
       category: category || 'SaaS',
       for_sale: true,
       is_for_sale: true,
+      asking_price: parsedAskingPrice,
+      mrr: parsedMrr,
+      ttm_revenue: parsedTtmRevenue,
       bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
       target_rank: targetRank,
       verification_token: verification_token,

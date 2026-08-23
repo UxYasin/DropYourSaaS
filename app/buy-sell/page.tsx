@@ -144,7 +144,32 @@ export default function BuySellPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [listings, setListings] = useState<BuySellListing[]>(MOCK_BUY_SELL_LISTINGS);
+  const [listings, setListings] = useState<BuySellListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const fetchListings = async () => {
+      try {
+        const res = await fetch('/api/buy-sell/listings');
+        if (res.ok) {
+          const data = await res.json();
+          if (active && data?.listings) {
+            setListings(data.listings);
+          }
+        }
+      } catch (err) {
+        console.warn('Error fetching live marketplace listings:', err);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    fetchListings();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredListings = listings.filter((item) => {
     const matchesSearch =

@@ -32,6 +32,9 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isForSale, setIsForSale] = useState(false);
   const [email, setEmail] = useState('');
+  const [askingPrice, setAskingPrice] = useState('');
+  const [mrr, setMrr] = useState('');
+  const [ttmRevenue, setTtmRevenue] = useState('');
   const [selectedUpsell, setSelectedUpsell] = useState<UpsellOption>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +61,9 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
         isAnonymous,
         isForSale,
         email: isForSale ? email : undefined,
+        askingPrice: isForSale ? askingPrice : undefined,
+        mrr: isForSale ? mrr : undefined,
+        ttmRevenue: isForSale ? ttmRevenue : undefined,
         selectedUpsell,
       };
 
@@ -391,20 +397,65 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 </button>
               </div>
 
-              {/* Conditional Email Field when List for Sale is ON */}
+              {/* Conditional Financials & Email Fields when List for Sale is ON */}
               {isForSale && (
-                <div className="pt-2 animate-in fade-in-50 duration-200 space-y-1">
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Contact Email (Required for Buyers)
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required={isForSale}
-                    className="w-full h-10 px-3.5 rounded-xl bg-white dark:bg-black border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                  />
+                <div className="pt-2 animate-in fade-in-50 duration-200 space-y-3">
+                  {/* Financial Inputs Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Asking Price ($)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={askingPrice}
+                        onChange={(e) => setAskingPrice(e.target.value)}
+                        placeholder="25000"
+                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Current MRR ($)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={mrr}
+                        onChange={(e) => setMrr(e.target.value)}
+                        placeholder="1850"
+                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        TTM Revenue ($)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={ttmRevenue}
+                        onChange={(e) => setTtmRevenue(e.target.value)}
+                        placeholder="19500"
+                        className="w-full h-10 px-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      Contact Email (Required for Buyers)
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required={isForSale}
+                      className="w-full h-10 px-3.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    />
+                  </div>
                 </div>
               )}
             </div>
