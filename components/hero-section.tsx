@@ -51,8 +51,8 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       setError('Enter a SaaS website link or App store link first');
       return;
     }
-    if (!email.trim()) {
-      setError('Enter your email address to continue');
+    if (isForSale && !email.trim()) {
+      setError('Enter your email address to list your project for sale');
       return;
     }
     const normalizedUrl = /^https?:\/\//i.test(url) ? url.trim() : `https://${url.trim().replace(/^@/, '')}`;
@@ -115,108 +115,44 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
     }
   };
 
-  const handleDecrease = () => {
-    const newBid = Math.max(1, bid - 1);
-    setBid(newBid);
-    onBidChange?.(newBid);
-  };
-
-  const handleIncrease = () => {
-    const newBid = Math.min(100000, bid + 1);
-    setBid(newBid);
-    onBidChange?.(newBid);
-  };
-
-  const displayRank = selectedRank || 1;
-  const bidText = `$${bid.toLocaleString()}`;
-  const isHandle = url.startsWith('@');
+  const currentBid = selectedBid || bid;
+  const currentRank = selectedRank || 1;
 
   return (
-    <section className="text-center overflow-hidden pt-2 pb-2">
-      <div className="flex justify-center mb-4">
-        <LiveStatsPill />
+    <div className="text-center py-6 sm:py-10 max-w-2xl mx-auto space-y-4 sm:space-y-6">
+      {/* 5-Second Dynamic Status Pill */}
+      <LiveStatsPill />
+
+      {/* Main Hero Headline & Copy */}
+      <div className="space-y-2 sm:space-y-3">
+        <h1 className="font-mono font-extrabold text-3xl sm:text-5xl md:text-6xl tracking-tight text-foreground leading-[1.1]">
+          {siteCopy.hero.headline}
+        </h1>
+        <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+          {siteCopy.hero.description}
+        </p>
       </div>
-      <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight max-w-2xl mx-auto">
-        {IS_FREE_MODE ? (
-          <>
-            List Your SaaS for{' '}
-            <span className="text-primary font-mono font-bold">Free</span>
-          </>
-        ) : (
-          <>
-            List Your SaaS for{' '}
-            <div className="inline-flex items-center gap-1 sm:gap-2 text-primary align-middle justify-center flex-wrap">
-              <button
-                type="button"
-                onClick={handleDecrease}
-                className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
-                aria-label="Decrease tier amount"
-              >
-                <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </button>
-              <input
-                type="text"
-                value={bidText}
-                onChange={(e) => {
-                  const num = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
-                  if (!isNaN(num) && num >= 1 && num <= 100000) {
-                    setBid(num);
-                    onBidChange?.(num);
-                  }
-                }}
-                className="bg-transparent border-none outline-none text-primary text-center font-mono font-bold text-3xl sm:text-4xl md:text-5xl p-0 focus:ring-0 w-auto min-w-0"
-                size={bidText.length}
-              />
-              <button
-                type="button"
-                onClick={handleIncrease}
-                className="inline-flex items-center justify-center size-7 sm:size-8 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
-                aria-label="Increase tier amount"
-              >
-                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </button>
-            </div>
-          </>
-        )}
-      </h1>
-      <p className="text-muted-foreground mt-3 text-xs sm:text-sm max-w-[60ch] mx-auto leading-relaxed">
-        {siteCopy.hero.description}
-      </p>
 
-      <div className="mt-7 max-w-xl mx-auto px-4">
-        {/* Glow wrapper with fixed 24px radius */}
-        <div className="relative group/input text-left">
-          {/* Animated rainbow glow */}
-          <div className="absolute -inset-[2px] rounded-[26px] transition-all duration-300 pointer-events-none animate-rainbow-glow opacity-40 blur-xs group-hover/input:opacity-75 group-hover/input:blur-sm" />
-          <div className="absolute -inset-[1px] rounded-[25px] transition-all duration-300 pointer-events-none animate-rainbow-glow opacity-55" />
-
-          {/* 24px Container in both collapsed and expanded states */}
-          <div
-            className={`relative bg-card border border-border/80 shadow-xl rounded-[24px] transition-all duration-300 ease-out overflow-hidden ${
-              isExpanded ? 'p-4 sm:p-5' : 'p-1.5 sm:p-2'
-            }`}
-          >
-            {/* Top Input Row */}
-            <div className="flex items-center transition-all duration-200 bg-[#f5f5f5] dark:bg-muted/40 border border-border/60 rounded-[18px] p-1.5 sm:p-2">
-              <div className="relative flex-1 flex items-center min-w-0">
-                {isHandle ? (
-                  <XIcon className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
-                ) : (
-                  <Globe className="size-4 sm:size-5 text-muted-foreground ml-3.5 mr-2.5 shrink-0" />
-                )}
+      {/* Claim Spot Card Form */}
+      <div className="pt-2">
+        <div className="p-3.5 sm:p-4 rounded-[26px] bg-card border border-border/80 shadow-md transition-all duration-200 hover:shadow-lg">
+          <div className="space-y-3">
+            {/* Input & Action Bar */}
+            <div className="flex items-center gap-2 p-1.5 sm:p-2 rounded-[20px] bg-muted/40 border border-border/60 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all">
+              <div className="flex items-center gap-2 flex-1 min-w-0 pl-2">
+                <Globe className="size-4 text-muted-foreground shrink-0" />
                 <input
                   ref={ref}
                   type="text"
-                  placeholder="SaaS website link or App store link"
                   value={url}
-                  onFocus={() => setIsExpanded(true)}
                   onChange={(e) => {
                     setUrl(e.target.value);
-                    if (!isExpanded) setIsExpanded(true);
+                    if (error) setError(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleClaim();
                   }}
+                  placeholder={siteCopy.hero.urlPlaceholder}
                   className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
                 />
               </div>
@@ -236,9 +172,9 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             {/* Expanded Content Section */}
             {isExpanded && (
               <div className="mt-4 pt-4 border-t border-border/60 space-y-3 animate-in fade-in-50 duration-200">
-                {/* Category & List for Sale Row (50% - 50%) */}
+                {/* Category & List for Sale Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
-                  {/* Left: Category Dropdown (50%) */}
+                  {/* Left: Category Dropdown */}
                   <div className="relative flex-1 flex items-center">
                     <select
                       value={category}
@@ -256,7 +192,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     </div>
                   </div>
 
-                  {/* Right: List for Sale (50%) */}
+                  {/* Right: List for Sale */}
                   <div className="h-12 p-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="min-w-0 text-left">
@@ -287,17 +223,24 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   </div>
                 </div>
 
-                {/* Your Email Input */}
-                <div className="relative flex-1 flex items-center">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
-                    required
-                  />
-                </div>
+                {/* Conditional Email Input (Only when List for Sale is enabled) */}
+                {isForSale && (
+                  <div className="space-y-1 animate-in fade-in-50 duration-200 text-left">
+                    <div className="relative flex-1 flex items-center">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
+                        required={isForSale}
+                      />
+                    </div>
+                    <p className="text-[11px] font-body text-muted-foreground px-1">
+                      Required to receive buyer bids and direct acquisition inquiries.
+                    </p>
+                  </div>
+                )}
 
                 {/* Expanded Action Buttons Row */}
                 <div className="flex items-center justify-between pt-1 gap-2">
@@ -319,37 +262,33 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     {isSubmitting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        <span>Scraping & Indexing...</span>
+                        Fetching SaaS Meta...
                       </>
                     ) : (
-                      <>
-                        <Plus className="size-4" />
-                        <span>{selectedRank ? `Claim #${selectedRank} Spot` : 'Claim #1 Spot'}</span>
-                      </>
+                      <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim Spot #1'}</span>
                     )}
                   </button>
                 </div>
               </div>
             )}
+
+            {error && (
+              <p className="text-xs font-mono text-amber-500 pt-1 text-left px-2 animate-in fade-in-50 duration-150">
+                {error}
+              </p>
+            )}
           </div>
         </div>
-
-        {error && <p className="text-xs text-destructive mt-2 text-center font-medium">{error}</p>}
-
-        <p className="mt-3.5 text-xs text-muted-foreground leading-relaxed text-center">
-          {siteCopy.hero.subtext}
-        </p>
       </div>
 
+      {/* Submission Modal */}
       <SubmissionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={scrapedData}
-        bid={bid}
-        selectedRank={displayRank}
+        bid={currentBid}
+        selectedRank={currentRank}
       />
-    </section>
+    </div>
   );
 });
-
-

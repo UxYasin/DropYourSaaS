@@ -1,4 +1,4 @@
--- Ensure both possible table targets have rank, target_rank, verification_token columns and claim_listing_spot function
+-- Ensure both possible table targets have rank, target_rank, verification_token, is_for_sale columns and claim_listing_spot function
 DO $$ 
 BEGIN
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'listings') THEN
@@ -8,6 +8,7 @@ BEGIN
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE;
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending_verification';
         ALTER TABLE listings ADD COLUMN IF NOT EXISTS submitter_email TEXT;
+        ALTER TABLE listings ADD COLUMN IF NOT EXISTS is_for_sale BOOLEAN DEFAULT FALSE;
         CREATE INDEX IF NOT EXISTS idx_listings_verification_token ON listings(verification_token);
     END IF;
 
@@ -18,6 +19,7 @@ BEGIN
         ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE;
         ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending_verification';
         ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS submitter_email TEXT;
+        ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS is_for_sale BOOLEAN DEFAULT FALSE;
         CREATE INDEX IF NOT EXISTS idx_leaderboard_entries_verification_token ON leaderboard_entries(verification_token);
     END IF;
 END $$;

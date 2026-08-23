@@ -12,6 +12,7 @@ export const siteCopy = {
       ? 'Already listed? Re-submit your project link after 24 hours to refresh your placement.'
       : "Already listed? Drop in the same link to push your tier higher — you're only charged the difference.",
     cta: 'Claim #1',
+    urlPlaceholder: 'yourproject.com or @twitter',
   },
   feed: {
     podiumButton: 'Take this spot',

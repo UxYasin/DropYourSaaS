@@ -15,12 +15,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-    }
-
     const entryName = title || name || new URL(url).hostname;
     const targetRank = requestedRank || selectedRank || 1;
+    const isMarketplaceListing = Boolean(isForSale);
     const supabaseAdmin = getSupabaseServerClient();
 
     // 1. Dual 24-Hour Cooldown (by Email and Domain)
@@ -35,10 +32,14 @@ export async function POST(request: NextRequest) {
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
       try {
+        const query = email
+          ? `email.eq.${email},submitter_email.eq.${email},url.ilike.%${parsedDomain}%`
+          : `url.ilike.%${parsedDomain}%`;
+
         const { data: recentEntries } = await supabaseAdmin
           .from('leaderboard_entries')
           .select('id, email, submitter_email, url, claimed_at')
-          .or(`email.eq.${email},submitter_email.eq.${email},url.ilike.%${parsedDomain}%`)
+          .or(query)
           .gte('claimed_at', twentyFourHoursAgo);
 
         if (recentEntries && recentEntries.length > 0) {
@@ -52,46 +53,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Authenticated & Previous Verification History Check
-    let isAlreadyVerified = false;
+    // CASE A: Standard Directory Listing (isForSale === false)
+    // Email verification skipped completely, published live immediately!
+    if (!isMarketplaceListing) {
+      console.log(`Standard directory listing for ${url}. Bypassing email verification and publishing live.`);
 
-    try {
-      const { data: verifiedHistory } = await supabaseAdmin
-        .from('leaderboard_entries')
-        .select('id')
-        .or(`email.eq.${email},submitter_email.eq.${email}`)
-        .eq('is_verified', true)
-        .limit(1);
-
-      if (verifiedHistory && verifiedHistory.length > 0) {
-        isAlreadyVerified = true;
-      } else {
-        const { data: listingsHistory } = await supabaseAdmin
-          .from('listings')
-          .select('id')
-          .or(`email.eq.${email},submitter_email.eq.${email}`)
-          .eq('is_verified', true)
-          .limit(1);
-
-        if (listingsHistory && listingsHistory.length > 0) {
-          isAlreadyVerified = true;
-        }
-      }
-    } catch (checkErr) {
-      console.warn('Verification check exception:', checkErr);
-    }
-
-    // CASE A: User is Logged In / Already Verified (isAlreadyVerified === true)
-    if (isAlreadyVerified) {
-      console.log(`User ${email} is already verified. Publishing listing directly without email verification.`);
+      const submitterEmail = email ? email.trim() : 'guest@dropyoursaas.com';
 
       const recordPayload: Record<string, any> = {
         url,
         name: entryName,
-        email,
-        submitter_email: email,
+        email: submitterEmail,
+        submitter_email: submitterEmail,
         category: category || 'SaaS',
-        for_sale: !!isForSale,
+        for_sale: false,
+        is_for_sale: false,
         bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
         target_rank: targetRank,
         is_verified: true,
@@ -131,7 +107,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // CASE B: Guest / First-time User (isAlreadyVerified === false)
+    // CASE B: Buy/Sell Marketplace Listing (isForSale === true)
+    // Email is required to receive buyer inquiries
+    if (!email || !email.trim()) {
+      return NextResponse.json(
+        { error: 'Email is required to list your SaaS for sale in the marketplace.' },
+        { status: 400 }
+      );
+    }
+
+    const cleanEmail = email.trim();
     const verification_token = crypto.randomUUID();
     const origin =
       process.env.NODE_ENV === 'production'
@@ -142,19 +127,20 @@ export async function POST(request: NextRequest) {
     savePendingToken(verification_token, {
       url,
       name: entryName,
-      email,
+      email: cleanEmail,
       category: category || 'SaaS',
-      isForSale: !!isForSale,
+      isForSale: true,
       bid: bid || 0,
     });
 
     const pendingPayload: Record<string, any> = {
       url,
       name: entryName,
-      email,
-      submitter_email: email,
+      email: cleanEmail,
+      submitter_email: cleanEmail,
       category: category || 'SaaS',
-      for_sale: !!isForSale,
+      for_sale: true,
+      is_for_sale: true,
       bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
       target_rank: targetRank,
       verification_token: verification_token,
@@ -202,9 +188,11 @@ export async function POST(request: NextRequest) {
               title: entryName,
               name: entryName,
               url,
-              submitter_email: email,
-              email,
+              submitter_email: cleanEmail,
+              email: cleanEmail,
               target_rank: targetRank,
+              for_sale: true,
+              is_for_sale: true,
               verification_token: verification_token,
               is_verified: false,
               status: 'pending_verification',
@@ -222,8 +210,8 @@ export async function POST(request: NextRequest) {
       const resend = new Resend(resendApiKey);
       const { error: emailError } = await resend.emails.send({
         from: 'DropYourSaaS <hello@dropyoursaas.com>',
-        to: [email],
-        subject: `Verify & Activate Your SaaS Listing: ${entryName}`,
+        to: [cleanEmail],
+        subject: `Verify & Activate Your Marketplace Listing: ${entryName}`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -234,9 +222,9 @@ export async function POST(request: NextRequest) {
             <body style="background-color: #f4f4f5; padding: 20px 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
               <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 32px; max-width: 480px; margin: 40px auto;">
                 <img src="https://dropyoursaas.com/logo.png" alt="DropYourSaaS" width="48" height="48" style="display: block; margin: 0 auto 16px auto; width: 48px; height: 48px; object-fit: contain;" />
-                <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Verify Your SaaS Listing</h2>
+                <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Verify Your Marketplace Listing</h2>
                 <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
-                  Click below to confirm your ownership of <strong>${entryName}</strong> and activate your instant directory indexing slot.
+                  Click below to confirm your email ownership of <strong>${entryName}</strong> to receive buyer acquisition inquiries.
                 </p>
                 <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
                   Verify Listing &amp; Activate Index
@@ -265,7 +253,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       verified: false,
-      redirectUrl: `/thank-you?email=${encodeURIComponent(email)}`,
+      redirectUrl: `/thank-you?email=${encodeURIComponent(cleanEmail)}`,
       message: 'Verification link sent to your email! Please check your inbox.',
     });
   } catch (err: any) {

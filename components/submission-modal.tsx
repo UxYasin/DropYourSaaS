@@ -85,6 +85,11 @@ export function SubmissionModal({
       return;
     }
 
+    if (isForSale && !email.trim()) {
+      setError('Email is required to list your project for sale.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     setRateLimitError(null);
@@ -109,6 +114,7 @@ export function SubmissionModal({
             isForSale,
             email: email.trim(),
             bid,
+            requestedRank: selectedRank,
           }),
         });
 
@@ -351,20 +357,25 @@ export function SubmissionModal({
             </div>
           </div>
 
-          {/* Email input (Required) */}
-          <div>
-            <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
-              Your Email
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-primary"
-              required
-            />
-          </div>
+          {/* Email input (Required only when List for Sale is enabled) */}
+          {isForSale && (
+            <div className="space-y-1 animate-in fade-in-50 duration-200">
+              <label className="block text-xs font-medium text-zinc-300 font-sans">
+                Your Email <span className="text-emerald-400 font-normal">(Required for Marketplace)</span>
+              </label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-primary"
+                required={isForSale}
+              />
+              <p className="text-[11px] font-body text-zinc-400 leading-snug">
+                Required to receive buyer bids and direct acquisition inquiries.
+              </p>
+            </div>
+          )}
 
           {/* Screenshot / OG Image preview banner */}
           {screenshotUrl && (
