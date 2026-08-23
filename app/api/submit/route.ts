@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
-      await resend.emails.send({
-        from: 'onboarding@resend.dev',
+      const { error: emailError } = await resend.emails.send({
+        from: 'DropYourSaaS <hello@dropyoursaas.com>',
         to: [email],
         subject: `Verify & Activate Your SaaS Listing: ${entryName}`,
         html: `
@@ -122,9 +122,15 @@ export async function POST(request: NextRequest) {
             </body>
           </html>
         `,
-      }).catch((err) => {
-        console.error('Resend email dispatch error:', err);
       });
+
+      if (emailError) {
+        console.error('Resend email error:', emailError);
+        return NextResponse.json(
+          { error: emailError.message || 'Failed to send verification email' },
+          { status: 500 }
+        );
+      }
     }
 
     await invalidateLeaderboardCache();

@@ -71,7 +71,7 @@ export function CongratulationsModal({ isOpen, onClose }: CongratulationsModalPr
             Congratulations! Your SaaS is live.
           </h2>
           <p className="font-body text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            Your submission has been verified and your developer account has been automatically created.
+            Your submission has been verified and your account has been automatically created.
           </p>
         </div>
 
