@@ -69,17 +69,6 @@ export function Header() {
               Buy/Sell
             </Link>
             <Link
-              href="/about"
-              className={cn(
-                'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/about'
-                  ? 'text-foreground font-semibold bg-muted/70'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-              )}
-            >
-              About
-            </Link>
-            <Link
               href="/pricing"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
@@ -89,17 +78,6 @@ export function Header() {
               )}
             >
               Pricing
-            </Link>
-            <Link
-              href="/rules"
-              className={cn(
-                'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/rules'
-                  ? 'text-foreground font-semibold bg-muted/70'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-              )}
-            >
-              Guidelines
             </Link>
           </nav>
           <LiveStatsPill compact />

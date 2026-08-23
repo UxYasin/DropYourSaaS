@@ -31,6 +31,10 @@ export function Footer() {
           <Link href="/about" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
             About
           </Link>
+          <span>·</span>
+          <Link href="/rules" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+            Guidelines
+          </Link>
         </div>
       </div>
     </footer>

@@ -16,8 +16,8 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { title: 'Directory', href: '/' },
-  { title: 'About', href: '/about' },
-  { title: 'Guidelines', href: '/rules' },
+  { title: 'Buy/Sell', href: '/buy-sell' },
+  { title: 'Pricing', href: '/pricing' },
 ];
 
 export function AppSidebar() {
