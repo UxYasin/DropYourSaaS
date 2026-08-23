@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Mail, Key, ArrowRight, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,13 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoadingPass, setIsLoadingPass] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,8 +121,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setPassword('');
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -274,6 +280,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
