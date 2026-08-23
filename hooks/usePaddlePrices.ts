@@ -33,7 +33,7 @@ export function usePaddlePrices(
       .then((response: PricePreviewResponse) => {
         if (response?.data?.details?.lineItems) {
           const map: PaddlePricesMap = {};
-          response.data.details.lineItems.forEach((item) => {
+          response.data.details.lineItems.forEach((item: any) => {
             if (item?.price?.id && item?.formattedTotals?.total) {
               map[item.price.id] = item.formattedTotals.total;
             }
@@ -41,7 +41,7 @@ export function usePaddlePrices(
           setPrices(map);
         }
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.warn('Paddle PricePreview notice:', err);
       })
       .finally(() => {

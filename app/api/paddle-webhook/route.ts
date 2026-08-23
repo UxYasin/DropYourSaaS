@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
     additional_info: customData.additionalInfo || null,
     selected_upsell: 'sponsor_panel',
     paddle_transaction_id: transactionId,
+    bid_cents: 1,
     claimed_at: new Date().toISOString(),
   };
 
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
         submitter_email: submitterEmail,
         status: 'published',
         is_verified: true,
+        bid_cents: 1,
         selected_upsell: 'sponsor_panel',
         paddle_transaction_id: transactionId,
         claimed_at: new Date().toISOString(),

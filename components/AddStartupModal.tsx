@@ -108,7 +108,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
     initializePaddle({
       token: clientToken,
       environment: env,
-      eventCallback: (event) => {
+      eventCallback: (event: { name: string; data?: any }) => {
         if (event.name === 'checkout.completed') {
           console.log('Paddle checkout completed successfully:', event.data);
           setSuccess(true);
@@ -117,7 +117,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
           }, 1000);
         }
       },
-    }).then((p) => {
+    }).then((p: Paddle | undefined) => {
       if (p) setPaddle(p);
     });
   }, [isOpen]);
