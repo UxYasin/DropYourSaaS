@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
 
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
     // Invalidate Redis caches
     await invalidateLeaderboardCache().catch(() => {});
 
-    // 5. Auto-login session generation via Supabase Admin magiclink redirect if available
+    // 5. Auto-login session generation via Supabase Admin magiclink redirect
     if (submitterEmail) {
       try {
         const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
@@ -163,14 +164,24 @@ export async function GET(request: NextRequest) {
         });
 
         if (linkData?.properties?.action_link) {
-          return NextResponse.redirect(linkData.properties.action_link);
+          let actionLink = linkData.properties.action_link;
+
+          // Replace localhost:3000 in generated magic link with public domain if on production
+          if (!baseUrl.includes('localhost') && actionLink.includes('http://localhost:3000')) {
+            actionLink = actionLink.replace('http://localhost:3000', baseUrl);
+          } else if (!baseUrl.includes('localhost') && actionLink.includes('http://localhost:')) {
+            actionLink = actionLink.replace(/http:\/\/localhost:\d+/, baseUrl);
+          }
+
+          console.log('Redirecting user to safe action link:', actionLink);
+          return NextResponse.redirect(actionLink);
         }
       } catch (linkErr) {
         console.warn('Magic link generation warning:', linkErr);
       }
     }
 
-    // Clean redirect to homepage with verified flag
+    // Clean redirect fallback to homepage with verified flag
     return NextResponse.redirect(new URL('/?verified=true', baseUrl));
   } catch (error: any) {
     console.error('Unhandled verification error:', error);
