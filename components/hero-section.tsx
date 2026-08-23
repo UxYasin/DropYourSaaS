@@ -135,12 +135,15 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
       {/* Claim Spot Card Form */}
       <div className="pt-2">
-        <div className="p-3.5 sm:p-4 rounded-[26px] bg-card border border-border/80 shadow-md transition-all duration-200 hover:shadow-lg">
-          <div className="space-y-3">
-            {/* Input & Action Bar */}
-            <div className="flex items-center gap-2 p-1.5 sm:p-2 rounded-[20px] bg-muted/40 border border-border/60 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all">
-              <div className="flex items-center gap-2 flex-1 min-w-0 pl-2">
-                <Globe className="size-4 text-muted-foreground shrink-0" />
+        <div className="relative group text-left">
+          {/* Ambient glowing border accent */}
+          <div className="absolute -inset-0.5 rounded-[28px] bg-gradient-to-r from-orange-500/30 via-amber-500/30 to-yellow-500/30 opacity-75 blur-xs group-hover:opacity-100 transition duration-300 pointer-events-none" />
+
+          <div className="relative p-4 sm:p-5 rounded-[26px] bg-card border border-border/80 shadow-md">
+            <div className="space-y-3">
+              {/* Top Row: Full-width text input with globe icon */}
+              <div className="flex items-center gap-2.5 p-2 rounded-[20px] bg-muted/40 border border-border/60 focus-within:border-amber-500/80 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all">
+                <Globe className="size-5 text-muted-foreground shrink-0 ml-2" />
                 <input
                   ref={ref}
                   type="text"
@@ -149,52 +152,54 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     setUrl(e.target.value);
                     if (error) setError(null);
                   }}
+                  onFocus={() => setIsExpanded(true)}
+                  onClick={() => setIsExpanded(true)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleClaim();
                   }}
-                  placeholder={siteCopy.hero.urlPlaceholder}
-                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
+                  placeholder="SaaS website link or App store link"
+                  className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground/70 pr-2 focus:ring-0 font-sans"
                 />
+                {!isExpanded && (
+                  <button
+                    type="button"
+                    className="h-10 px-5 rounded-[16px] shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
+                    onClick={() => setIsExpanded(true)}
+                  >
+                    <Plus className="size-4" />
+                    <span>{selectedRank ? `+ Claim #${selectedRank} Spot` : '+ Claim #1 Spot'}</span>
+                  </button>
+                )}
               </div>
 
-              {!isExpanded && (
-                <button
-                  type="button"
-                  className="h-10 sm:h-11 px-5 sm:px-6 rounded-[18px] shrink-0 font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-xs hover:shadow active:scale-95 transition-all flex items-center gap-1.5"
-                  onClick={() => setIsExpanded(true)}
-                >
-                  <Plus className="size-3.5 sm:size-4" />
-                  <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim #1'}</span>
-                </button>
-              )}
-            </div>
+              {/* Expandable Section */}
+              {isExpanded && (
+                <div className="animate-in fade-in-50 duration-200">
+                  {/* Divider line */}
+                  <div className="border-t border-zinc-200 dark:border-zinc-800 my-3" />
 
-            {/* Expanded Content Section */}
-            {isExpanded && (
-              <div className="mt-4 pt-4 border-t border-border/60 space-y-3 animate-in fade-in-50 duration-200">
-                {/* Category & List for Sale Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
-                  {/* Left: Category Dropdown */}
-                  <div className="relative flex-1 flex items-center">
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
-                    >
-                      {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                      <ChevronDown className="size-4" />
+                  {/* Row 1: Category & List for Sale Toggle */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
+                    {/* Left: Category dropdown */}
+                    <div className="relative flex-1 flex items-center">
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors cursor-pointer shadow-xs"
+                      >
+                        {['SaaS', 'AI Tool', 'Mobile App', 'Developer Tool', 'Productivity', 'Marketing'].map((cat) => (
+                          <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <ChevronDown className="size-4" />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Right: List for Sale */}
-                  <div className="h-12 p-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
-                    <div className="flex items-center gap-2 min-w-0">
+                    {/* Right: "List for Sale?" Switch / Toggle */}
+                    <div className="h-12 px-3.5 py-2.5 rounded-[18px] bg-muted/30 border border-border/70 flex items-center justify-between gap-2 flex-1">
                       <div className="min-w-0 text-left">
                         <div className="text-xs font-bold font-sans text-foreground truncate">
                           List for Sale?
@@ -203,82 +208,92 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                           Feature in Buy/Sell
                         </div>
                       </div>
-                    </div>
 
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={isForSale}
+                        onClick={() => setIsForSale(!isForSale)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          isForSale ? 'bg-emerald-500' : 'bg-zinc-600'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                            isForSale ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Conditional Email Field */}
+                  {isForSale && (
+                    <div className="mt-3 space-y-1 animate-in fade-in-50 duration-200 text-left">
+                      <div className="relative flex-1 flex items-center">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (error) setError(null);
+                          }}
+                          placeholder="you@example.com"
+                          className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
+                          required={isForSale}
+                        />
+                      </div>
+                      <p className="text-[11px] font-body text-muted-foreground px-1">
+                        Required to receive buyer bids and acquisition inquiries
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Row 3: Footer Actions */}
+                  <div className="flex items-center justify-between pt-3 gap-2">
+                    {/* Left: Collapse button */}
                     <button
                       type="button"
-                      role="switch"
-                      aria-checked={isForSale}
-                      onClick={() => setIsForSale(!isForSale)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        isForSale ? 'bg-emerald-500' : 'bg-zinc-600'
-                      }`}
+                      onClick={() => setIsExpanded(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-2 rounded-full hover:bg-muted/50 transition-colors inline-flex items-center gap-1 cursor-pointer"
                     >
-                      <span
-                        className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                          isForSale ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
+                      <ChevronUp className="size-3.5" />
+                      ^ Collapse
+                    </button>
+
+                    {/* Right: Primary orange/vibrant action button */}
+                    <button
+                      type="button"
+                      className="h-11 px-6 sm:px-8 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
+                      onClick={handleClaim}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          Fetching SaaS Meta...
+                        </>
+                      ) : (
+                        <span>+ Claim #{selectedRank ? selectedRank : '1'} Spot</span>
+                      )}
                     </button>
                   </div>
                 </div>
+              )}
 
-                {/* Conditional Email Input (Only when List for Sale is enabled) */}
-                {isForSale && (
-                  <div className="space-y-1 animate-in fade-in-50 duration-200 text-left">
-                    <div className="relative flex-1 flex items-center">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        className="w-full h-12 rounded-[18px] bg-muted/30 border border-border/70 text-foreground font-sans text-xs sm:text-sm px-3.5 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 hover:border-border transition-colors shadow-xs"
-                        required={isForSale}
-                      />
-                    </div>
-                    <p className="text-[11px] font-body text-muted-foreground px-1">
-                      Required to receive buyer bids and direct acquisition inquiries.
-                    </p>
-                  </div>
-                )}
-
-                {/* Expanded Action Buttons Row */}
-                <div className="flex items-center justify-between pt-1 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded(false)}
-                    className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-2 rounded-full hover:bg-muted/50 transition-colors inline-flex items-center gap-1"
-                  >
-                    <ChevronUp className="size-3.5" />
-                    Collapse
-                  </button>
-
-                  <button
-                    type="button"
-                    className="h-11 px-6 sm:px-8 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2"
-                    onClick={handleClaim}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        Fetching SaaS Meta...
-                      </>
-                    ) : (
-                      <span>{selectedRank ? `Claim #${selectedRank}` : 'Claim Spot #1'}</span>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <p className="text-xs font-mono text-amber-500 pt-1 text-left px-2 animate-in fade-in-50 duration-150">
-                {error}
-              </p>
-            )}
+              {error && (
+                <p className="text-xs font-mono text-amber-500 pt-1 text-left px-2 animate-in fade-in-50 duration-150">
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Helper Note Below Card */}
+        <p className="text-xs font-body text-muted-foreground text-center mt-3">
+          Already listed? Re-submit your project link after 24 hours to refresh your placement.
+        </p>
       </div>
 
       {/* Submission Modal */}
