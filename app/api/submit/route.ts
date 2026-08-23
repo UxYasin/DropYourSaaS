@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Explicitly insert into leaderboard_entries (bypassing RLS via Service Role)
-    const recordPayload = {
+    const recordPayload: Record<string, any> = {
       url,
       name: entryName,
       email,
@@ -87,17 +87,36 @@ export async function POST(request: NextRequest) {
       const { data: insertedData, error: dbError } = await supabaseAdmin
         .from('leaderboard_entries')
         .upsert(recordPayload, { onConflict: 'url' })
-        .select('id, verification_token')
+        .select()
         .maybeSingle();
 
       if (!dbError && insertedData) {
-        console.log('Successfully inserted leaderboard_entries record with token:', insertedData.verification_token);
+        console.log('Successfully inserted leaderboard_entries record with token:', verification_token);
         insertedSuccessfully = true;
       } else if (dbError) {
-        console.warn('Primary leaderboard_entries insert warning:', dbError);
+        console.warn('Primary leaderboard_entries insert error:', dbError.message);
+
+        // Minimal payload fallback if optional columns missing
+        const legacyPayload = {
+          url,
+          name: entryName,
+          bid_cents: IS_FREE_MODE ? 0 : Math.round((bid || 1) * 100),
+          claimed_at: new Date().toISOString(),
+        };
+
+        const { error: legacyErr } = await supabaseAdmin
+          .from('leaderboard_entries')
+          .upsert(legacyPayload, { onConflict: 'url' });
+
+        if (!legacyErr) {
+          console.log('Fallback legacy leaderboard_entries upsert succeeded');
+          insertedSuccessfully = true;
+        } else {
+          console.warn('Legacy leaderboard_entries upsert error:', legacyErr.message);
+        }
       }
-    } catch (e) {
-      console.warn('leaderboard_entries upsert exception:', e);
+    } catch (e: any) {
+      console.warn('leaderboard_entries upsert exception:', e.message);
     }
 
     // Secondary table fallback: listings
@@ -118,17 +137,17 @@ export async function POST(request: NextRequest) {
             },
             { onConflict: 'url' }
           )
-          .select('id, verification_token')
+          .select()
           .maybeSingle();
 
         if (!listingsErr && listingsData) {
-          console.log('Successfully inserted listings record with token:', listingsData.verification_token);
+          console.log('Successfully inserted listings record with token:', verification_token);
           insertedSuccessfully = true;
         } else if (listingsErr) {
-          console.error('Listings insert error:', listingsErr);
+          console.warn('Listings insert notice:', listingsErr.message);
         }
-      } catch (e) {
-        console.warn('Listings upsert exception:', e);
+      } catch (e: any) {
+        console.warn('Listings upsert exception:', e.message);
       }
     }
 
