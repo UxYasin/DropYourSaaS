@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   X,
@@ -16,8 +16,12 @@ import {
   UserCheck,
   Building,
   HelpCircle,
+  Zap,
 } from 'lucide-react';
+import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 import { cn } from '@/lib/utils';
+import { SPONSOR_TIERS, type SponsorTier } from '@/lib/sponsor-tiers';
+import { usePaddlePrices } from '@/hooks/usePaddlePrices';
 
 interface AddStartupModalProps {
   isOpen: boolean;
@@ -73,10 +77,52 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
   const [email, setEmail] = useState('');
   const [selectedUpsell, setSelectedUpsell] = useState<UpsellOption>(null);
 
+  // Dynamic Scarcity & Paddle State
+  const [paddle, setPaddle] = useState<Paddle | null>(null);
+  const [detectedCountry, setDetectedCountry] = useState<string | undefined>();
+  const [activeSponsorTier, setActiveSponsorTier] = useState<SponsorTier>(SPONSOR_TIERS[0]);
+  const [slotsFilled, setSlotsFilled] = useState(0);
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Fetch active sponsor slots & initialize Paddle.js
+  useEffect(() => {
+    if (!isOpen) return;
+
+    fetch('/api/sponsor-slots')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.activeTier) setActiveSponsorTier(data.activeTier);
+        if (data?.slotsFilled !== undefined) setSlotsFilled(data.slotsFilled);
+        if (data?.detectedCountry) setDetectedCountry(data.detectedCountry);
+      })
+      .catch(() => {});
+
+    const clientToken =
+      process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_01m0qcs48f1f7w4w7r8';
+    const env = (process.env.NEXT_PUBLIC_PADDLE_ENV || 'sandbox') as 'sandbox' | 'production';
+
+    initializePaddle({
+      token: clientToken,
+      environment: env,
+      eventCallback: (event) => {
+        if (event.name === 'checkout.completed') {
+          console.log('Paddle checkout completed successfully:', event.data);
+          setSuccess(true);
+          setTimeout(() => {
+            window.location.href = '/thank-you';
+          }, 1000);
+        }
+      },
+    }).then((p) => {
+      if (p) setPaddle(p);
+    });
+  }, [isOpen]);
+
+  const { prices: localizedPrices } = usePaddlePrices(paddle, detectedCountry);
 
   if (!isOpen) return null;
 
@@ -96,40 +142,67 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
     setIsSubmitting(true);
     setError(null);
 
+    const formData = {
+      url: url.trim(),
+      founderName,
+      locationCountry,
+      foundedYear,
+      xHandle,
+      isAnonymous,
+      last30DaysRevenue,
+      mrr,
+      activeSubscriptions,
+      valueProposition,
+      problemSolved,
+      audience,
+      marketCategory,
+      category: marketCategory,
+      pricingModel,
+      teamSize,
+      fundingStatus,
+      techStack,
+      marketingChannels,
+      additionalInfo,
+      isForSale,
+      askingPrice: isForSale ? askingPrice : undefined,
+      ttmRevenue: isForSale ? ttmRevenue : undefined,
+      email: email.trim(),
+      selectedUpsell,
+    };
+
+    // If Side-panel sponsor spot (Paddle Overlay Checkout)
+    if (selectedUpsell === 'sponsor_panel' && paddle) {
+      try {
+        paddle.Checkout.open({
+          settings: {
+            displayMode: 'overlay',
+            variant: 'one-page',
+            successUrl: '/thank-you',
+          },
+          items: [{ priceId: activeSponsorTier.priceId, quantity: 1 }],
+          customData: formData,
+          customer: email.trim() ? { email: email.trim() } : undefined,
+        });
+      } catch (err) {
+        console.warn('Paddle overlay checkout error:', err);
+        setError('Could not open checkout overlay. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // Standard Submit or Polar API route
     try {
       const endpoint = selectedUpsell ? '/api/checkout' : '/api/submit';
-      const body = {
-        url: url.trim(),
-        founderName,
-        locationCountry,
-        foundedYear,
-        xHandle,
-        isAnonymous,
-        last30DaysRevenue,
-        mrr,
-        activeSubscriptions,
-        valueProposition,
-        problemSolved,
-        audience,
-        marketCategory,
-        category: marketCategory,
-        pricingModel,
-        teamSize,
-        fundingStatus,
-        techStack,
-        marketingChannels,
-        additionalInfo,
-        isForSale,
-        askingPrice: isForSale ? askingPrice : undefined,
-        ttmRevenue: isForSale ? ttmRevenue : undefined,
-        email: email.trim(),
-        selectedUpsell,
-      };
 
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          ...formData,
+          priceId: selectedUpsell === 'sponsor_panel' ? activeSponsorTier.priceId : undefined,
+        }),
       });
 
       const data = await res.json();
@@ -159,6 +232,9 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
       setIsSubmitting(false);
     }
   };
+
+  const activeLocalizedPrice =
+    localizedPrices[activeSponsorTier.priceId] || `$${activeSponsorTier.baseUsd}`;
 
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
@@ -523,7 +599,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 <button
                   type="button"
                   onClick={() => setSelectedUpsell(null)}
-                  className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline"
+                  className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline cursor-pointer"
                 >
                   Clear Selection
                 </button>
@@ -591,7 +667,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 </div>
               </div>
 
-              {/* Card 3 ($399) */}
+              {/* Card 3 (Dynamic Scarcity Sponsor Spot) */}
               <div
                 onClick={() =>
                   setSelectedUpsell(selectedUpsell === 'sponsor_panel' ? null : 'sponsor_panel')
@@ -599,16 +675,21 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 className={cn(
                   'relative p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-2',
                   selectedUpsell === 'sponsor_panel'
-                    ? 'bg-blue-500/10 border-blue-500 dark:border-[#08F9C9] ring-2 ring-blue-500/40 dark:ring-[#08F9C9]/40 shadow-lg'
+                    ? 'bg-amber-500/10 border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/40 shadow-lg'
                     : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                    $399
+                  <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <Zap className="size-3 text-amber-500 fill-amber-500" />
+                    {activeLocalizedPrice}
                   </span>
-                  {selectedUpsell === 'sponsor_panel' && (
-                    <CheckCircle2 className="size-4 text-blue-500 dark:text-[#08F9C9]" />
+                  {selectedUpsell === 'sponsor_panel' ? (
+                    <CheckCircle2 className="size-4 text-amber-500" />
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                      {activeSponsorTier.label}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -616,7 +697,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                     Side-panel sponsor spot
                   </h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Put your startup in the sponsor panels across 50,000+ monthly index views.
+                    Put your startup in sponsor panels across 50,000+ views. Price increases as slots fill up!
                   </p>
                 </div>
               </div>
@@ -755,14 +836,12 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                   </>
                 ) : (
                   <span>
-                    {selectedUpsell
-                      ? `Continue to Payment (${
-                          selectedUpsell === 'dofollow'
-                            ? '$19'
-                            : selectedUpsell === 'ai_boost'
-                            ? '$79'
-                            : '$399'
-                        })`
+                    {selectedUpsell === 'sponsor_panel'
+                      ? `Continue to Payment (${activeLocalizedPrice})`
+                      : selectedUpsell === 'dofollow'
+                      ? 'Continue to Payment ($19)'
+                      : selectedUpsell === 'ai_boost'
+                      ? 'Continue to Payment ($79)'
                       : 'Add startup (Free)'}
                   </span>
                 )}
