@@ -28,7 +28,6 @@ create table if not exists leaderboard_entries (
   tech_stack text,
   marketing_channels text,
   additional_info text,
-  paddle_transaction_id text,
   bid_cents integer not null default 0,
   clicks integer not null default 0,
   verification_token text,

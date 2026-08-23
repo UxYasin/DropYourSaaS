@@ -52,7 +52,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-white">3. Purchases and Payments</h2>
             <p>
-              All financial transactions for paid sponsorships are processed securely through our merchant of record, Paddle. By purchasing a placement, you warrant that you are authorized to use the payment method provided. All prices are subject to change based on our dynamic scarcity model.
+              All financial transactions for paid sponsorships are processed securely through our authorized payment processors. By purchasing a placement, you warrant that you are authorized to use the payment method provided. All prices are subject to change based on our dynamic scarcity model.
             </p>
           </section>
 

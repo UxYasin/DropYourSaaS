@@ -66,7 +66,7 @@ export default function RefundsPage() {
               >
                 yasin@dropyoursaas.com
               </a>{' '}
-              with your Paddle transaction ID, registered email, and a clear description of the issue.
+              with your order receipt / transaction ID, registered email, and a clear description of the issue.
             </p>
           </section>
         </div>

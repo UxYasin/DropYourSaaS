@@ -18,10 +18,8 @@ import {
   HelpCircle,
   Zap,
 } from 'lucide-react';
-import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 import { cn } from '@/lib/utils';
 import { SPONSOR_TIERS, type SponsorTier } from '@/lib/sponsor-tiers';
-import { usePaddlePrices } from '@/hooks/usePaddlePrices';
 
 interface AddStartupModalProps {
   isOpen: boolean;
@@ -77,9 +75,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
   const [email, setEmail] = useState('');
   const [selectedUpsell, setSelectedUpsell] = useState<UpsellOption>(null);
 
-  // Dynamic Scarcity & Paddle State
-  const [paddle, setPaddle] = useState<Paddle | null>(null);
-  const [detectedCountry, setDetectedCountry] = useState<string | undefined>();
+  // Dynamic Scarcity Pricing State
   const [activeSponsorTier, setActiveSponsorTier] = useState<SponsorTier>(SPONSOR_TIERS[0]);
   const [slotsFilled, setSlotsFilled] = useState(0);
 
@@ -88,7 +84,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Fetch active sponsor slots & initialize Paddle.js
+  // Fetch active sponsor slots
   useEffect(() => {
     if (!isOpen) return;
 
@@ -97,32 +93,9 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
       .then((data) => {
         if (data?.activeTier) setActiveSponsorTier(data.activeTier);
         if (data?.slotsFilled !== undefined) setSlotsFilled(data.slotsFilled);
-        if (data?.detectedCountry) setDetectedCountry(data.detectedCountry);
       })
       .catch(() => {});
-
-    const clientToken =
-      process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_01m0qcs48f1f7w4w7r8';
-    const env = (process.env.NEXT_PUBLIC_PADDLE_ENV || 'sandbox') as 'sandbox' | 'production';
-
-    initializePaddle({
-      token: clientToken,
-      environment: env,
-      eventCallback: (event: { name: string; data?: any }) => {
-        if (event.name === 'checkout.completed') {
-          console.log('Paddle checkout completed successfully:', event.data);
-          setSuccess(true);
-          setTimeout(() => {
-            window.location.href = '/thank-you';
-          }, 1000);
-        }
-      },
-    }).then((p: Paddle | undefined) => {
-      if (p) setPaddle(p);
-    });
   }, [isOpen]);
-
-  const { prices: localizedPrices } = usePaddlePrices(paddle, detectedCountry);
 
   if (!isOpen) return null;
 
@@ -170,39 +143,14 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
       selectedUpsell,
     };
 
-    // If Side-panel sponsor spot (Paddle Overlay Checkout)
-    if (selectedUpsell === 'sponsor_panel' && paddle) {
-      try {
-        paddle.Checkout.open({
-          settings: {
-            displayMode: 'overlay',
-            variant: 'one-page',
-            successUrl: '/thank-you',
-          },
-          items: [{ priceId: activeSponsorTier.priceId, quantity: 1 }],
-          customData: formData,
-          customer: email.trim() ? { email: email.trim() } : undefined,
-        });
-      } catch (err) {
-        console.warn('Paddle overlay checkout error:', err);
-        setError('Could not open checkout overlay. Please try again.');
-      } finally {
-        setIsSubmitting(false);
-      }
-      return;
-    }
-
-    // Standard Submit or Polar API route
+    // Standard Submit or Checkout API route
     try {
       const endpoint = selectedUpsell ? '/api/checkout' : '/api/submit';
 
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          priceId: selectedUpsell === 'sponsor_panel' ? activeSponsorTier.priceId : undefined,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
@@ -233,8 +181,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
     }
   };
 
-  const activeLocalizedPrice =
-    localizedPrices[activeSponsorTier.priceId] || `$${activeSponsorTier.baseUsd}`;
+  const activePriceDisplay = `$${activeSponsorTier.baseUsd}`;
 
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
@@ -246,47 +193,47 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
           className="absolute top-4 right-4 p-2 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors z-10"
         >
           <X className="size-5" />
-          <span className="sr-only">Close</span>
         </button>
 
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-7">
-          {/* Header */}
-          <div className="space-y-2 border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-[#08F9C9] text-xs font-mono font-bold">
-              <Sparkles className="size-3.5" />
-              Comprehensive Startup Profile
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-              Add your startup
-            </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
-              Showcase your verified product details &amp; metrics to 200,000+ monthly visitors. It&apos;s free!
-            </p>
+        {/* Modal Header */}
+        <div className="p-6 sm:p-8 pb-4 border-b border-zinc-100 dark:border-zinc-800/80 space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold border border-emerald-500/20">
+            <Sparkles className="size-3.5" />
+            Bento Box Manual Data Entry
           </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+            List Your Startup on DropYourSaaS
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            Fill in your product metrics manually below to populate your live startup profile, attract buyers, and gain SEO backlinks.
+          </p>
+        </div>
 
-          {/* Section 1: Founder & Company Info */}
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
+          {/* SECTION 1: Product & Basic Info */}
           <div className="space-y-4">
-            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              <UserCheck className="size-4 text-blue-500" />
-              Section 1: Founder &amp; Company Info
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+              <Globe className="size-4 text-emerald-500" />
+              1. Product &amp; Founder Info
             </h3>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                SaaS / Product URL <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                required
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://yourproject.com"
-                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
-              />
-            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2 space-y-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Website URL <span className="text-amber-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://your-saas.com"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                />
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   Founder Name
                 </label>
@@ -294,104 +241,82 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                   type="text"
                   value={founderName}
                   onChange={(e) => setFounderName(e.target.value)}
-                  placeholder="e.g., Dogan"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="e.g. Alex Rivera"
+                  disabled={isAnonymous}
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-40"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Country / Location
+                  Location / Country
                 </label>
                 <input
                   type="text"
                   value={locationCountry}
                   onChange={(e) => setLocationCountry(e.target.value)}
-                  placeholder="United States"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="e.g. United States, Germany"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   Founded Year
                 </label>
                 <input
-                  type="text"
+                  type="number"
+                  min="2000"
+                  max="2026"
                   value={foundedYear}
                   onChange={(e) => setFoundedYear(e.target.value)}
                   placeholder="2024"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  X Handle (optional)
+                  X (Twitter) Handle
                 </label>
                 <input
                   type="text"
                   value={xHandle}
                   onChange={(e) => setXHandle(e.target.value)}
-                  placeholder="@username"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="@yourhandle"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                 />
               </div>
             </div>
 
-            {/* Anonymous Mode Toggle */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                  Anonymous mode
-                  <span
-                    title="Hide your exact product name and founder details on public directory"
-                    className="cursor-help text-zinc-400 text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800"
-                  >
-                    ?
-                  </span>
-                </div>
-                <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Hide your exact product name and founder details from public index
-                </div>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isAnonymous}
-                onClick={() => setIsAnonymous(!isAnonymous)}
-                className={cn(
-                  'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                  isAnonymous ? 'bg-blue-600' : 'bg-zinc-300 dark:bg-zinc-700'
-                )}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="isAnonymous"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="size-4 rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+              />
+              <label
+                htmlFor="isAnonymous"
+                className="text-xs font-medium text-zinc-600 dark:text-zinc-400 cursor-pointer flex items-center gap-1"
               >
-                <span
-                  className={cn(
-                    'pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out',
-                    isAnonymous ? 'translate-x-5' : 'translate-x-0'
-                  )}
-                />
-              </button>
+                <UserCheck className="size-3.5" />
+                List as Anonymous Founder
+              </label>
             </div>
           </div>
 
-          {/* Section 2: Financial Metrics (Manual) */}
-          <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <div>
-              <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <DollarSign className="size-4 text-emerald-500" />
-                Section 2: Financial Metrics (Manual)
-              </h3>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 italic">
-                Manually verify your current metrics. These will be displayed on your listing profile.
-              </p>
-            </div>
+          {/* SECTION 2: Financial Metrics */}
+          <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+              <DollarSign className="size-4 text-emerald-500" />
+              2. Financial Metrics (Manual Entry)
+            </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   Last 30 Days Revenue ($)
                 </label>
                 <input
@@ -399,281 +324,250 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                   min="0"
                   value={last30DaysRevenue}
                   onChange={(e) => setLast30DaysRevenue(e.target.value)}
-                  placeholder="5400"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                  placeholder="2450"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
-                  Current MRR ($)
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Monthly Recurring (MRR $)
                 </label>
                 <input
                   type="number"
                   min="0"
                   value={mrr}
                   onChange={(e) => setMrr(e.target.value)}
-                  placeholder="1850"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                  placeholder="2100"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
-                  Active Subscriptions
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Active Subscriptions / Customers
                 </label>
                 <input
                   type="number"
                   min="0"
                   value={activeSubscriptions}
                   onChange={(e) => setActiveSubscriptions(e.target.value)}
-                  placeholder="120"
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
+                  placeholder="48"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 3: Product Details (The Bento Box) */}
-          <div className="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              <Building className="size-4 text-purple-500" />
-              Section 3: Product Details (The Bento Box)
+          {/* SECTION 3: Bento Box Product Details */}
+          <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+              <Code2 className="size-4 text-emerald-500" />
+              3. Bento Box Product Details
             </h3>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Value Proposition
-              </label>
-              <textarea
-                rows={2}
-                value={valueProposition}
-                onChange={(e) => setValueProposition(e.target.value)}
-                placeholder="E.g., Uses AI to help users quickly identify gemstones..."
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Problem Solved
-              </label>
-              <textarea
-                rows={2}
-                value={problemSolved}
-                onChange={(e) => setProblemSolved(e.target.value)}
-                placeholder="E.g., People often cannot identify a gemstone without visiting an expert..."
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Target Audience
-              </label>
-              <input
-                type="text"
-                value={audience}
-                onChange={(e) => setAudience(e.target.value)}
-                placeholder="Jewelry owners, collectors, shoppers..."
-                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
+            <div className="space-y-4">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Market Category
-                </label>
-                <select
-                  value={marketCategory}
-                  onChange={(e) => setMarketCategory(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
-                >
-                  {MARKET_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Pricing Model
+                  Core Value Proposition (One-liner)
                 </label>
                 <input
                   type="text"
-                  value={pricingModel}
-                  onChange={(e) => setPricingModel(e.target.value)}
-                  placeholder="Freemium, $15/mo, etc."
-                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  value={valueProposition}
+                  onChange={(e) => setValueProposition(e.target.value)}
+                  placeholder="e.g. AI-powered copywriter that generates high-converting landing page headlines."
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Team Size
-                </label>
-                <select
-                  value={teamSize}
-                  onChange={(e) => setTeamSize(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
-                >
-                  {TEAM_SIZES.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Problem Solved
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={problemSolved}
+                    onChange={(e) => setProblemSolved(e.target.value)}
+                    placeholder="What painful problem does your software solve for users?"
+                    className="w-full p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Target Audience / ICP
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={audience}
+                    onChange={(e) => setAudience(e.target.value)}
+                    placeholder="Who is your primary customer? (e.g. Solopreneurs, Marketing Agencies)"
+                    className="w-full p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all resize-none"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Funding
-                </label>
-                <select
-                  value={fundingStatus}
-                  onChange={(e) => setFundingStatus(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
-                >
-                  {FUNDING_STATUSES.map((fund) => (
-                    <option key={fund} value={fund}>
-                      {fund}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Market Category
+                  </label>
+                  <select
+                    value={marketCategory}
+                    onChange={(e) => setMarketCategory(e.target.value)}
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                  >
+                    {MARKET_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Team Size
+                  </label>
+                  <select
+                    value={teamSize}
+                    onChange={(e) => setTeamSize(e.target.value)}
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                  >
+                    {TEAM_SIZES.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Funding Status
+                  </label>
+                  <select
+                    value={fundingStatus}
+                    onChange={(e) => setFundingStatus(e.target.value)}
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+                  >
+                    {FUNDING_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tech Stack
-              </label>
-              <input
-                type="text"
-                value={techStack}
-                onChange={(e) => setTechStack(e.target.value)}
-                placeholder="Next.js, React Native, Supabase (comma separated)"
-                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-mono"
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Tech Stack Keywords
+                  </label>
+                  <input
+                    type="text"
+                    value={techStack}
+                    onChange={(e) => setTechStack(e.target.value)}
+                    placeholder="Next.js, Supabase, Tailwind, OpenAI"
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                  />
+                </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Marketing Channels
-              </label>
-              <input
-                type="text"
-                value={marketingChannels}
-                onChange={(e) => setMarketingChannels(e.target.value)}
-                placeholder="Meta Ads, SEO, X/Twitter (comma separated)"
-                className="w-full h-10 px-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Additional Info (Optional)
-              </label>
-              <textarea
-                rows={2}
-                value={additionalInfo}
-                onChange={(e) => setAdditionalInfo(e.target.value)}
-                placeholder="Expansion areas, ASO strategies, etc."
-                className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-              />
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Primary Marketing Channels
+                  </label>
+                  <input
+                    type="text"
+                    value={marketingChannels}
+                    onChange={(e) => setMarketingChannels(e.target.value)}
+                    placeholder="X / Twitter, Cold Outreach, SEO, ProductHunt"
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-xs placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Paid Upsell Section */}
-          <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <TrendingUp className="size-4 text-amber-500" />
-                Boost Your Visibility (Optional Upsells)
-              </h3>
-              {selectedUpsell && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedUpsell(null)}
-                  className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline cursor-pointer"
-                >
-                  Clear Selection
-                </button>
-              )}
-            </div>
+          {/* SECTION 4: Boost & Placement Options */}
+          <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 flex items-center gap-2">
+              <TrendingUp className="size-4 text-emerald-500" />
+              4. Boost &amp; Placement Options (Optional)
+            </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Card 1 ($19) */}
+              {/* Option 1: Dofollow Backlink */}
               <div
                 onClick={() =>
                   setSelectedUpsell(selectedUpsell === 'dofollow' ? null : 'dofollow')
                 }
                 className={cn(
-                  'relative p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-2',
+                  'p-4 rounded-2xl border cursor-pointer transition-all space-y-2 relative',
                   selectedUpsell === 'dofollow'
-                    ? 'bg-blue-500/10 border-blue-500 dark:border-[#08F9C9] ring-2 ring-blue-500/40 dark:ring-[#08F9C9]/40 shadow-lg'
+                    ? 'bg-blue-500/10 border-blue-500 ring-2 ring-blue-500/30'
                     : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-[#08F9C9]">
-                    $19
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                    +$19
                   </span>
                   {selectedUpsell === 'dofollow' && (
-                    <CheckCircle2 className="size-4 text-blue-500 dark:text-[#08F9C9]" />
+                    <CheckCircle2 className="size-4 text-blue-500" />
                   )}
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white leading-snug">
-                    Dofollow link · DA 69
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
+                    SEO Dofollow Backlink
                   </h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Build trust with a verified revenue profile &amp; permanent SEO backlink.
+                    Pass full domain authority to your SaaS with a permanent dofollow link.
                   </p>
                 </div>
               </div>
 
-              {/* Card 2 ($79) */}
+              {/* Option 2: AI Spotlight */}
               <div
                 onClick={() =>
                   setSelectedUpsell(selectedUpsell === 'ai_boost' ? null : 'ai_boost')
                 }
                 className={cn(
-                  'relative p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-2',
+                  'p-4 rounded-2xl border cursor-pointer transition-all space-y-2 relative',
                   selectedUpsell === 'ai_boost'
-                    ? 'bg-blue-500/10 border-blue-500 dark:border-[#08F9C9] ring-2 ring-blue-500/40 dark:ring-[#08F9C9]/40 shadow-lg'
+                    ? 'bg-purple-500/10 border-purple-500 ring-2 ring-purple-500/30'
                     : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-[#08F9C9]">
-                    $79
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                    +$79
                   </span>
                   {selectedUpsell === 'ai_boost' && (
-                    <CheckCircle2 className="size-4 text-blue-500 dark:text-[#08F9C9]" />
+                    <CheckCircle2 className="size-4 text-purple-500" />
                   )}
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white leading-snug">
-                    AI visibility boost
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
+                    Featured AI Spotlight
                   </h4>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed">
-                    Give ChatGPT, Claude, and AI assistants a verified profile to recommend your SaaS.
+                    Pin your startup at the top of category feeds for 30 days.
                   </p>
                 </div>
               </div>
 
-              {/* Card 3 (Dynamic Scarcity Sponsor Spot) */}
+              {/* Option 3: Side-Panel Sponsor Spot */}
               <div
                 onClick={() =>
-                  setSelectedUpsell(selectedUpsell === 'sponsor_panel' ? null : 'sponsor_panel')
+                  setSelectedUpsell(
+                    selectedUpsell === 'sponsor_panel' ? null : 'sponsor_panel'
+                  )
                 }
                 className={cn(
-                  'relative p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between space-y-2',
+                  'p-4 rounded-2xl border cursor-pointer transition-all space-y-2 relative',
                   selectedUpsell === 'sponsor_panel'
                     ? 'bg-amber-500/10 border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/40 shadow-lg'
                     : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
@@ -682,7 +576,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center gap-1">
                     <Zap className="size-3 text-amber-500 fill-amber-500" />
-                    {activeLocalizedPrice}
+                    {activePriceDisplay}
                   </span>
                   {selectedUpsell === 'sponsor_panel' ? (
                     <CheckCircle2 className="size-4 text-amber-500" />
@@ -837,7 +731,7 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                 ) : (
                   <span>
                     {selectedUpsell === 'sponsor_panel'
-                      ? `Continue to Payment (${activeLocalizedPrice})`
+                      ? `Continue to Payment (${activePriceDisplay})`
                       : selectedUpsell === 'dofollow'
                       ? 'Continue to Payment ($19)'
                       : selectedUpsell === 'ai_boost'

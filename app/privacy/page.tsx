@@ -49,7 +49,7 @@ export default function PrivacyPage() {
                 <strong className="text-white">Voluntary Data:</strong> When you submit your startup or buy an ad slot, we collect your email address, startup name, website URL, description, and optional social handles.
               </li>
               <li>
-                <strong className="text-white">Transaction Data:</strong> Payment details are handled securely and directly by our Merchant of Record, Paddle. We never store or process raw credit card numbers on our servers.
+                <strong className="text-white">Transaction Data:</strong> Payment details are handled securely and directly by our payment processors. We never store or process raw credit card numbers on our servers.
               </li>
               <li>
                 <strong className="text-white">Log Files &amp; Analytics:</strong> Standard internet log data including IP addresses, browser types, and referral pages to monitor site performance and security.
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-white">3. How We Use Your Information</h2>
             <p>
-              We use collected information to operate the directory, display your startup listing, process secure transactions via Paddle, and send operational updates regarding your submission.
+              We use collected information to operate the directory, display your startup listing, process secure transactions, and send operational updates regarding your submission.
             </p>
           </section>
 
