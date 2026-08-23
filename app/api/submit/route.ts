@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
       await resend.emails.send({
-        from: 'DropYourSaaS <indexing@dropyoursaas.com>',
+        from: 'onboarding@resend.dev',
         to: [email],
         subject: `Verify & Activate Your SaaS Listing: ${entryName}`,
         html: `
