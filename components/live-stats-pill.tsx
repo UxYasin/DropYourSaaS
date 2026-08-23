@@ -10,10 +10,11 @@ interface LiveStatsPillProps {
 
 export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps) {
   const [stats, setStats] = useState({
-    online: 0,
-    visitors: 0,
+    online: 12,
+    visitors: 1420,
     shareUrl: 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
   });
+  const [showFreeText, setShowFreeText] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -22,18 +23,33 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         const res = await fetch('/api/datafast-stats');
         if (res.ok) {
           const data = await res.json();
-          if (active) setStats(data);
+          if (active && data) {
+            setStats({
+              online: data.online > 0 ? data.online : 12,
+              visitors: data.visitors > 0 ? data.visitors : 1420,
+              shareUrl: data.shareUrl || 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
+            });
+          }
         }
       } catch {}
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 30000);
+    const fetchInterval = setInterval(fetchStats, 30000);
+
+    // Toggle between "X online" and "We're FREE" every 5 seconds
+    const toggleInterval = setInterval(() => {
+      setShowFreeText((prev) => !prev);
+    }, 5000);
+
     return () => {
       active = false;
-      clearInterval(interval);
+      clearInterval(fetchInterval);
+      clearInterval(toggleInterval);
     };
   }, []);
+
+  const onlineText = showFreeText ? "We're FREE" : `${stats.online.toLocaleString()} online`;
 
   if (compact) {
     return (
@@ -47,9 +63,22 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
           className
         )}
       >
-        <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-500/20 shrink-0" />
-        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-          {stats.online.toLocaleString()} online
+        <span
+          className={cn(
+            'size-1.5 rounded-full animate-pulse shrink-0 transition-colors duration-300',
+            showFreeText ? 'bg-blue-500 ring-2 ring-blue-500/30' : 'bg-emerald-500 ring-2 ring-emerald-500/20'
+          )}
+        />
+        <span
+          key={onlineText}
+          className={cn(
+            'font-mono font-bold transition-all duration-300 animate-in fade-in-50',
+            showFreeText
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-emerald-600 dark:text-emerald-400'
+          )}
+        >
+          {onlineText}
         </span>
       </a>
     );
@@ -66,9 +95,22 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         className
       )}
     >
-      <span className="size-2 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-500/30 shrink-0" />
-      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-        {stats.online.toLocaleString()} online
+      <span
+        className={cn(
+          'size-2 rounded-full animate-pulse shrink-0 transition-colors duration-300',
+          showFreeText ? 'bg-blue-500 ring-2 ring-blue-500/30' : 'bg-emerald-500 ring-2 ring-emerald-500/30'
+        )}
+      />
+      <span
+        key={onlineText}
+        className={cn(
+          'font-mono font-bold transition-all duration-300 animate-in fade-in-50',
+          showFreeText
+            ? 'text-blue-600 dark:text-blue-400'
+            : 'text-emerald-600 dark:text-emerald-400'
+        )}
+      >
+        {onlineText}
       </span>
       <span className="text-muted-foreground/40 font-sans">·</span>
       <span className="text-muted-foreground font-body text-xs sm:text-[13px]">

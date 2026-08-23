@@ -151,9 +151,8 @@ export function SetPasswordModal({ isOpen, onClose }: SetPasswordModalProps) {
           <div className="pt-2 flex items-center gap-3">
             <Button
               type="button"
-              variant="outline"
               onClick={onClose}
-              className="w-1/3 rounded-full border-zinc-800 text-zinc-300 hover:bg-zinc-900 font-sans text-xs h-11"
+              className="w-1/3 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white font-sans font-bold text-xs h-11 transition-colors flex items-center justify-center shrink-0"
             >
               Cancel
             </Button>
