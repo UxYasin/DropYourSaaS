@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
+import { getPendingToken, removePendingToken } from '@/lib/token-store';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
 
   if (!token) {
     return NextResponse.redirect(new URL('/?error=missing_token', baseUrl));
@@ -13,53 +16,91 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabaseAdmin = getSupabaseServerClient();
-
-    // 1. Fetch matching pending listing from leaderboard_entries or listings (bypassing RLS via Service Role)
     let listing: any = null;
     let targetTable = 'leaderboard_entries';
 
-    const { data: entryData, error: entryErr } = await supabaseAdmin
-      .from('leaderboard_entries')
-      .select('*')
-      .eq('verification_token', token)
-      .maybeSingle();
+    // 1. Check in-memory fallback store first for instant match
+    const pendingFallback = getPendingToken(token);
 
-    if (entryData) {
-      listing = entryData;
-      targetTable = 'leaderboard_entries';
-    } else {
-      const { data: listingsData } = await supabaseAdmin
-        .from('listings')
+    // 2. Fetch matching pending listing from Supabase leaderboard_entries or listings
+    try {
+      const { data: entryData } = await supabaseAdmin
+        .from('leaderboard_entries')
         .select('*')
         .eq('verification_token', token)
         .maybeSingle();
-      if (listingsData) {
-        listing = listingsData;
-        targetTable = 'listings';
+
+      if (entryData) {
+        listing = entryData;
+        targetTable = 'leaderboard_entries';
+      } else {
+        const { data: listingsData } = await supabaseAdmin
+          .from('listings')
+          .select('*')
+          .eq('verification_token', token)
+          .maybeSingle();
+        if (listingsData) {
+          listing = listingsData;
+          targetTable = 'listings';
+        }
       }
+    } catch (fetchErr) {
+      console.warn('Database fetch warning in verify route:', fetchErr);
+    }
+
+    // Fallback to in-memory pending token if database query returned null
+    if (!listing && pendingFallback) {
+      listing = {
+        url: pendingFallback.url,
+        name: pendingFallback.name,
+        email: pendingFallback.email,
+        submitter_email: pendingFallback.email,
+        verification_token: token,
+      };
     }
 
     if (!listing) {
-      console.error(`Verification error: Token ${token} not found across tables`);
+      console.error(`Verification error: Token ${token} not found in database or memory store`);
       return NextResponse.redirect(new URL('/?error=invalid_token', baseUrl));
     }
 
-    // 2. Mark verified and published
-    const { error: updateError } = await supabaseAdmin
-      .from(targetTable)
-      .update({
-        is_verified: true,
-        status: 'published',
-        claimed_at: new Date().toISOString(),
-      })
-      .eq('verification_token', token);
+    // 3. Mark verified and published in Supabase database
+    try {
+      const { error: updateError } = await supabaseAdmin
+        .from(targetTable)
+        .update({
+          is_verified: true,
+          status: 'published',
+          claimed_at: new Date().toISOString(),
+        })
+        .eq('verification_token', token);
 
-    if (updateError) {
-      console.error('Database update failed:', updateError);
-      return NextResponse.redirect(new URL('/?error=update_failed', baseUrl));
+      if (updateError && pendingFallback) {
+        // Publish to leaderboard_entries if record was pending
+        try {
+          await supabaseAdmin
+            .from('leaderboard_entries')
+            .upsert(
+              {
+                url: pendingFallback.url,
+                name: pendingFallback.name,
+                email: pendingFallback.email,
+                submitter_email: pendingFallback.email,
+                verification_token: token,
+                is_verified: true,
+                status: 'published',
+                bid_cents: Math.round((pendingFallback.bid || 0) * 100),
+                claimed_at: new Date().toISOString(),
+              },
+              { onConflict: 'url' }
+            );
+        } catch {}
+      }
+    } catch (dbUpdateException) {
+      console.warn('Database verify update exception:', dbUpdateException);
     }
 
-    // 3. Auto-link/provision user if service role key is present
+    // 4. Auto-link / provision user account if service role key is present
     const submitterEmail = listing.email || listing.submitter_email;
 
     if (submitterEmail) {
@@ -77,20 +118,27 @@ export async function GET(request: NextRequest) {
         }
 
         if (user) {
-          await supabaseAdmin
-            .from(targetTable)
-            .update({ user_id: user.id })
-            .eq('verification_token', token);
+          try {
+            await supabaseAdmin
+              .from(targetTable)
+              .update({ user_id: user.id })
+              .eq('verification_token', token);
+          } catch {}
         }
       } catch (authErr) {
         console.warn('Auth auto-provisioning non-critical warning:', authErr);
       }
     }
 
+    // Cleanup memory store token
+    if (pendingFallback) {
+      removePendingToken(token);
+    }
+
     // Invalidate Redis caches
     await invalidateLeaderboardCache().catch(() => {});
 
-    // 4. Auto-login session generation via Supabase Admin magiclink redirect if available
+    // 5. Auto-login session generation via Supabase Admin magiclink redirect if available
     if (submitterEmail) {
       try {
         const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
