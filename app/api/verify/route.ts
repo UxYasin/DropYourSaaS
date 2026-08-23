@@ -5,7 +5,8 @@ import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
+  const siteUrl = baseUrl;
 
   if (!token) {
     return NextResponse.redirect(`${siteUrl}/?error=missing_token`);

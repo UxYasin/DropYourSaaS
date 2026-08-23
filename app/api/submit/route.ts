@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Generate verification_token & status: 'pending_verification'
+    // 2. Generate verification_token & dynamic baseUrl resolution
     const verificationToken = crypto.randomUUID();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const verifyUrl = `${siteUrl}/api/verify?token=${verificationToken}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
+    const verifyUrl = `${baseUrl}/api/verify?token=${verificationToken}`;
 
     // Save listing into database
     const { error: dbError } = await supabase
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // 3. Dispatch transactional email via Resend
+    // 3. Dispatch transactional email via Resend (Clean Light Mode Layout)
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
@@ -97,26 +97,19 @@ export async function POST(request: NextRequest) {
               <meta charset="utf-8">
               <title>Verify Listing</title>
             </head>
-            <body style="background-color: #000000; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; margin: 0;">
-              <div style="max-width: 560px; margin: 0 auto; background-color: #09090b; border: 1px solid #27272a; border-radius: 20px; padding: 36px; text-align: center;">
-                <div style="margin-bottom: 24px;">
-                  <h1 style="font-size: 24px; font-weight: 800; color: #ffffff; margin: 0 0 8px 0; letter-spacing: -0.5px;">
-                    Verify Your SaaS Listing
-                  </h1>
-                  <p style="font-size: 14px; color: #a1a1aa; margin: 0; line-height: 1.6;">
-                    Click below to confirm your ownership of <strong>${entryName}</strong> and activate your instant directory indexing slot.
-                  </p>
-                </div>
-
-                <div style="margin: 32px 0;">
-                  <a href="${verifyUrl}" target="_blank" style="background-color: #0066FF; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 14px; display: inline-block; border: 1px solid #3b82f6; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);">
-                    Verify Listing &amp; Activate Index
-                  </a>
-                </div>
-
-                <p style="font-size: 12px; color: #71717a; margin-top: 32px; border-t: 1px solid #18181b; padding-top: 20px;">
-                  Or copy and paste this verification URL into your browser:<br>
-                  <a href="${verifyUrl}" style="color: #60a5fa; text-decoration: underline; word-break: break-all;">${verifyUrl}</a>
+            <body style="background-color: #f4f4f5; padding: 20px 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+              <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 32px; max-width: 480px; margin: 40px auto;">
+                <img src="${baseUrl}/icon.png" alt="DropYourSaaS" width="48" height="48" style="display:block; margin:0 auto 20px auto; border-radius:8px;" />
+                <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Verify Your SaaS Listing</h2>
+                <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
+                  Click below to confirm your ownership of <strong>${entryName}</strong> and activate your instant directory indexing slot.
+                </p>
+                <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
+                  Verify Listing &amp; Activate Index
+                </a>
+                <p style="color: #71717a; font-size: 12px; text-align: center; word-break: break-all; margin: 0;">
+                  Or copy and paste this link: <br/>
+                  <a href="${verifyUrl}" style="color: #2563eb;">${verifyUrl}</a>
                 </p>
               </div>
             </body>
@@ -138,9 +131,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Verification link sent to your email! Please check your inbox.',
-      verifyUrl, // included for local development testing
+      verifyUrl,
     });
   } catch (err: any) {
+    console.error('Submit route error:', err);
     return NextResponse.json(
       { error: err.message || 'Internal server error' },
       { status: 500 }
