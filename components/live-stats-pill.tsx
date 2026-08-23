@@ -10,11 +10,10 @@ interface LiveStatsPillProps {
 
 export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps) {
   const [stats, setStats] = useState({
-    online: 12,
-    visitors: 1420,
+    online: 0,
+    visitors: 0,
     shareUrl: 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
   });
-  const [showFreeText, setShowFreeText] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -25,8 +24,8 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
           const data = await res.json();
           if (active && data) {
             setStats({
-              online: data.online > 0 ? data.online : 12,
-              visitors: data.visitors > 0 ? data.visitors : 1420,
+              online: typeof data.online === 'number' ? data.online : 0,
+              visitors: typeof data.visitors === 'number' ? data.visitors : 0,
               shareUrl: data.shareUrl || 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
             });
           }
@@ -37,20 +36,13 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
     fetchStats();
     const fetchInterval = setInterval(fetchStats, 30000);
 
-    // Toggle between "X online" and "We're FREE" every 5 seconds
-    const toggleInterval = setInterval(() => {
-      setShowFreeText((prev) => !prev);
-    }, 5000);
-
     return () => {
       active = false;
       clearInterval(fetchInterval);
-      clearInterval(toggleInterval);
     };
   }, []);
 
-  const onlineText = showFreeText ? "We're FREE" : `${stats.online.toLocaleString()} online`;
-
+  // Header navigation pill (compact mode): Displays "We're FREE"
   if (compact) {
     return (
       <a
@@ -59,31 +51,17 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         rel="noopener noreferrer"
         title="View public analytics on DataFast"
         className={cn(
-          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-border/80 bg-muted/40 hover:bg-muted/70 text-[11px] text-muted-foreground transition-all duration-150 shadow-xs hover:border-emerald-500/40 whitespace-nowrap shrink-0',
+          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 transition-all duration-150 shadow-xs whitespace-nowrap shrink-0',
           className
         )}
       >
-        <span
-          className={cn(
-            'size-1.5 rounded-full animate-pulse shrink-0 transition-colors duration-300',
-            showFreeText ? 'bg-blue-500 ring-2 ring-blue-500/30' : 'bg-emerald-500 ring-2 ring-emerald-500/20'
-          )}
-        />
-        <span
-          key={onlineText}
-          className={cn(
-            'font-mono font-bold transition-all duration-300 animate-in fade-in-50',
-            showFreeText
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-emerald-600 dark:text-emerald-400'
-          )}
-        >
-          {onlineText}
-        </span>
+        <span className="size-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
+        <span>We&apos;re FREE</span>
       </a>
     );
   }
 
+  // Hero section pill: Displays real live traffic from DataFast API without text toggle animation
   return (
     <a
       href={stats.shareUrl}
@@ -95,22 +73,9 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         className
       )}
     >
-      <span
-        className={cn(
-          'size-2 rounded-full animate-pulse shrink-0 transition-colors duration-300',
-          showFreeText ? 'bg-blue-500 ring-2 ring-blue-500/30' : 'bg-emerald-500 ring-2 ring-emerald-500/30'
-        )}
-      />
-      <span
-        key={onlineText}
-        className={cn(
-          'font-mono font-bold transition-all duration-300 animate-in fade-in-50',
-          showFreeText
-            ? 'text-blue-600 dark:text-blue-400'
-            : 'text-emerald-600 dark:text-emerald-400'
-        )}
-      >
-        {onlineText}
+      <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
+      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+        {stats.online.toLocaleString()} online
       </span>
       <span className="text-muted-foreground/40 font-sans">·</span>
       <span className="text-muted-foreground font-body text-xs sm:text-[13px]">
