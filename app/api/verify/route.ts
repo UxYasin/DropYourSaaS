@@ -7,10 +7,11 @@ import { getPendingToken, removePendingToken } from '@/lib/token-store';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
+  const origin =
+    process.env.NODE_ENV === 'production'
+      ? 'https://dropyoursaas.com'
+      : (process.env.NEXT_PUBLIC_APP_URL || 'https://dropyoursaas.com');
+  const baseUrl = origin;
 
   if (!token) {
     return NextResponse.redirect(new URL('/?error=missing_token', baseUrl));

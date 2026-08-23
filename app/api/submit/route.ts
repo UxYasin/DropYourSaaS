@@ -133,11 +133,11 @@ export async function POST(request: NextRequest) {
 
     // CASE B: Guest / First-time User (isAlreadyVerified === false)
     const verification_token = crypto.randomUUID();
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://dropyoursaas.com');
-    const verifyUrl = `${baseUrl}/api/verify?token=${verification_token}`;
+    const origin =
+      process.env.NODE_ENV === 'production'
+        ? 'https://dropyoursaas.com'
+        : (process.env.NEXT_PUBLIC_APP_URL || 'https://dropyoursaas.com');
+    const verifyUrl = `${origin}/api/verify?token=${verification_token}`;
 
     savePendingToken(verification_token, {
       url,
@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
             </head>
             <body style="background-color: #f4f4f5; padding: 20px 0; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
               <div style="background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 32px; max-width: 480px; margin: 40px auto;">
-                <img src="${baseUrl}/icon.png" alt="DropYourSaaS" width="48" height="48" style="display:block; margin:0 auto 20px auto; border-radius:8px;" />
+                <img src="https://dropyoursaas.com/logo.png" alt="DropYourSaaS" width="48" height="48" style="display: block; margin: 0 auto 16px auto; width: 48px; height: 48px; object-fit: contain;" />
                 <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Verify Your SaaS Listing</h2>
                 <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
                   Click below to confirm your ownership of <strong>${entryName}</strong> and activate your instant directory indexing slot.
