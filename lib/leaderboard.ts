@@ -2,7 +2,7 @@ import { redis } from '@/lib/redis';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { leaderboardItems as seedLeaderboardItems, type LeaderboardItem } from '@/lib/leaderboard-data';
 
-const CACHE_KEY = 'leaderboard:v3';
+const CACHE_KEY = 'leaderboard:v4';
 const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for ultra-fast live real-time updates
 
 export async function getLeaderboard(category?: string): Promise<LeaderboardItem[]> {
@@ -22,7 +22,7 @@ export async function getLeaderboard(category?: string): Promise<LeaderboardItem
 }
 
 export async function getTrendingLeaderboard(limit = 5): Promise<LeaderboardItem[]> {
-  const cacheKey = `leaderboard:trending:v3:${limit}`;
+  const cacheKey = `leaderboard:trending:v4:${limit}`;
   try {
     const cached = await redis.get<LeaderboardItem[]>(cacheKey);
     if (cached && Array.isArray(cached) && cached.length > 0) return cached;
@@ -39,7 +39,7 @@ export async function getTrendingLeaderboard(limit = 5): Promise<LeaderboardItem
 }
 
 export async function getRecentSubmissions(limit = 5): Promise<LeaderboardItem[]> {
-  const cacheKey = `leaderboard:recent:v3:${limit}`;
+  const cacheKey = `leaderboard:recent:v4:${limit}`;
   try {
     const cached = await redis.get<LeaderboardItem[]>(cacheKey);
     if (cached && Array.isArray(cached) && cached.length > 0) return cached;
@@ -60,12 +60,9 @@ export async function invalidateLeaderboardCache() {
     await redis.del(CACHE_KEY);
     await redis.del('leaderboard:v1');
     await redis.del('leaderboard:v2');
-    await redis.del('leaderboard:trending:v1:5');
-    await redis.del('leaderboard:recent:v1:5');
-    await redis.del('leaderboard:trending:v2:5');
-    await redis.del('leaderboard:recent:v2:5');
-    await redis.del('leaderboard:trending:v3:5');
-    await redis.del('leaderboard:recent:v3:5');
+    await redis.del('leaderboard:v3');
+    await redis.del('leaderboard:trending:v4:5');
+    await redis.del('leaderboard:recent:v4:5');
   } catch {}
 }
 
@@ -99,7 +96,10 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
       query = query.ilike('category', `%${category}%`);
     }
 
-    const { data: entryData } = await query.order('claimed_at', { ascending: false });
+    // Order strictly by rank ascending, then claimed_at descending
+    const { data: entryData } = await query
+      .order('rank', { ascending: true, nullsFirst: false })
+      .order('claimed_at', { ascending: false });
 
     if (entryData && entryData.length > 0) {
       dbEntries = entryData;
@@ -113,7 +113,9 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
         listingQuery = listingQuery.ilike('category', `%${category}%`);
       }
 
-      const { data: listingData } = await listingQuery.order('claimed_at', { ascending: false });
+      const { data: listingData } = await listingQuery
+        .order('rank', { ascending: true, nullsFirst: false })
+        .order('claimed_at', { ascending: false });
 
       if (listingData && listingData.length > 0) {
         dbEntries = listingData;
@@ -123,8 +125,12 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
     console.warn('Error loading live Supabase listings:', err);
   }
 
-  // Map real DB entries to LeaderboardItem
-  const realItems: LeaderboardItem[] = dbEntries.map((row, idx) => {
+  // Build a map of items by their assigned rank
+  const realItemsMap = new Map<number, LeaderboardItem>();
+  const realUrlSet = new Set<string>();
+  const unrankedItems: LeaderboardItem[] = [];
+
+  dbEntries.forEach((row) => {
     let hostname = 'SaaS Product';
     try {
       hostname = row.url ? new URL(row.url).hostname.replace(/^www\./, '') : 'SaaS Product';
@@ -132,41 +138,66 @@ export async function fetchLeaderboardFromDatabase(category?: string): Promise<L
       hostname = row.url || 'SaaS Product';
     }
 
-    return {
-      rank: idx + 1,
+    const assignedRank = Number(row.rank || row.target_rank) || 0;
+    const item: LeaderboardItem = {
+      rank: assignedRank,
       name: row.name || row.title || hostname,
       bid: (row.bid_cents || 0) / 100,
       url: row.url,
       clicks: row.clicks || 0,
       time: formatRelativeTime(row.claimed_at || row.created_at || new Date().toISOString()),
     };
+
+    if (row.url) {
+      realUrlSet.add(row.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
+    }
+
+    if (assignedRank > 0 && !realItemsMap.has(assignedRank)) {
+      realItemsMap.set(assignedRank, item);
+    } else {
+      unrankedItems.push(item);
+    }
   });
 
-  // Fill remaining spots up to 20 with seed items if database entries are fewer than 20
-  const merged: LeaderboardItem[] = [...realItems];
-  const urlSet = new Set(
-    realItems
-      .filter((i) => i.url)
-      .map((i) => i.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''))
-  );
+  // Assemble full sequential array
+  const result: LeaderboardItem[] = [];
+  const maxRank = Math.max(20, ...Array.from(realItemsMap.keys()));
 
   let seedIdx = 0;
-  while (merged.length < 20 && seedIdx < seedLeaderboardItems.length) {
-    const seed = seedLeaderboardItems[seedIdx];
-    const seedNorm = seed.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+  let unrankedIdx = 0;
 
-    if (!urlSet.has(seedNorm)) {
-      merged.push({
-        ...seed,
-        rank: merged.length + 1,
-      });
-      urlSet.add(seedNorm);
+  for (let r = 1; r <= maxRank; r++) {
+    if (realItemsMap.has(r)) {
+      result.push({ ...realItemsMap.get(r)!, rank: r });
+    } else if (unrankedIdx < unrankedItems.length) {
+      result.push({ ...unrankedItems[unrankedIdx], rank: r });
+      unrankedIdx++;
+    } else {
+      // Fill empty slot with seed item
+      while (seedIdx < seedLeaderboardItems.length) {
+        const seed = seedLeaderboardItems[seedIdx];
+        const seedNorm = seed.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+        seedIdx++;
+        if (!realUrlSet.has(seedNorm)) {
+          result.push({
+            ...seed,
+            rank: r,
+          });
+          realUrlSet.add(seedNorm);
+          break;
+        }
+      }
     }
-    seedIdx++;
   }
 
-  // Ensure clean sequential ranks 1..N
-  return merged.map((item, idx) => ({
+  // Append any remaining unranked items
+  while (unrankedIdx < unrankedItems.length) {
+    result.push({ ...unrankedItems[unrankedIdx], rank: result.length + 1 });
+    unrankedIdx++;
+  }
+
+  // Return clean sequential ranks 1..N
+  return result.map((item, idx) => ({
     ...item,
     rank: idx + 1,
   }));

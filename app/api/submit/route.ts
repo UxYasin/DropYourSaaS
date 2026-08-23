@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const entryName = title || name || parsedDomain || 'SaaS Product';
-    const targetRank = requestedRank || selectedRank || 1;
+    const targetRank = Math.max(1, Number(requestedRank || selectedRank || 1));
     const isMarketplaceListing = Boolean(isForSale);
     const supabaseAdmin = getSupabaseServerClient();
 
@@ -69,7 +69,6 @@ export async function POST(request: NextRequest) {
     const parsedLast30DaysRevenue = Number(last30DaysRevenue) || 0;
     const parsedActiveSubscriptions = Number(activeSubscriptions) || 0;
     const resolvedCategory = marketCategory || category || 'SaaS';
-    // Always ensure bid_cents >= 100 to pass database CHECK (bid_cents > 0) constraint
     const calculatedBidCents = Math.max(100, Math.round((Number(bid) || 1) * 100));
 
     // 1. Dual 24-Hour Cooldown (by Email and Domain)
@@ -98,13 +97,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 2. Rank displacement logic: Shift existing listings with rank >= targetRank down by +1
+    try {
+      const { data: existingToShift } = await supabaseAdmin
+        .from('leaderboard_entries')
+        .select('id, rank')
+        .gte('rank', targetRank)
+        .neq('url', formattedUrl)
+        .order('rank', { ascending: false });
+
+      if (existingToShift && existingToShift.length > 0) {
+        for (const item of existingToShift) {
+          const newRank = item.rank + 1;
+          await supabaseAdmin
+            .from('leaderboard_entries')
+            .update({ rank: newRank, target_rank: newRank })
+            .eq('id', item.id);
+        }
+      }
+    } catch (shiftErr) {
+      console.warn('Rank shift notice:', shiftErr);
+    }
+
     // CASE A: Standard Directory Listing (isForSale === false)
     if (!isMarketplaceListing) {
-      console.log(`Standard directory listing for ${formattedUrl}. Publishing live immediately.`);
+      console.log(`Standard directory listing for ${formattedUrl} claiming position #${targetRank}.`);
 
       const submitterEmail = email ? email.trim() : 'guest@dropyoursaas.com';
 
-      // Primary core payload matching exact Supabase column schema
       const corePayload = {
         url: formattedUrl,
         name: entryName,
@@ -127,11 +147,12 @@ export async function POST(request: NextRequest) {
 
       if (upsertErr) {
         console.error('Supabase leaderboard_entries upsert error:', upsertErr.message);
-        // Try fallback without rank/target_rank if constraint error occurs
         const fallbackPayload = {
           url: formattedUrl,
           name: entryName,
           bid_cents: calculatedBidCents,
+          rank: targetRank,
+          target_rank: targetRank,
           is_verified: true,
           status: 'published',
           claimed_at: new Date().toISOString(),
@@ -155,7 +176,7 @@ export async function POST(request: NextRequest) {
         success: true,
         verified: true,
         immediate: true,
-        message: 'Listing published immediately!',
+        message: `Listing published immediately at position #${targetRank}!`,
       });
     }
 
@@ -210,7 +231,7 @@ export async function POST(request: NextRequest) {
       target_rank: targetRank,
       rank: targetRank,
       verification_token: verification_token,
-      status: 'published', // In free mode, publish live immediately!
+      status: 'published',
       is_verified: true,
       is_for_sale: true,
       claimed_at: new Date().toISOString(),
@@ -224,7 +245,7 @@ export async function POST(request: NextRequest) {
       console.warn('leaderboard_entries upsert exception:', e.message);
     }
 
-    // Send notification/verification email via Resend if configured
+    // Send notification email
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       try {
@@ -232,7 +253,7 @@ export async function POST(request: NextRequest) {
         await resend.emails.send({
           from: 'DropYourSaaS <hello@dropyoursaas.com>',
           to: [cleanEmail],
-          subject: `Your Marketplace Listing is Live: ${entryName}`,
+          subject: `Your Marketplace Listing is Live at #${targetRank}: ${entryName}`,
           html: `
             <!DOCTYPE html>
             <html>
@@ -245,7 +266,7 @@ export async function POST(request: NextRequest) {
                   <img src="https://dropyoursaas.com/logo.png" alt="DropYourSaaS" width="48" height="48" style="display: block; margin: 0 auto 16px auto; width: 48px; height: 48px; object-fit: contain;" />
                   <h2 style="color: #18181b; font-size: 20px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">Your Marketplace Listing is Live!</h2>
                   <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
-                    Your SaaS product <strong>${entryName}</strong> has been published to the DropYourSaaS directory and marketplace index.
+                    Your SaaS product <strong>${entryName}</strong> has been published to position <strong>#${targetRank}</strong> on the DropYourSaaS directory.
                   </p>
                   <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
                     Confirm &amp; Manage Listing
@@ -272,7 +293,7 @@ export async function POST(request: NextRequest) {
       verified: true,
       immediate: true,
       redirectUrl: `/thank-you?email=${encodeURIComponent(cleanEmail)}`,
-      message: 'Marketplace listing published live immediately!',
+      message: `Marketplace listing published live immediately at position #${targetRank}!`,
     });
   } catch (err: any) {
     console.error('Submit route error:', err);
