@@ -51,11 +51,11 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         rel="noopener noreferrer"
         title="View public analytics on DataFast"
         className={cn(
-          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 transition-all duration-150 shadow-xs whitespace-nowrap shrink-0',
+          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-[11px] font-mono font-bold text-orange-600 dark:text-orange-400 transition-all duration-150 shadow-xs whitespace-nowrap shrink-0',
           className
         )}
       >
-        <span className="size-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
+        <span className="size-1.5 rounded-full bg-orange-500 ring-2 ring-orange-500/30 animate-pulse shrink-0" />
         <span>We&apos;re FREE</span>
       </a>
     );
