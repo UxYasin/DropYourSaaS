@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800/80 py-8 bg-zinc-50/50 dark:bg-black/50">
       <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-zinc-500 dark:text-zinc-400">
         <div className="flex flex-col items-center md:items-start gap-3">
-          <p>© 2026 DropYourSaaS · Developer Directory &amp; Software Index</p>
+          <p>© 2026 DropYourSaaS · A realtime database &amp; marketplace for SaaS owners</p>
           <a
             href="https://tools.launchllama.co?utm_source=badge&utm_medium=referral"
             target="_blank"

@@ -8,8 +8,8 @@ import { DataFastAnalytics } from '@/components/datafast-analytics';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'DropYourSaaS · Developer Directory & Software Index',
-  description: 'A curated digital software directory and developer indexing platform. Submit and feature your SaaS product.',
+  title: 'DropYourSaaS · A realtime database & marketplace for SaaS owners',
+  description: 'A realtime database & marketplace for SaaS owners. Discover, buy, and sell verified software tools.',
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png' },
