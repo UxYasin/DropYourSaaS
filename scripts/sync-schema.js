@@ -38,6 +38,7 @@ ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS funding_status text;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS tech_stack text;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS marketing_channels text;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS additional_info text;
+ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS paddle_transaction_id text;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS verification_token text;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS is_verified boolean DEFAULT false;
 ALTER TABLE leaderboard_entries ADD COLUMN IF NOT EXISTS status text DEFAULT 'pending_verification';
