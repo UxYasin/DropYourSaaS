@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ export function SubmissionModal({
   selectedRank = 1,
   onSuccess,
 }: SubmissionModalProps) {
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
@@ -114,19 +116,22 @@ export function SubmissionModal({
 
         if (res.status === 429) {
           setRateLimitError(data.message || 'You can only submit one free listing every 24 hours.');
+          setIsSubmitting(false);
           return;
         }
 
         if (!res.ok) {
-          setError(data.error || 'Failed to submit listing');
+          setError(data.error || 'Failed to submit listing. Please try again.');
+          setIsSubmitting(false);
           return;
         }
 
         onSuccess?.();
         onClose();
-        window.location.reload();
-      } catch {
-        setError('An unexpected error occurred. Please try again.');
+        router.push(`/thank-you?email=${encodeURIComponent(email.trim())}`);
+      } catch (err: any) {
+        console.error('Submission catch error:', err);
+        setError('An unexpected network error occurred. Please try again.');
       } finally {
         setIsSubmitting(false);
       }

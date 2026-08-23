@@ -11,18 +11,21 @@ import { Footer } from "@/components/footer"
 import { MobileLayout } from "@/components/mobile-layout"
 
 import { BentoRails } from "@/components/bento-rails"
+import { CongratulationsModal } from "@/components/congratulations-modal"
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedRank, setSelectedRank] = useState<number | undefined>()
   const [selectedBid, setSelectedBid] = useState<number | undefined>()
   const [showVerifiedBanner, setShowVerifiedBanner] = useState(false)
+  const [showCongratsModal, setShowCongratsModal] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('verified') === 'true') {
         setShowVerifiedBanner(true);
+        setShowCongratsModal(true);
       }
     }
   }, []);
@@ -68,7 +71,7 @@ export default function Home() {
                 <LatestActivity />
               </div>
 
-              <div className="mt-4">
+              <div id="index-feed" className="mt-4">
                 <LeaderboardList onClaimClick={handleClaimClick} />
               </div>
             </div>
@@ -78,6 +81,11 @@ export default function Home() {
         </main>
         <Footer />
       </div>
+
+      <CongratulationsModal
+        isOpen={showCongratsModal}
+        onClose={() => setShowCongratsModal(false)}
+      />
     </MobileLayout>
   )
 }

@@ -5,7 +5,7 @@ import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   if (!token) {
     return NextResponse.redirect(`${siteUrl}/?error=missing_token`);
@@ -68,7 +68,26 @@ export async function GET(request: NextRequest) {
     // Invalidate Redis caches so listing publishes immediately
     await invalidateLeaderboardCache();
 
-    // 5. Redirect user to /?verified=true
+    // 5. Auto-login session generation via Supabase Admin magiclink
+    if (submitterEmail) {
+      try {
+        const { data: linkData } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: submitterEmail,
+          options: {
+            redirectTo: `${siteUrl}/?verified=true`,
+          },
+        });
+
+        if (linkData?.properties?.action_link) {
+          return NextResponse.redirect(linkData.properties.action_link);
+        }
+      } catch (authErr) {
+        console.error('Auto-login magic link error:', authErr);
+      }
+    }
+
+    // Fallback redirect to /?verified=true
     return NextResponse.redirect(`${siteUrl}/?verified=true`);
   } catch (err: any) {
     console.error('Verification error:', err);
