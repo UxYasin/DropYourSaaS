@@ -8,6 +8,9 @@ export interface PendingListing {
   email: string;
   category: string;
   isForSale: boolean;
+  askingPrice?: number;
+  mrr?: number;
+  ttmRevenue?: number;
   bid: number;
   createdAt: string;
 }
