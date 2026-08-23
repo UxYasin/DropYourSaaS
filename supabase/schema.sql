@@ -6,13 +6,23 @@ create table if not exists leaderboard_entries (
   id uuid primary key default gen_random_uuid(),
   url text not null unique,
   name text not null,
-  bid_cents integer not null check (bid_cents > 0),
+  email text,
+  submitter_email text,
+  category text default 'SaaS',
+  for_sale boolean default false,
+  bid_cents integer not null default 0,
   clicks integer not null default 0,
+  verification_token text,
+  is_verified boolean default false,
+  status text default 'pending_verification',
   claimed_at timestamptz not null default now()
 );
 
 create index if not exists leaderboard_entries_bid_cents_idx
   on leaderboard_entries (bid_cents desc);
+
+create index if not exists idx_leaderboard_entries_verification_token
+  on leaderboard_entries (verification_token);
 
 create table if not exists bids (
   id uuid primary key default gen_random_uuid(),
