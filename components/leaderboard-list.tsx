@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { DirectoryCard } from '@/components/directory-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
@@ -123,12 +124,14 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
   const [totalPages, setTotalPages] = useState(1);
+  const searchParams = useSearchParams();
+  const isVerified = searchParams?.get('verified') === 'true';
 
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
 
-    fetch(`/api/leaderboard?page=${page}&limit=50`)
+    fetch(`/api/leaderboard?page=${page}&limit=50&t=${Date.now()}`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
@@ -147,7 +150,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, isVerified]);
 
   const handleClaimClick = (rank: number, bid: number) => {
     if (onClaimClick) {

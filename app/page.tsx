@@ -72,7 +72,9 @@ export default function Home() {
               </div>
 
               <div id="index-feed" className="mt-4">
-                <LeaderboardList onClaimClick={handleClaimClick} />
+                <Suspense fallback={null}>
+                  <LeaderboardList onClaimClick={handleClaimClick} />
+                </Suspense>
               </div>
             </div>
 

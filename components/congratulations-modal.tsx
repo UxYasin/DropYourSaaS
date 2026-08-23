@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle2, Sparkles, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,15 +18,19 @@ export function CongratulationsModal({
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    if (searchParams.get('verified') === 'true' || propIsOpen) {
+    if (searchParams.get('verified') === 'true') {
+      setInternalIsOpen(true);
+      router.refresh();
+    } else if (propIsOpen) {
       setInternalIsOpen(true);
     } else if (propIsOpen === false) {
       setInternalIsOpen(false);
     }
-  }, [searchParams, propIsOpen]);
+  }, [searchParams, propIsOpen, router]);
 
   const isOpen = propIsOpen !== undefined ? propIsOpen : internalIsOpen;
 
