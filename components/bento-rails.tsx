@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
+import { PinAdModal } from '@/components/pin-ad-modal';
+import { Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface RailCardItem {
@@ -69,6 +71,11 @@ let globalPool: RailCardItem[] = [];
 
 export function BentoRails({ side }: BentoRailsProps) {
   const [displayedItems, setDisplayedItems] = useState<RailCardItem[]>([]);
+  const [pinModalState, setPinModalState] = useState<{
+    isOpen: boolean;
+    siteUrl: string;
+    projectName: string;
+  }>({ isOpen: false, siteUrl: '', projectName: '' });
 
   useEffect(() => {
     let isMounted = true;
@@ -152,83 +159,111 @@ export function BentoRails({ side }: BentoRailsProps) {
   const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackCards;
 
   return (
-    <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] shrink-0 sticky top-20 h-fit">
-      {cardsToRender.map((card, i) => {
-        const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
-        const theme = BENTO_THEMES[themeIndex];
-        const favicon = `https://www.google.com/s2/favicons?domain=${card.name}&sz=128`;
-        const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
+    <>
+      <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] shrink-0 sticky top-20 h-fit">
+        {cardsToRender.map((card, i) => {
+          const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
+          const theme = BENTO_THEMES[themeIndex];
+          const favicon = `https://www.google.com/s2/favicons?domain=${card.name}&sz=128`;
+          const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
-        return (
-          <div key={card.id || `slot-${i}`} className="relative h-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={card.id || card.url}
-                initial={{ rotateX: -90, opacity: 0 }}
-                animate={{ rotateX: 0, opacity: 1 }}
-                exit={{ rotateX: 90, opacity: 0 }}
-                transition={{ duration: 0.45, ease: 'easeInOut' }}
-                className={cn(
-                  'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-2.5 group overflow-hidden',
-                  theme.bg,
-                  theme.border
-                )}
-              >
-                {/* Top Row: Favicon, Title, Category Badge & VotePill */}
-                <div className="flex items-start justify-between gap-2.5">
+          return (
+            <div key={card.id || `slot-${i}`} className="relative h-auto group">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={card.id || card.url}
+                  initial={{ rotateX: -90, opacity: 0 }}
+                  animate={{ rotateX: 0, opacity: 1 }}
+                  exit={{ rotateX: 90, opacity: 0 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className={cn(
+                    'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden relative',
+                    theme.bg,
+                    theme.border
+                  )}
+                >
+                  {/* Top Row: Favicon, Title, Category Badge & VotePill */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="sponsored noopener noreferrer"
+                      className="flex items-center gap-2.5 min-w-0 flex-1"
+                    >
+                      <div className="size-10 sm:size-11 rounded-xl bg-background/90 border border-border/60 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+                        <Image
+                          src={favicon}
+                          alt={card.name}
+                          width={44}
+                          height={44}
+                          className="size-full object-contain rounded-[6px]"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className={cn('font-bold text-sm sm:text-base truncate hover:underline transition-all', theme.text)}>
+                          {card.name}
+                        </h3>
+                        <span className={cn('inline-block mt-0.5 text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border', theme.badge)}>
+                          {card.category || 'SaaS'}
+                        </span>
+                      </div>
+                    </a>
+
+                    {/* VotePill */}
+                    <div className="shrink-0 pt-0.5">
+                      <VotePill
+                        listingId={card.id}
+                        initialScore={card.net_score}
+                        initialUserVote={card.user_vote}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: 2-Line Truncated Tagline/Description */}
                   <a
                     href={href}
                     target="_blank"
                     rel="sponsored noopener noreferrer"
-                    className="flex items-center gap-2.5 min-w-0 flex-1"
+                    className="block pr-6"
                   >
-                    <div className="size-10 sm:size-11 rounded-xl bg-background/90 border border-border/60 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
-                      <Image
-                        src={favicon}
-                        alt={card.name}
-                        width={44}
-                        height={44}
-                        className="size-full object-contain rounded-[6px]"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className={cn('font-bold text-sm sm:text-base truncate hover:underline transition-all', theme.text)}>
-                        {card.name}
-                      </h3>
-                      <span className={cn('inline-block mt-0.5 text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border', theme.badge)}>
-                        {card.category || 'SaaS'}
-                      </span>
-                    </div>
+                    <p className={cn('text-xs line-clamp-2 leading-relaxed', theme.subtext)}>
+                      {card.tagline || `Verified ${card.name} SaaS tool on DropYourSaaS.`}
+                    </p>
                   </a>
 
-                  {/* VotePill */}
-                  <div className="shrink-0 pt-0.5">
-                    <VotePill
-                      listingId={card.id}
-                      initialScore={card.net_score}
-                      initialUserVote={card.user_vote}
-                      size="sm"
-                    />
-                  </div>
-                </div>
+                  {/* Hover-to-Reveal Pin Icon Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setPinModalState({
+                        isOpen: true,
+                        siteUrl: card.url,
+                        projectName: card.name,
+                      });
+                    }}
+                    title="Pin your Ads for 30 days"
+                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/90 text-foreground border border-border/80 shadow-sm hover:scale-105 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 z-10 text-[10px] font-mono font-bold"
+                  >
+                    <Pin className="size-3 fill-current shrink-0" />
+                    <span className="hidden sm:inline">Pin Ad • $100</span>
+                  </button>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </aside>
 
-                {/* Bottom Row: 2-Line Truncated Tagline/Description */}
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="sponsored noopener noreferrer"
-                  className="block"
-                >
-                  <p className={cn('text-xs line-clamp-2 leading-relaxed', theme.subtext)}>
-                    {card.tagline || `Verified ${card.name} SaaS tool on DropYourSaaS.`}
-                  </p>
-                </a>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </aside>
+      <PinAdModal
+        isOpen={pinModalState.isOpen}
+        onClose={() => setPinModalState({ isOpen: false, siteUrl: '', projectName: '' })}
+        defaultSiteUrl={pinModalState.siteUrl}
+        defaultProjectName={pinModalState.projectName}
+      />
+    </>
   );
 }

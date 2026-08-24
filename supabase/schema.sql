@@ -139,3 +139,15 @@ CREATE TRIGGER trg_update_leaderboard_votes
 AFTER INSERT OR UPDATE OR DELETE ON listing_votes
 FOR EACH ROW EXECUTE FUNCTION update_leaderboard_vote_counts();
 
+-- 4. Create ad_requests table for Pin Ad monetization
+CREATE TABLE IF NOT EXISTS ad_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_url TEXT NOT NULL,
+  project_name TEXT NOT NULL,
+  one_liner TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'invoiced', 'active', 'rejected')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+
