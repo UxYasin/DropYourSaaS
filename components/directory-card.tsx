@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Clock, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
@@ -9,6 +10,7 @@ import { siteCopy } from '@/lib/copy';
 import { VotePill } from '@/components/VotePill';
 import { FaviconImage } from '@/components/favicon-image';
 import { PreviewImage } from '@/components/preview-image';
+import { getListingSlug } from '@/lib/slug';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
@@ -122,14 +124,22 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </div>
             </div>
 
-            {/* Voting Pill, Price & CTA */}
+            {/* Voting Pill, View Listing, Price & CTA */}
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-              <VotePill
-                listingId={item.id || ''}
-                initialScore={item.net_score || 0}
-                initialUserVote={item.user_vote || 0}
-                size="md"
-              />
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/s/${getListingSlug(item)}`}
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
+                >
+                  View listing →
+                </Link>
+                <VotePill
+                  listingId={item.id || ''}
+                  initialScore={item.net_score || 0}
+                  initialUserVote={item.user_vote || 0}
+                  size="md"
+                />
+              </div>
               {siteCopy.feed.showPrices && (
                 <div className="font-mono font-black text-xl sm:text-2xl text-sky-500 tracking-tight shrink-0">
                   {formatBid(item.bid)}
@@ -261,12 +271,20 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
 
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
-              <VotePill
-                listingId={item.id || ''}
-                initialScore={item.net_score || 0}
-                initialUserVote={item.user_vote || 0}
-                size="sm"
-              />
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/s/${getListingSlug(item)}`}
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
+                >
+                  View listing →
+                </Link>
+                <VotePill
+                  listingId={item.id || ''}
+                  initialScore={item.net_score || 0}
+                  initialUserVote={item.user_vote || 0}
+                  size="sm"
+                />
+              </div>
               {siteCopy.feed.showPrices && (
                 <div className={`font-mono font-black text-lg sm:text-xl tracking-tight shrink-0 ${theme.priceColor}`}>
                   {formatBid(item.bid)}
@@ -354,12 +372,20 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <VotePill
-                listingId={item.id || ''}
-                initialScore={item.net_score || 0}
-                initialUserVote={item.user_vote || 0}
-                size="sm"
-              />
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/s/${getListingSlug(item)}`}
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
+                >
+                  View listing →
+                </Link>
+                <VotePill
+                  listingId={item.id || ''}
+                  initialScore={item.net_score || 0}
+                  initialUserVote={item.user_vote || 0}
+                  size="sm"
+                />
+              </div>
               {siteCopy.feed.showPrices && (
                 <div className={`font-mono font-black text-xs sm:text-sm ${currentStyle.text}`}>
                   {formatBid(item.bid)}
@@ -426,12 +452,20 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0 font-sans">
-            <VotePill
-              listingId={item.id || ''}
-              initialScore={item.net_score || 0}
-              initialUserVote={item.user_vote || 0}
-              size="sm"
-            />
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/s/${getListingSlug(item)}`}
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
+              >
+                View listing →
+              </Link>
+              <VotePill
+                listingId={item.id || ''}
+                initialScore={item.net_score || 0}
+                initialUserVote={item.user_vote || 0}
+                size="sm"
+              />
+            </div>
             {siteCopy.feed.showPrices && (
               <div className="font-mono font-black text-xs text-sky-500">
                 {formatBid(item.bid)}

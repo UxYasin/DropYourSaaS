@@ -2,6 +2,7 @@ import { redis } from '@/lib/redis';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { leaderboardItems as seedLeaderboardItems, type LeaderboardItem } from '@/lib/leaderboard-data';
 import { cookies } from 'next/headers';
+import { getListingSlug } from '@/lib/slug';
 
 const CACHE_KEY = 'leaderboard:v5';
 const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for real-time responsiveness
@@ -257,3 +258,65 @@ function formatRelativeTime(iso: string) {
   const days = Math.floor(hours / 24);
   return days === 1 ? 'yesterday' : `${days} days ago`;
 }
+
+export async function getListingBySlug(slug: string): Promise<LeaderboardItem | null> {
+  const cleanSlug = decodeURIComponent(slug).toLowerCase().trim();
+  const allItems = await getLeaderboard(undefined, 'rank');
+
+  // 1. Match in active leaderboard
+  const directMatch = allItems.find((item) => {
+    const itemSlug = getListingSlug(item);
+    if (itemSlug === cleanSlug) return true;
+    if (item.id && item.id.toLowerCase() === cleanSlug) return true;
+    if (item.name && item.name.toLowerCase() === cleanSlug) return true;
+    try {
+      const host = new URL(item.url).hostname.toLowerCase().replace(/^www\./, '');
+      if (host === cleanSlug || host.replace(/\./g, '-') === cleanSlug) return true;
+    } catch {}
+    return false;
+  });
+
+  if (directMatch) return directMatch;
+
+  // 2. Direct database lookup fallback
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data: row } = await supabase
+      .from('leaderboard_entries')
+      .select('*')
+      .or(`id.eq.${cleanSlug},url.ilike.%${cleanSlug}%,name.ilike.%${cleanSlug}%`)
+      .maybeSingle();
+
+    if (row) {
+      const urlStr = String(row.url || '');
+      let hostname = 'SaaS Product';
+      try {
+        hostname = urlStr ? new URL(urlStr).hostname.replace(/^www\./, '') : 'SaaS Product';
+      } catch {
+        hostname = urlStr || 'SaaS Product';
+      }
+
+      return {
+        id: String(row.id || ''),
+        rank: Number(row.rank || row.target_rank) || 1,
+        name: String(row.name || row.title || hostname),
+        bid: Number(row.bid_cents || 0) / 100,
+        url: urlStr,
+        clicks: Number(row.clicks || 0),
+        time: formatRelativeTime(String(row.claimed_at || row.created_at || new Date().toISOString())),
+        upvotes: Number(row.upvotes || 0),
+        downvotes: Number(row.downvotes || 0),
+        net_score: Number(row.net_score || 0),
+        hot_score: Number(row.hot_score || 0),
+        user_vote: 0,
+        category: String(row.category || 'SaaS'),
+        claimed_at: String(row.claimed_at || row.created_at || ''),
+        favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
+        preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : undefined),
+      };
+    }
+  } catch {}
+
+  return null;
+}
+
