@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
 import { IS_FREE_MODE } from '@/lib/copy';
-
 import { CATEGORIES } from '@/lib/categories';
 
 export interface ScrapedData {
@@ -49,6 +48,7 @@ export function SubmissionModal({
   const [favicon, setFavicon] = useState(initialData?.favicon || '');
   const [screenshotUrl, setScreenshotUrl] = useState(initialData?.screenshotUrl || '');
   const [category, setCategory] = useState(initialData?.category || 'SaaS');
+  const [isForSale, setIsForSale] = useState(initialData?.isForSale || false);
   const [email, setEmail] = useState(initialData?.email || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +65,7 @@ export function SubmissionModal({
     setFavicon(initialData?.favicon || '');
     setScreenshotUrl(initialData?.screenshotUrl || '');
     setCategory(initialData?.category || 'SaaS');
+    setIsForSale(initialData?.isForSale || false);
     setEmail(initialData?.email || '');
     setError(null);
     setRateLimitError(null);
@@ -101,7 +102,7 @@ export function SubmissionModal({
             faviconUrl: favicon || undefined,
             screenshotUrl: screenshotUrl || undefined,
             category: category || 'SaaS',
-            forSale: false,
+            forSale: isForSale,
             email: email.trim() || undefined,
             targetRank: selectedRank,
           }),
@@ -177,7 +178,7 @@ export function SubmissionModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-900 transition-colors"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-900 transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
           <X className="size-5" />
@@ -304,45 +305,75 @@ export function SubmissionModal({
           {/* Category & For Sale Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="w-full">
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5 font-sans">
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-border bg-background text-foreground font-sans text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full h-10 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-white font-sans text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
               >
                 {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat} className="bg-card text-foreground">
+                  <option key={cat} value={cat} className="bg-zinc-950 text-white">
                     {cat}
                   </option>
                 ))}
               </select>
             </div>
+
+            <div>
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
+                Marketplace
+              </label>
+              <div className="w-full h-10 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-sans font-medium flex items-center justify-between">
+                <span className="text-zinc-300">List for Sale?</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isForSale}
+                  onClick={() => setIsForSale(!isForSale)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    isForSale ? 'bg-emerald-500' : 'bg-zinc-700'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      isForSale ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Optional Contact Email for Ownership / Invoicing */}
+          {/* Contact Email */}
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-muted-foreground font-sans">
-              Contact / Invoicing Email <span className="text-muted-foreground/60 font-normal">(Optional)</span>
+            <label className="block text-xs font-medium text-zinc-300 font-sans">
+              Contact / Founder Email {isForSale ? <span className="text-emerald-400 font-bold">(Required for Marketplace)</span> : <span className="text-zinc-500 font-normal">(Optional)</span>}
             </label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="founder@yourproduct.com"
-              className="bg-background border-border text-foreground font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-amber-500"
+              className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-amber-500"
+              required={isForSale}
             />
+            {isForSale && (
+              <p className="text-[11px] font-body text-emerald-400/90 leading-snug">
+                Buyers on the /buy-sell marketplace will use this email for direct acquisition inquiries.
+              </p>
+            )}
           </div>
 
           {/* Screenshot / OG Image preview banner */}
           {screenshotUrl && (
             <div className="pt-1">
-              <label className="block text-xs font-medium text-muted-foreground mb-1 font-sans flex items-center gap-1">
-                <ImageIcon className="size-3 text-muted-foreground" />
+              <label className="block text-xs font-medium text-zinc-400 mb-1 font-sans flex items-center gap-1">
+                <ImageIcon className="size-3 text-zinc-400" />
                 Featured Preview
               </label>
-              <div className="relative h-24 w-full rounded-xl bg-muted/40 border border-border overflow-hidden">
+              <div className="relative h-24 w-full rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
                 <Image
                   src={screenshotUrl}
                   alt="Website preview"
@@ -359,7 +390,7 @@ export function SubmissionModal({
             <Button
               type="button"
               onClick={onClose}
-              className="w-1/3 rounded-full border border-border bg-muted/50 hover:bg-muted text-foreground font-sans font-bold text-xs sm:text-sm h-11 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+              className="w-1/3 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white font-sans font-bold text-xs sm:text-sm h-11 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
             >
               Cancel
             </Button>
@@ -390,4 +421,4 @@ export function SubmissionModal({
     </div>,
     document.body
   );
-};
+}

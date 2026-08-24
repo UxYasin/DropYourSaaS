@@ -65,6 +65,17 @@ export function Header() {
               Leaderboard
             </Link>
             <Link
+              href="/buy-sell"
+              className={cn(
+                'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
+                pathname.startsWith('/buy-sell')
+                  ? 'text-foreground font-semibold bg-muted/70'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              )}
+            >
+              Buy / Sell
+            </Link>
+            <Link
               href="/advertise"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',

@@ -3,9 +3,25 @@ import { getSupabaseServerClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+export interface BuySellListingItem {
+  id: string;
+  rank: number;
+  name: string;
+  url: string;
+  description: string;
+  category: string;
+  askingPrice: number;
+  ttmRevenue: number;
+  mrr: number;
+  email: string;
+  favicon: string;
+  time: string;
+  clicks: number;
+}
+
 export async function GET() {
   const supabaseAdmin = getSupabaseServerClient();
-  let liveListings: any[] = [];
+  let liveListings: BuySellListingItem[] = [];
 
   try {
     const { data: dbData } = await supabaseAdmin
