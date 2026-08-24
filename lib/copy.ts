@@ -2,8 +2,8 @@ export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE === 'true';
 
 export const siteCopy = {
   hero: {
-    headline: 'Drop Your SaaS & Pay to Rank',
-    description: 'The real-time software discovery & direct advertising platform. Instant indexation, permanent SEO backlinks, and pay-to-rank leaderboard exposure.',
+    headline: 'Rank higher. Get more clicks for FREE',
+    description: 'The real-time software discovery & direct promotional platform. Instant indexation, permanent SEO backlinks, and community-ranked leaderboard exposure.',
     subtext: 'Boost your ranking tier at any time to capture prime visibility on the leaderboard and side rails.',
     cta: 'Claim #1 Spot',
     urlPlaceholder: 'Your SaaS URL or domain (e.g. yourproduct.com)',

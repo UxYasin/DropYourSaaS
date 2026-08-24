@@ -104,9 +104,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       {/* Main Hero Headline & Copy */}
       <div className="space-y-2 sm:space-y-3">
         <h1 className="font-mono font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-foreground leading-[1.1]">
-          Drop Your SaaS
+          Rank higher.
           <span className="block mt-1 sm:mt-2">
-            &amp; <span className="text-[#E0674B] dark:text-[#F0785C]">Pay to Rank</span>
+            Get more clicks for{' '}
+            <span className="text-[#E0674B] dark:text-[#F0785C]">FREE</span>
           </span>
         </h1>
         <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
