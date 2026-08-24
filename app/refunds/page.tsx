@@ -5,8 +5,8 @@ import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
 
 export const metadata = {
-  title: 'Refund & Cancellation Policy | DropYourSaaS',
-  description: 'Refund Policy, cancellation terms, and digital goods delivery details for DropYourSaaS.',
+  title: 'Refund & Cancellation Policy | DropYourSaaS.com',
+  description: 'Refund Policy, cancellation terms, and digital goods delivery details for DropYourSaaS.com.',
 };
 
 export default function RefundsPage() {

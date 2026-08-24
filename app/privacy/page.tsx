@@ -5,8 +5,8 @@ import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
 
 export const metadata = {
-  title: 'Privacy Policy | DropYourSaaS',
-  description: 'Privacy Policy, data protection practices, and cookie disclosures for DropYourSaaS.',
+  title: 'Privacy Policy | DropYourSaaS.com',
+  description: 'Privacy Policy, data protection practices, and cookie disclosures for DropYourSaaS.com.',
 };
 
 export default function PrivacyPage() {

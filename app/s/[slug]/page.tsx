@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = `${listing.name} – SaaS Discovery on DropYourSaaS`;
-  const description = `Discover ${listing.name} on DropYourSaaS. Community-ranked #${listing.rank} software with instant indexation, verified SEO backlinks, and real-time leaderboard exposure.`;
+  const title = `${listing.name} – SaaS Discovery on DropYourSaaS.com`;
+  const description = `Discover ${listing.name} on DropYourSaaS.com. Community-ranked #${listing.rank} software with instant indexation, verified SEO backlinks, and real-time leaderboard exposure.`;
 
   return {
     title,
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       url: `https://dropyoursaas.com/s/${slug}`,
-      siteName: 'DropYourSaaS',
+      siteName: 'DropYourSaaS.com',
       images: listing.preview_image_url
         ? [{ url: listing.preview_image_url }]
         : listing.favicon

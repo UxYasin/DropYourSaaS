@@ -5,8 +5,8 @@ import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
 
 export const metadata = {
-  title: 'Terms of Service | DropYourSaaS',
-  description: 'Terms of Service, direct advertising agreement, and acceptable use policy for DropYourSaaS.',
+  title: 'Terms of Service | DropYourSaaS.com',
+  description: 'Terms of Service, direct advertising agreement, and acceptable use policy for DropYourSaaS.com.',
 };
 
 export default function TermsPage() {

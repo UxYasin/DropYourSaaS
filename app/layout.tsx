@@ -8,7 +8,10 @@ import { DataFastAnalytics } from '@/components/datafast-analytics';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'DropYourSaaS · Rank higher. Get more clicks for FREE',
+  title: {
+    default: 'DropYourSaaS.com · Rank higher. Get more clicks for FREE',
+    template: '%s · DropYourSaaS.com',
+  },
   description:
     'The real-time discovery & promotional platform for software founders. Rank higher, get more clicks for FREE with instant indexation, permanent SEO backlinks, and community-ranked leaderboard exposure.',
   icons: {
