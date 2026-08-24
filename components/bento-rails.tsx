@@ -278,11 +278,13 @@ export function BentoRails({ side }: BentoRailsProps) {
                         projectName: card.name,
                       });
                     }}
-                    title={`Pin this spot (${formatSlotLabel(slotPos)}) • $100/mo`}
-                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/95 text-foreground border border-border/80 shadow-md hover:scale-105 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 z-10 text-[10px] font-mono font-bold"
+                    title="Pin my Ads $100/m"
+                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center gap-1.5 h-7 sm:h-8 px-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-md border border-blue-400/40 backdrop-blur-xs font-mono group/pin overflow-hidden"
                   >
-                    <Pin className="size-3 fill-current shrink-0 text-blue-500 group-hover:text-white" />
-                    <span className="hidden sm:inline">Pin Spot ({formatSlotLabel(slotPos)}) • $100</span>
+                    <span className="text-xs sm:text-sm leading-none shrink-0 select-none">📌</span>
+                    <span className="max-w-0 group-hover/pin:max-w-[140px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight">
+                      Pin my Ads $100/m
+                    </span>
                   </button>
                 </motion.div>
               </AnimatePresence>
