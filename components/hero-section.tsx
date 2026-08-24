@@ -117,16 +117,11 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
       {/* Main Hero Headline & Copy */}
       <div className="space-y-2 sm:space-y-3">
-        <h1 className="font-mono font-extrabold text-3xl sm:text-5xl md:text-6xl tracking-tight text-foreground leading-[1.1]">
-          {siteCopy.hero.headline.split(/(Free|FREE)/i).map((part, i) =>
-            /^(Free|FREE)$/i.test(part) ? (
-              <span key={i} className="text-orange-500 dark:text-orange-400">
-                {part}
-              </span>
-            ) : (
-              part
-            )
-          )}
+        <h1 className="font-mono font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-foreground leading-[1.1]">
+          Drop Your SaaS
+          <span className="block mt-1 sm:mt-2">
+            for <span className="text-[#E0674B] dark:text-[#F0785C]">FREE</span>
+          </span>
         </h1>
         <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
           {siteCopy.hero.description}

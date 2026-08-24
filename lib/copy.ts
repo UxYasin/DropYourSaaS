@@ -2,7 +2,7 @@ export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE === 'true';
 
 export const siteCopy = {
   hero: {
-    headline: 'New spots are FREE',
+    headline: 'Drop Your SaaS for FREE',
     description: 'Paying zero dollar for the perfect spot. Get free audience.',
     subtext: 'Already listed? Re-submit your project link after 24 hours to refresh your placement.',
     cta: 'Claim #1',
