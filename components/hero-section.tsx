@@ -29,7 +29,18 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
   const handleClaim = async () => {
     if (!url.trim()) {
-      setError('Enter your SaaS website or domain link first');
+      setScrapedData({
+        title: '',
+        description: '',
+        favicon: '',
+        screenshotUrl: '',
+        url: '',
+        category,
+        isForSale: false,
+        email: '',
+      });
+      setError(null);
+      setIsModalOpen(true);
       return;
     }
 
@@ -185,10 +196,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   <div className="min-w-0 text-left">
                     <div className="text-xs font-bold font-sans text-foreground truncate flex items-center gap-1">
                       <Sparkles className="size-3 text-amber-500 shrink-0" />
-                      Instant Indexation
+                      Instant Indexation &amp; Fast-Track
                     </div>
                     <div className="text-[10px] font-body text-muted-foreground truncate">
-                      Do-follow SEO backlink included
+                      ⚡ $5 Fast-Track (Do-Follow + Badge) or Free
                     </div>
                   </div>
                 </div>
