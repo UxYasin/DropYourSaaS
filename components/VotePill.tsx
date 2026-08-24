@@ -42,23 +42,20 @@ export function VotePill({
 
     if (isSubmitting || !listingId) return;
 
-    // Determine new vote direction
     const newDirection = userVote === targetDirection ? 0 : targetDirection;
 
-    // Calculate score delta for Optimistic UI update
     let delta = 0;
     if (userVote === 0) {
-      delta = newDirection; // 0 -> 1 (+1) or 0 -> -1 (-1)
+      delta = newDirection;
     } else if (newDirection === 0) {
-      delta = -userVote; // 1 -> 0 (-1) or -1 -> 0 (+1)
+      delta = -userVote;
     } else {
-      delta = newDirection * 2; // -1 -> 1 (+2) or 1 -> -1 (-2)
+      delta = newDirection * 2;
     }
 
     const prevScore = score;
     const prevVote = userVote;
 
-    // Optimistic UI state update
     setScore((prev) => prev + delta);
     setUserVote(newDirection);
     setIsSubmitting(true);
@@ -81,12 +78,10 @@ export function VotePill({
           setUserVote(data.userVote as 1 | -1 | 0);
         }
       } else {
-        // Revert on API error
         setScore(prevScore);
         setUserVote(prevVote);
       }
     } catch {
-      // Revert on network exception
       setScore(prevScore);
       setUserVote(prevVote);
     } finally {
@@ -97,12 +92,12 @@ export function VotePill({
   const isUpvoted = userVote === 1;
   const isDownvoted = userVote === -1;
 
-  const iconSizes = size === 'sm' ? 'size-4' : 'size-5';
+  const iconSizes = size === 'sm' ? 'size-3.5 sm:size-4' : 'size-4.5 sm:size-5';
 
   return (
     <div
       className={cn(
-        'inline-flex items-center rounded-full bg-zinc-900/80 border border-zinc-800/80 px-2 py-0.5 backdrop-blur-sm select-none transition-all',
+        'inline-flex items-center rounded-full bg-zinc-200/80 dark:bg-zinc-900/80 border border-zinc-300/80 dark:border-zinc-800/80 px-1.5 py-0.5 backdrop-blur-sm select-none transition-all shadow-xs',
         className
       )}
     >
@@ -113,10 +108,10 @@ export function VotePill({
         disabled={isSubmitting}
         title="Upvote"
         className={cn(
-          'p-1 rounded-full transition-colors cursor-pointer focus:outline-none',
+          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none',
           isUpvoted
             ? 'text-[#FF4500] fill-[#FF4500]'
-            : 'text-zinc-400 hover:text-[#FF4500]'
+            : 'text-zinc-500 dark:text-zinc-400 hover:text-[#FF4500]'
         )}
       >
         <ArrowBigUp
@@ -127,10 +122,10 @@ export function VotePill({
       {/* Net Score */}
       <span
         className={cn(
-          'px-1.5 font-semibold font-mono text-xs transition-colors min-w-[20px] text-center',
+          'px-1 font-bold font-mono text-xs transition-colors min-w-[18px] text-center',
           isUpvoted && 'text-[#FF4500]',
           isDownvoted && 'text-[#7193FF]',
-          !isUpvoted && !isDownvoted && 'text-zinc-300'
+          !isUpvoted && !isDownvoted && 'text-zinc-700 dark:text-zinc-200'
         )}
       >
         {formatScore(score)}
@@ -143,10 +138,10 @@ export function VotePill({
         disabled={isSubmitting}
         title="Downvote"
         className={cn(
-          'p-1 rounded-full transition-colors cursor-pointer focus:outline-none',
+          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none',
           isDownvoted
             ? 'text-[#7193FF] fill-[#7193FF]'
-            : 'text-zinc-400 hover:text-[#7193FF]'
+            : 'text-zinc-500 dark:text-zinc-400 hover:text-[#7193FF]'
         )}
       >
         <ArrowBigDown

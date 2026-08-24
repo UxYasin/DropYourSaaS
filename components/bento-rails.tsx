@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
+import { cn } from '@/lib/utils';
 
 export interface RailCardItem {
   id: string;
@@ -18,6 +19,51 @@ export interface RailCardItem {
 interface BentoRailsProps {
   side: 'left' | 'right';
 }
+
+const BENTO_THEMES = [
+  {
+    bg: 'bg-[var(--bento-blue)]',
+    border: 'border-blue-300/80 dark:border-blue-800/50',
+    text: 'text-blue-950 dark:text-blue-100',
+    subtext: 'text-blue-900/80 dark:text-blue-200/80',
+    badge: 'bg-blue-500/15 text-blue-900 dark:text-blue-300 border-blue-400/30',
+  },
+  {
+    bg: 'bg-[var(--bento-yellow)]',
+    border: 'border-amber-300/80 dark:border-amber-800/50',
+    text: 'text-amber-950 dark:text-amber-100',
+    subtext: 'text-amber-900/80 dark:text-amber-200/80',
+    badge: 'bg-amber-500/15 text-amber-900 dark:text-amber-300 border-amber-400/30',
+  },
+  {
+    bg: 'bg-[var(--bento-mint)]',
+    border: 'border-emerald-300/80 dark:border-emerald-800/50',
+    text: 'text-emerald-950 dark:text-emerald-100',
+    subtext: 'text-emerald-900/80 dark:text-emerald-200/80',
+    badge: 'bg-emerald-500/15 text-emerald-900 dark:text-emerald-300 border-emerald-400/30',
+  },
+  {
+    bg: 'bg-[var(--bento-pink)]',
+    border: 'border-pink-300/80 dark:border-pink-800/50',
+    text: 'text-pink-950 dark:text-pink-100',
+    subtext: 'text-pink-900/80 dark:text-pink-200/80',
+    badge: 'bg-pink-500/15 text-pink-900 dark:text-pink-300 border-pink-400/30',
+  },
+  {
+    bg: 'bg-[var(--bento-lavender)]',
+    border: 'border-purple-300/80 dark:border-purple-800/50',
+    text: 'text-purple-950 dark:text-purple-100',
+    subtext: 'text-purple-900/80 dark:text-purple-200/80',
+    badge: 'bg-purple-500/15 text-purple-900 dark:text-purple-300 border-purple-400/30',
+  },
+  {
+    bg: 'bg-[var(--bento-gray)]',
+    border: 'border-zinc-300/80 dark:border-zinc-700/50',
+    text: 'text-zinc-950 dark:text-zinc-100',
+    subtext: 'text-zinc-800/80 dark:text-zinc-300/80',
+    badge: 'bg-zinc-500/15 text-zinc-900 dark:text-zinc-300 border-zinc-400/30',
+  },
+];
 
 let globalPool: RailCardItem[] = [];
 
@@ -36,7 +82,6 @@ export function BentoRails({ side }: BentoRailsProps) {
           if (Array.isArray(data.pool) && data.pool.length > 0 && isMounted) {
             globalPool = data.pool;
 
-            // Left rail gets slots 0..4, Right rail gets slots 5..9
             const startIdx = side === 'left' ? 0 : 5;
             const slice = data.pool.slice(startIdx, startIdx + 5);
             setDisplayedItems(slice);
@@ -47,9 +92,9 @@ export function BentoRails({ side }: BentoRailsProps) {
 
     fetchPool();
 
-    // Random staggered card flipping (every 5 to 12 seconds)
+    // Staggered card flip interval (every 5 to 12 seconds)
     const scheduleNextFlip = () => {
-      const randomDelay = Math.floor(Math.random() * 7000) + 5000; // 5000ms to 12000ms
+      const randomDelay = Math.floor(Math.random() * 7000) + 5000;
 
       timerId = setTimeout(() => {
         if (!isMounted) return;
@@ -107,51 +152,57 @@ export function BentoRails({ side }: BentoRailsProps) {
   const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackCards;
 
   return (
-    <aside className="hidden lg:flex flex-col gap-4 w-72 sm:w-[290px] shrink-0 sticky top-20 h-fit">
+    <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] shrink-0 sticky top-20 h-fit">
       {cardsToRender.map((card, i) => {
+        const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
+        const theme = BENTO_THEMES[themeIndex];
         const favicon = `https://www.google.com/s2/favicons?domain=${card.name}&sz=128`;
         const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
         return (
-          <div key={card.id || `slot-${i}`} className="relative min-h-[145px] sm:min-h-[155px]">
+          <div key={card.id || `slot-${i}`} className="relative h-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={card.id || card.url}
                 initial={{ rotateX: -90, opacity: 0 }}
                 animate={{ rotateX: 0, opacity: 1 }}
                 exit={{ rotateX: 90, opacity: 0 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                className="w-full h-full p-4 sm:p-5 rounded-2xl border border-zinc-800/70 bg-zinc-950/70 hover:bg-zinc-900/90 hover:border-zinc-700 transition-all shadow-md flex flex-col justify-between gap-3 group"
+                transition={{ duration: 0.45, ease: 'easeInOut' }}
+                className={cn(
+                  'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-2.5 group overflow-hidden',
+                  theme.bg,
+                  theme.border
+                )}
               >
-                {/* Top Row: Favicon, Name & VotePill */}
-                <div className="flex items-start justify-between gap-3">
+                {/* Top Row: Favicon, Title, Category Badge & VotePill */}
+                <div className="flex items-start justify-between gap-2.5">
                   <a
                     href={href}
                     target="_blank"
                     rel="sponsored noopener noreferrer"
-                    className="flex items-center gap-3 min-w-0 flex-1"
+                    className="flex items-center gap-2.5 min-w-0 flex-1"
                   >
-                    <div className="size-11 sm:size-12 rounded-xl bg-zinc-900 border border-zinc-800/80 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div className="size-10 sm:size-11 rounded-xl bg-background/90 border border-border/60 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
                       <Image
                         src={favicon}
                         alt={card.name}
-                        width={48}
-                        height={48}
-                        className="size-full object-contain rounded-[8px]"
+                        width={44}
+                        height={44}
+                        className="size-full object-contain rounded-[6px]"
                         unoptimized
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-white truncate group-hover:text-amber-400 transition-colors">
+                      <h3 className={cn('font-bold text-sm sm:text-base truncate hover:underline transition-all', theme.text)}>
                         {card.name}
                       </h3>
-                      <span className="inline-block mt-0.5 text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-900 text-zinc-400 border border-zinc-800">
+                      <span className={cn('inline-block mt-0.5 text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border', theme.badge)}>
                         {card.category || 'SaaS'}
                       </span>
                     </div>
                   </a>
 
-                  {/* Compact VotePill */}
+                  {/* VotePill */}
                   <div className="shrink-0 pt-0.5">
                     <VotePill
                       listingId={card.id}
@@ -162,14 +213,14 @@ export function BentoRails({ side }: BentoRailsProps) {
                   </div>
                 </div>
 
-                {/* Bottom Section: 2-Line Expanded Description */}
+                {/* Bottom Row: 2-Line Truncated Tagline/Description */}
                 <a
                   href={href}
                   target="_blank"
                   rel="sponsored noopener noreferrer"
                   className="block"
                 >
-                  <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed group-hover:text-zinc-300 transition-colors">
+                  <p className={cn('text-xs line-clamp-2 leading-relaxed', theme.subtext)}>
                     {card.tagline || `Verified ${card.name} SaaS tool on DropYourSaaS.`}
                   </p>
                 </a>
