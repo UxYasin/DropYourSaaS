@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 
 interface VotePillProps {
   listingId: string;
-  initialScore?: number;
-  initialUserVote?: 1 | -1 | 0;
+  initialScore?: number | null;
+  initialUserVote?: 1 | -1 | 0 | null;
   className?: string;
   size?: 'sm' | 'md';
 }
@@ -32,9 +32,12 @@ export function VotePill({
   className,
   size = 'md',
 }: VotePillProps) {
-  const [score, setScore] = useState<number>(initialScore);
-  const [userVote, setUserVote] = useState<1 | -1 | 0>(initialUserVote);
+  const [optimisticScore, setOptimisticScore] = useState<number | null>(null);
+  const [optimisticVote, setOptimisticVote] = useState<1 | -1 | 0 | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const score = optimisticScore !== null ? optimisticScore : (initialScore ?? 0);
+  const userVote = optimisticVote !== null ? optimisticVote : ((initialUserVote as 1 | -1 | 0) ?? 0);
 
   const handleVote = async (targetDirection: 1 | -1, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -42,8 +45,10 @@ export function VotePill({
 
     if (isSubmitting || !listingId) return;
 
-    const newDirection = userVote === targetDirection ? 0 : targetDirection;
+    // 1. Calculate direction (toggle to 0 if clicking the same button)
+    const newDirection: 1 | -1 | 0 = userVote === targetDirection ? 0 : targetDirection;
 
+    // 2. Calculate optimistic delta
     let delta = 0;
     if (userVote === 0) {
       delta = newDirection;
@@ -56,8 +61,9 @@ export function VotePill({
     const prevScore = score;
     const prevVote = userVote;
 
-    setScore((prev) => prev + delta);
-    setUserVote(newDirection);
+    // Optimistic update
+    setOptimisticScore(score + delta);
+    setOptimisticVote(newDirection);
     setIsSubmitting(true);
 
     try {
@@ -73,17 +79,19 @@ export function VotePill({
       const data = await res.json();
 
       if (res.ok && typeof data.netScore === 'number') {
-        setScore(data.netScore);
+        setOptimisticScore(data.netScore);
         if (typeof data.userVote === 'number') {
-          setUserVote(data.userVote as 1 | -1 | 0);
+          setOptimisticVote(data.userVote as 1 | -1 | 0);
         }
       } else {
-        setScore(prevScore);
-        setUserVote(prevVote);
+        // Revert on error
+        setOptimisticScore(prevScore);
+        setOptimisticVote(prevVote);
       }
     } catch {
-      setScore(prevScore);
-      setUserVote(prevVote);
+      // Revert on network exception
+      setOptimisticScore(prevScore);
+      setOptimisticVote(prevVote);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,15 +108,19 @@ export function VotePill({
         'inline-flex items-center rounded-full bg-zinc-200/80 dark:bg-zinc-900/80 border border-zinc-300/80 dark:border-zinc-800/80 px-1.5 py-0.5 backdrop-blur-sm select-none transition-all shadow-xs',
         className
       )}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
     >
       {/* Upvote Button */}
       <button
         type="button"
         onClick={(e) => handleVote(1, e)}
         disabled={isSubmitting}
-        title="Upvote"
+        aria-label="Upvote"
+        title={isUpvoted ? 'Remove upvote' : 'Upvote'}
         className={cn(
-          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none',
+          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none active:scale-90',
           isUpvoted
             ? 'text-[#FF4500] fill-[#FF4500]'
             : 'text-zinc-500 dark:text-zinc-400 hover:text-[#FF4500]'
@@ -136,9 +148,10 @@ export function VotePill({
         type="button"
         onClick={(e) => handleVote(-1, e)}
         disabled={isSubmitting}
-        title="Downvote"
+        aria-label="Downvote"
+        title={isDownvoted ? 'Remove downvote' : 'Downvote'}
         className={cn(
-          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none',
+          'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none active:scale-90',
           isDownvoted
             ? 'text-[#7193FF] fill-[#7193FF]'
             : 'text-zinc-500 dark:text-zinc-400 hover:text-[#7193FF]'
@@ -151,3 +164,4 @@ export function VotePill({
     </div>
   );
 }
+

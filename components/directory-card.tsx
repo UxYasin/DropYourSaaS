@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Clock, ExternalLink } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 import { siteCopy } from '@/lib/copy';
 import { VotePill } from '@/components/VotePill';
+import { FaviconImage } from '@/components/favicon-image';
+import { PreviewImage } from '@/components/preview-image';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
@@ -21,12 +22,10 @@ interface DirectoryCardProps {
 
 export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProps) {
   const [meta, setMeta] = useState<MetaData | null>(null);
-  const [clicks, setClicks] = useState(item.clicks);
+  const [clickedExtra, setClickedExtra] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setClicks(item.clicks);
-  }, [item.clicks]);
+  const clicks = (item.clicks || 0) + clickedExtra;
 
   useEffect(() => {
     let active = true;
@@ -47,13 +46,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
 
   const title = meta?.title || item.name;
   const description = meta?.description || `Explore ${item.name} — verified software tools & developer services listed on DropYourSaaS.`;
-  const favicon = meta?.favicon || `https://www.google.com/s2/favicons?domain=${item.name}&sz=128`;
-  const previewImageUrl = meta?.image || (item as any).preview_image_url || (item as any).og_image || null;
+  const previewImageUrl = meta?.image || item.preview_image_url || null;
 
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
-    setClicks((prev) => prev + 1);
+    setClickedExtra((prev) => prev + 1);
     trackEvent('outbound_click', { url: item.url, rank: item.rank, name: item.name });
 
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
@@ -93,13 +91,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 className="shrink-0"
               >
                 <div className="size-14 sm:size-16 rounded-[14px] bg-muted/80 p-1.5 border border-border/80 shadow-sm flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <Image
-                    src={favicon}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="size-full object-contain rounded-[10px]"
-                    unoptimized
+                  <FaviconImage
+                    url={item.url}
+                    name={item.name}
+                    src={meta?.favicon}
+                    size={52}
+                    containerClassName="rounded-[10px] size-full"
                   />
                 </div>
               </a>
@@ -159,24 +156,23 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             </span>
           </div>
 
-          {previewImageUrl ? (
-            <div className="mt-4 pt-3 border-t border-border/60">
-              <a
-                href={href}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                onClick={handleClick}
-                className="block relative w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-xl border border-border/80 bg-muted/40 group/preview shadow-xs"
-              >
-                <img
-                  src={previewImageUrl}
-                  alt={item.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover/preview:scale-[1.02]"
-                  loading="lazy"
-                />
-              </a>
-            </div>
-          ) : null}
+          {/* Large Preview Banner for Spot #1 */}
+          <div className="mt-4 pt-3 border-t border-border/60">
+            <a
+              href={href}
+              target="_blank"
+              rel="sponsored noopener noreferrer"
+              onClick={handleClick}
+              className="block"
+            >
+              <PreviewImage
+                src={previewImageUrl}
+                url={item.url}
+                name={item.name}
+                title={title}
+              />
+            </a>
+          </div>
         </Card>
       </div>
     );
@@ -223,13 +219,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 className="shrink-0"
               >
                 <div className="size-12 sm:size-14 rounded-[14px] bg-background/90 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <Image
-                    src={favicon}
-                    alt={item.name}
-                    width={56}
-                    height={56}
-                    className="size-full object-contain rounded-[8px]"
-                    unoptimized
+                  <FaviconImage
+                    url={item.url}
+                    name={item.name}
+                    src={meta?.favicon}
+                    size={44}
+                    containerClassName="rounded-[8px] size-full"
                   />
                 </div>
               </a>
@@ -323,13 +318,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 className="shrink-0"
               >
                 <div className="size-10 sm:size-11 rounded-[12px] bg-background/80 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <Image
-                    src={favicon}
-                    alt={item.name}
-                    width={44}
-                    height={44}
-                    className="size-full object-contain rounded-[8px]"
-                    unoptimized
+                  <FaviconImage
+                    url={item.url}
+                    name={item.name}
+                    src={meta?.favicon}
+                    size={36}
+                    containerClassName="rounded-[8px] size-full"
                   />
                 </div>
               </a>
@@ -404,13 +398,12 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               className="shrink-0"
             >
               <div className="size-7 sm:size-8 rounded-lg bg-muted/60 p-0.5 border border-border/50 flex items-center justify-center overflow-hidden">
-                <Image
-                  src={favicon}
-                  alt={item.name}
-                  width={32}
-                  height={32}
-                  className="size-full object-contain rounded-[4px]"
-                  unoptimized
+                <FaviconImage
+                  url={item.url}
+                  name={item.name}
+                  src={meta?.favicon}
+                  size={26}
+                  containerClassName="rounded-[4px] size-full"
                 />
               </div>
             </a>
@@ -457,3 +450,4 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
     </div>
   );
 }
+

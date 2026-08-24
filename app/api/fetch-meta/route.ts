@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       description = (ogDesc || metaDesc || description).trim();
 
       const appleIcon = $('link[rel="apple-touch-icon"]').attr('href');
-      const icon = $('link[rel="icon"]').attr('href');
+      const icon = $('link[rel="icon"]').attr('href') || $('link[rel="shortcut icon"]').attr('href');
       const extractedFavicon = appleIcon || icon;
       if (extractedFavicon) {
         try {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         } catch {}
       }
 
-      const ogImage = $('meta[property="og:image"]').attr('content') || $('meta[name="twitter:image"]').attr('content');
+      const ogImage = $('meta[property="og:image"]').attr('content') || $('meta[name="twitter:image"]').attr('content') || $('meta[name="image"]').attr('content');
       if (ogImage) {
         try {
           image = new URL(ogImage, normalizedUrl).toString();

@@ -8,8 +8,9 @@ import { DataFastAnalytics } from '@/components/datafast-analytics';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'DropYourSaaS · A realtime database & marketplace for SaaS owners',
-  description: 'A realtime database & marketplace for SaaS owners. Discover, buy, and sell verified software tools.',
+  title: 'DropYourSaaS · Pay-to-Rank Software Discovery & Advertising Platform',
+  description:
+    'The real-time discovery and direct advertising platform for SaaS founders. Pay-to-rank leaderboard, instant indexation, permanent SEO backlinks, and high-visibility sponsor slots.',
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png' },

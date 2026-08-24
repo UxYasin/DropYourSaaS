@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { LatestActivitySkeleton } from '@/components/latest-activity-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 import { siteCopy } from '@/lib/copy';
+import { FaviconImage } from '@/components/favicon-image';
 
 export function LatestActivity() {
   const [items, setItems] = useState<{ name: string; rank: number; amount: string; time: string; url: string }[]>([]);
@@ -87,13 +86,11 @@ export function LatestActivity() {
                   className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
                 >
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <Image
-                      src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
-                      alt={item.name}
-                      width={14}
-                      height={14}
-                      className="rounded flex-shrink-0"
-                      unoptimized
+                    <FaviconImage
+                      url={item.url}
+                      name={item.name}
+                      size={15}
+                      containerClassName="rounded size-3.5 shrink-0"
                     />
                     <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
                       {item.name}

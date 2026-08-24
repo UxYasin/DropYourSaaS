@@ -1,76 +1,134 @@
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Zap, Mail, CheckCircle2 } from 'lucide-react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { MobileLayout } from '@/components/mobile-layout';
 
 export const metadata = {
-  title: 'Refund Policy | DropYourSaaS',
-  description: 'Refund Policy details for paid sponsorships and advertising on DropYourSaaS.',
+  title: 'Refund & Cancellation Policy | DropYourSaaS',
+  description: 'Refund Policy, cancellation terms, and digital goods delivery details for DropYourSaaS.',
 };
 
 export default function RefundsPage() {
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans">
-      <div className="max-w-3xl mx-auto py-16 px-6 space-y-12">
+    <MobileLayout>
+      <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors">
+        <Header />
+
+      <main className="flex-1 max-w-4xl mx-auto py-10 sm:py-16 px-4 sm:px-6 space-y-12">
         {/* Top Back Link */}
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-[#08F9C9] transition-colors group"
+            className="inline-flex items-center gap-2 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="size-3.5 group-hover:-translate-x-1 transition-transform" />
-            ← Back to Home
+            ← Back to Leaderboard
           </Link>
         </div>
 
         {/* Header */}
-        <div className="space-y-4 border-b border-zinc-800 pb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-mono font-bold">
+        <div className="space-y-4 border-b border-border/80 pb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-400 text-xs font-mono font-bold">
             <RefreshCw className="size-3.5" />
-            Billing Transparency
+            Billing Transparency &amp; Digital Goods Policy
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Refund Policy
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
+            Refund &amp; Cancellation Policy
           </h1>
-          <p className="text-xs font-mono text-zinc-500">Last Updated: August 2026</p>
+          <p className="text-xs font-mono text-muted-foreground">
+            Effective Date: August 24, 2026 · Version 3.2
+          </p>
         </div>
 
-        {/* Long-form Legal Content */}
-        <div className="text-zinc-300 text-sm leading-relaxed space-y-8">
+        {/* Policy Body */}
+        <div className="text-muted-foreground text-sm leading-relaxed space-y-10 font-sans">
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">1. General Policy</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">1. Immediate Execution of Digital Goods</h2>
             <p>
-              Because our Side-panel sponsor spots provide immediate digital exposure, prime inventory allocation, and high-visibility placement across our directory index views, all purchases of sponsor spots are final and non-refundable once the advertisement is successfully published on the platform.
+              DropYourSaaS delivers direct digital advertising and directory indexing services. When you complete a transaction for a <strong>Pay-to-Rank Leaderboard Boost</strong> or a <strong>Pinned Side-Rail Sponsor Spot</strong>, inventory allocation, search engine indexing, and real-time public exposure begin immediately.
             </p>
+            <div className="p-4 rounded-2xl bg-card border border-border/80 space-y-2 text-xs">
+              <div className="font-bold text-foreground flex items-center gap-2">
+                <Zap className="size-4 text-amber-500" />
+                Standard Policy for Instant Digital Marketing Services:
+              </div>
+              <p>
+                Due to the immediate distribution of backlinks and digital exposure upon transaction confirmation, standard advertising fees and leaderboard boost payments are non-refundable once the listing is live.
+              </p>
+            </div>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">2. Exceptional Circumstances</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">2. Recurring Sponsorships &amp; Cancellations</h2>
             <p>
-              Refund requests will only be considered under specific, verifiable technical failures—such as a critical platform outage preventing your ad from displaying during your active 7-day window, or an accidental double-charge caused by a payment gateway error.
+              If you have purchased a monthly or multi-period Pinned Side-Rail Sponsorship:
             </p>
+            <ul className="list-disc pl-5 space-y-1.5 marker:text-purple-500 text-xs sm:text-sm">
+              <li>
+                <strong>Cancel Anytime:</strong> You may cancel any recurring subscription at any time prior to the next renewal billing date via your invoice link or by emailing support.
+              </li>
+              <li>
+                <strong>Active Period Guarantee:</strong> Your sponsored ad spot will remain live on the designated rail until the end of your prepaid billing period.
+              </li>
+              <li>
+                <strong>No Pro-Rated Mid-Cycle Refunds:</strong> We do not issue partial refunds for days remaining in an active cycle once the period has commenced.
+              </li>
+            </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">3. Timeframe for Claims</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">3. Technical Downtime &amp; Exceptional Refunds</h2>
             <p>
-              Any dispute, billing error inquiry, or refund request must be submitted in writing within 48 hours of the initial transaction timestamp.
+              We are committed to delivering the exact advertising impressions and placement you purchased. Full or partial refunds will be promptly granted under the following circumstances:
+            </p>
+            <div className="space-y-3">
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border/80 text-xs space-y-1">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-500" />
+                  Technical Outage / Failure to Render
+                </div>
+                <p>
+                  If an active pinned ad spot fails to render or display on the platform due to verified server outages for more than 24 consecutive hours.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border/80 text-xs space-y-1">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-500" />
+                  Duplicate Charge
+                </div>
+                <p>
+                  If an accidental double charge occurs due to a payment gateway glitch, the duplicate transaction will be refunded immediately in full.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">4. Dispute &amp; Review Timeframe</h2>
+            <p>
+              Any refund inquiry or billing review request must be submitted within <strong>7 days</strong> of the transaction date.
             </p>
           </section>
 
-          <section className="space-y-3 pt-4 border-t border-zinc-900">
-            <h2 className="text-xl font-bold text-white">4. How to Request Review</h2>
+          <section className="space-y-3 pt-6 border-t border-border/80">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Requesting a Billing Review</h2>
             <p>
-              To request a review of your transaction, please email{' '}
-              <a
-                href="mailto:yasin@dropyoursaas.com"
-                className="text-[#08F9C9] font-mono hover:underline"
-              >
-                yasin@dropyoursaas.com
-              </a>{' '}
-              with your order receipt / transaction ID, registered email, and a clear description of the issue.
+              To request a refund or review of your transaction, please email our billing team with your Order ID, registered email, and website URL:
             </p>
+            <div className="flex items-center gap-2 text-xs font-mono text-purple-600 dark:text-purple-400">
+              <Mail className="size-4" />
+              <a href="mailto:billing@dropyoursaas.com" className="hover:underline">
+                billing@dropyoursaas.com
+              </a>
+            </div>
           </section>
         </div>
+      </main>
+
+      <Footer />
       </div>
-    </div>
+    </MobileLayout>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -43,50 +43,39 @@ export function SubmissionModal({
   onSuccess,
 }: SubmissionModalProps) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [url, setUrl] = useState('');
-  const [favicon, setFavicon] = useState('');
-  const [screenshotUrl, setScreenshotUrl] = useState('');
-  const [category, setCategory] = useState('SaaS');
-  const [isForSale, setIsForSale] = useState(false);
-  const [email, setEmail] = useState('');
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [url, setUrl] = useState(initialData?.url || '');
+  const [favicon, setFavicon] = useState(initialData?.favicon || '');
+  const [screenshotUrl, setScreenshotUrl] = useState(initialData?.screenshotUrl || '');
+  const [category, setCategory] = useState(initialData?.category || 'SaaS');
+  const [email, setEmail] = useState(initialData?.email || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title || '');
-      setDescription(initialData.description || '');
-      setUrl(initialData.url || '');
-      setFavicon(initialData.favicon || '');
-      setScreenshotUrl(initialData.screenshotUrl || '');
-      setCategory(initialData.category || 'SaaS');
-      setIsForSale(Boolean(initialData.isForSale));
-      setEmail(initialData.email || '');
-      setError(null);
-      setRateLimitError(null);
-    }
-  }, [initialData]);
+  // Sync state when new initialData arrives
+  const initialUrl = initialData?.url;
+  const [prevUrl, setPrevUrl] = useState(initialUrl);
+  if (initialUrl !== prevUrl) {
+    setPrevUrl(initialUrl);
+    setTitle(initialData?.title || '');
+    setDescription(initialData?.description || '');
+    setUrl(initialData?.url || '');
+    setFavicon(initialData?.favicon || '');
+    setScreenshotUrl(initialData?.screenshotUrl || '');
+    setCategory(initialData?.category || 'SaaS');
+    setEmail(initialData?.email || '');
+    setError(null);
+    setRateLimitError(null);
+  }
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!isOpen || !initialData || !mounted) return null;
+  if (!isOpen || !initialData || typeof document === 'undefined') return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) {
       setError('Please provide a valid URL');
-      return;
-    }
-
-    if (isForSale && !email.trim()) {
-      setError('Email is required to list your project for sale.');
       return;
     }
 
@@ -98,7 +87,6 @@ export function SubmissionModal({
       url,
       bid,
       title,
-      rank: selectedRank,
     });
 
     if (IS_FREE_MODE) {
@@ -110,23 +98,23 @@ export function SubmissionModal({
             url,
             title: title.trim() || undefined,
             description: description.trim() || undefined,
-            category,
-            isForSale,
-            email: email.trim(),
-            bid,
-            requestedRank: selectedRank,
+            faviconUrl: favicon || undefined,
+            screenshotUrl: screenshotUrl || undefined,
+            category: category || 'SaaS',
+            forSale: false,
+            email: email.trim() || undefined,
+            targetRank: selectedRank,
           }),
         });
 
         const data = await res.json();
 
-        if (res.status === 429) {
-          setRateLimitError(data.message || 'You can only submit one free listing every 24 hours.');
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (!res.ok) {
+        if (!res.ok || !data.success) {
+          if (data.rateLimited) {
+            setRateLimitError(data.error || 'Submission limit reached for this domain. Please try again later.');
+            setIsSubmitting(false);
+            return;
+          }
           setError(data.error || 'Failed to submit listing. Please try again.');
           setIsSubmitting(false);
           return;
@@ -139,7 +127,7 @@ export function SubmissionModal({
         } else {
           router.push(data.redirectUrl || `/thank-you?email=${encodeURIComponent(email.trim())}`);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Submission catch error:', err);
         setError('An unexpected network error occurred. Please try again.');
       } finally {
@@ -315,76 +303,46 @@ export function SubmissionModal({
 
           {/* Category & For Sale Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
+            <div className="w-full">
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5 font-sans">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 text-white font-sans text-xs h-10 rounded-xl px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-10 px-3 rounded-xl border border-border bg-background text-foreground font-sans text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
               >
                 {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat} className="bg-zinc-950 text-white">
+                  <option key={cat} value={cat} className="bg-card text-foreground">
                     {cat}
                   </option>
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block text-xs font-medium text-zinc-300 mb-1.5 font-sans">
-                Marketplace
-              </label>
-              <div className="w-full h-10 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-sans font-medium flex items-center justify-between">
-                <span className="text-zinc-300">List for Sale?</span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isForSale}
-                  onClick={() => setIsForSale(!isForSale)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    isForSale ? 'bg-emerald-500' : 'bg-zinc-700'
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                      isForSale ? 'translate-x-5' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
           </div>
 
-          {/* Email input (Required only when List for Sale is enabled) */}
-          {isForSale && (
-            <div className="space-y-1 animate-in fade-in-50 duration-200">
-              <label className="block text-xs font-medium text-zinc-300 font-sans">
-                Your Email <span className="text-emerald-400 font-normal">(Required for Marketplace)</span>
-              </label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-primary"
-                required={isForSale}
-              />
-              <p className="text-[11px] font-body text-zinc-400 leading-snug">
-                Required to receive buyer bids and direct acquisition inquiries.
-              </p>
-            </div>
-          )}
+          {/* Optional Contact Email for Ownership / Invoicing */}
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-muted-foreground font-sans">
+              Contact / Invoicing Email <span className="text-muted-foreground/60 font-normal">(Optional)</span>
+            </label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="founder@yourproduct.com"
+              className="bg-background border-border text-foreground font-sans text-xs sm:text-sm h-10 rounded-xl focus-visible:ring-amber-500"
+            />
+          </div>
 
           {/* Screenshot / OG Image preview banner */}
           {screenshotUrl && (
             <div className="pt-1">
-              <label className="block text-xs font-medium text-zinc-400 mb-1 font-sans flex items-center gap-1">
-                <ImageIcon className="size-3 text-zinc-400" />
+              <label className="block text-xs font-medium text-muted-foreground mb-1 font-sans flex items-center gap-1">
+                <ImageIcon className="size-3 text-muted-foreground" />
                 Featured Preview
               </label>
-              <div className="relative h-24 w-full rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+              <div className="relative h-24 w-full rounded-xl bg-muted/40 border border-border overflow-hidden">
                 <Image
                   src={screenshotUrl}
                   alt="Website preview"
@@ -401,23 +359,27 @@ export function SubmissionModal({
             <Button
               type="button"
               onClick={onClose}
-              className="w-1/3 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-white font-sans font-bold text-xs sm:text-sm h-11 transition-colors flex items-center justify-center shrink-0"
+              className="w-1/3 rounded-full border border-border bg-muted/50 hover:bg-muted text-foreground font-sans font-bold text-xs sm:text-sm h-11 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || Boolean(rateLimitError)}
-              className="flex-1 rounded-full bg-white text-black hover:bg-zinc-200 disabled:opacity-50 font-sans font-bold text-xs sm:text-sm h-11 shadow-lg flex items-center justify-center gap-2"
+              className="flex-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Securing Spot...
+                  <span>Processing...</span>
                 </>
               ) : (
                 <>
-                  Save & Continue {IS_FREE_MODE ? '(Free)' : `($${bid})`}
+                  <span>
+                    {IS_FREE_MODE
+                      ? `Publish Listing #${selectedRank}`
+                      : `Boost Listing · $${bid}`}
+                  </span>
                   <ArrowRight className="size-4" />
                 </>
               )}
@@ -428,4 +390,4 @@ export function SubmissionModal({
     </div>,
     document.body
   );
-}
+};

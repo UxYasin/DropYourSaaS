@@ -15,11 +15,16 @@ import { cn } from '@/lib/utils';
 export function Header() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const { toggleSidebar } = useSidebar();
+  
+  let toggleSidebar = () => {};
+  try {
+    const sidebar = useSidebar();
+    toggleSidebar = sidebar.toggleSidebar;
+  } catch {}
 
   return (
     <header className="sticky top-3 z-40 px-4 w-full max-w-4xl mx-auto flex justify-center">
-      <div className="w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 bg-background/70 backdrop-blur-md border border-transparent shadow-none transition-colors">
+      <div className="w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 bg-background/80 dark:bg-zinc-950/80 backdrop-blur-md border border-border/60 shadow-xs transition-colors">
         <div className="flex items-center gap-3">
           {isMobile && (
             <Button variant="ghost" size="icon-sm" onClick={toggleSidebar}>
@@ -47,37 +52,39 @@ export function Header() {
           </Link>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
-          <nav className={cn('flex items-center gap-2 sm:gap-3', isMobile && 'hidden')}>
+          <nav className={cn('flex items-center gap-1.5 sm:gap-2', isMobile && 'hidden')}>
             <Link
               href="/"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/' ? 'text-foreground font-semibold bg-muted/70' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                pathname === '/'
+                  ? 'text-foreground font-semibold bg-muted/70'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
               Leaderboard
             </Link>
             <Link
-              href="/buy-sell"
+              href="/advertise"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/buy-sell'
+                pathname === '/advertise' || pathname === '/pricing'
                   ? 'text-foreground font-semibold bg-muted/70'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
-              Buy/Sell
+              Advertise
             </Link>
             <Link
-              href="/pricing"
+              href="/rules"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/pricing'
+                pathname === '/rules'
                   ? 'text-foreground font-semibold bg-muted/70'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
-              Pricing
+              Guidelines
             </Link>
           </nav>
           <LiveStatsPill compact />
@@ -88,3 +95,4 @@ export function Header() {
     </header>
   );
 }
+

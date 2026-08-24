@@ -4,10 +4,12 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800/80 py-8 bg-zinc-50/50 dark:bg-black/50">
-      <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-zinc-500 dark:text-zinc-400">
-        <div className="flex flex-col items-center md:items-start gap-3">
-          <p>© 2026 DropYourSaaS · A realtime database &amp; marketplace for SaaS owners</p>
+    <footer className="mt-auto border-t border-border/80 py-8 bg-muted/20 backdrop-blur-xs">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
+        <div className="flex flex-col items-center md:items-start gap-2.5">
+          <p className="font-mono">
+            © 2026 DropYourSaaS · Pay-to-Rank Software Discovery &amp; Advertising Platform
+          </p>
           <a
             href="https://tools.launchllama.co?utm_source=badge&utm_medium=referral"
             target="_blank"
@@ -20,41 +22,40 @@ export function Footer() {
               alt="As seen on Launch Llama Newsletter"
               width={200}
               height={50}
-              className="h-10 w-auto object-contain"
+              className="h-9 w-auto object-contain"
             />
           </a>
         </div>
 
         <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 text-xs font-medium">
-          <Link href="/pricing" className="hover:text-zinc-900 dark:hover:text-white transition-colors text-amber-500 font-bold">
-            Pricing
+          <Link
+            href="/advertise"
+            className="text-amber-600 dark:text-amber-400 font-bold hover:underline transition-colors"
+          >
+            Advertise
           </Link>
           <span>·</span>
-          <Link href="/terms" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <Link href="/terms" className="hover:text-foreground transition-colors">
             Terms of Service
           </Link>
           <span>·</span>
-          <Link href="/privacy" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
             Privacy Policy
           </Link>
           <span>·</span>
-          <Link href="/refunds" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <Link href="/refunds" className="hover:text-foreground transition-colors">
             Refund Policy
           </Link>
           <span>·</span>
-          <Link href="/stats" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-            Directory Stats
-          </Link>
-          <span>·</span>
-          <Link href="/about" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
-            About
-          </Link>
-          <span>·</span>
-          <Link href="/rules" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
+          <Link href="/rules" className="hover:text-foreground transition-colors">
             Guidelines
+          </Link>
+          <span>·</span>
+          <Link href="/about" className="hover:text-foreground transition-colors">
+            About
           </Link>
         </div>
       </div>
     </footer>
   );
-}
+}

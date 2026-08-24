@@ -1,21 +1,26 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { Card } from '@/components/ui/card';
-import { Clock, MousePointerClick } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Clock } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
-
-function getRankStyle(rank: number) {
-  if (rank === 1) return 'bg-amber-500/10 text-amber-600 border-amber-500/30';
-  if (rank === 2) return 'bg-slate-400/10 text-slate-500 border-slate-400/30';
-  if (rank === 3) return 'bg-orange-600/10 text-orange-700 border-orange-600/30';
-  return 'bg-muted text-muted-foreground border-transparent';
-}
+import { FaviconImage } from '@/components/favicon-image';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
+}
+
+function getRankStyle(rank: number) {
+  switch (rank) {
+    case 1:
+      return 'bg-amber-500/10 text-amber-600 border-amber-500/30';
+    case 2:
+      return 'bg-slate-500/10 text-slate-600 border-slate-500/30';
+    case 3:
+      return 'bg-orange-500/10 text-orange-600 border-orange-500/30';
+    default:
+      return 'bg-muted text-muted-foreground border-transparent';
+  }
 }
 
 interface LeaderboardCardProps {
@@ -27,7 +32,6 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
   const [meta, setMeta] = useState<MetaData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchMeta = async () => {
@@ -44,7 +48,6 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
 
   const title = meta?.title || item.name;
   const description = meta?.description || '';
-  const favicon = meta?.favicon || `https://www.google.com/s2/favicons?domain=${item.name}&sz=32`;
 
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
@@ -73,13 +76,12 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
                 >
                   #{item.rank}
                 </span>
-                <Image
-                  src={favicon}
-                  alt={item.name}
-                  width={36}
-                  height={36}
-                  className="rounded-lg shrink-0 border border-border/40"
-                  unoptimized
+                <FaviconImage
+                  url={item.url}
+                  name={item.name}
+                  src={meta?.favicon}
+                  size={36}
+                  containerClassName="rounded-lg shrink-0 border border-border/40"
                 />
               </div>
               <div className="min-w-0 flex-1">

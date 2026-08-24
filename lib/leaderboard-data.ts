@@ -20,6 +20,8 @@ export interface LeaderboardItem {
   user_vote?: 1 | -1 | 0;
   category?: string;
   claimed_at?: string;
+  favicon?: string;
+  preview_image_url?: string;
 }
 
 // Seed data for `supabase/seed.sql` / local development when no database is

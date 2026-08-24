@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
-import { PinAdModal, formatSlotLabel } from '@/components/pin-ad-modal';
-import { Pin, Sparkles } from 'lucide-react';
+import { PinAdModal } from '@/components/pin-ad-modal';
+import { Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FaviconImage } from '@/components/favicon-image';
 
 export interface RailCardItem {
   id: string;
@@ -186,7 +186,6 @@ export function BentoRails({ side }: BentoRailsProps) {
 
           const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
           const theme = BENTO_THEMES[themeIndex];
-          const favicon = `https://www.google.com/s2/favicons?domain=${card.name}&sz=128`;
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
           return (
@@ -214,13 +213,11 @@ export function BentoRails({ side }: BentoRailsProps) {
                       className="flex items-center gap-2.5 min-w-0 flex-1"
                     >
                       <div className="size-10 sm:size-11 rounded-xl bg-background/90 border border-border/60 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
-                        <Image
-                          src={favicon}
-                          alt={card.name}
-                          width={44}
-                          height={44}
-                          className="size-full object-contain rounded-[6px]"
-                          unoptimized
+                        <FaviconImage
+                          url={card.url}
+                          name={card.name}
+                          size={36}
+                          containerClassName="rounded-[6px] size-full"
                         />
                       </div>
                       <div className="min-w-0 flex-1">

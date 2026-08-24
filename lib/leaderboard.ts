@@ -77,7 +77,7 @@ export async function fetchLeaderboardFromDatabase(
     voterToken = cookieStore.get('voter_token')?.value;
   } catch {}
 
-  let userVotesMap = new Map<string, 1 | -1>();
+  const userVotesMap = new Map<string, 1 | -1>();
   if (voterToken) {
     try {
       const { data: votes } = await supabase
@@ -93,7 +93,7 @@ export async function fetchLeaderboardFromDatabase(
     } catch {}
   }
 
-  let dbEntries: any[] = [];
+  let dbEntries: Record<string, unknown>[] = [];
   try {
     let query = supabase
       .from('leaderboard_entries')
@@ -118,7 +118,7 @@ export async function fetchLeaderboardFromDatabase(
 
     const { data: entryData } = await query;
     if (entryData && entryData.length > 0) {
-      dbEntries = entryData;
+      dbEntries = entryData as Record<string, unknown>[];
     }
   } catch (err) {
     console.warn('Error loading live Supabase listings:', err);
@@ -127,27 +127,30 @@ export async function fetchLeaderboardFromDatabase(
   // If DB entries exist and sorting is not default 'rank', return directly ordered by score!
   if (dbEntries.length > 0 && sortBy !== 'rank') {
     return dbEntries.map((row, idx) => {
+      const urlStr = String(row.url || '');
       let hostname = 'SaaS Product';
       try {
-        hostname = row.url ? new URL(row.url).hostname.replace(/^www\./, '') : 'SaaS Product';
+        hostname = urlStr ? new URL(urlStr).hostname.replace(/^www\./, '') : 'SaaS Product';
       } catch {
-        hostname = row.url || 'SaaS Product';
+        hostname = urlStr || 'SaaS Product';
       }
       return {
-        id: row.id,
+        id: String(row.id || ''),
         rank: idx + 1,
-        name: row.name || row.title || hostname,
-        bid: (row.bid_cents || 0) / 100,
-        url: row.url,
-        clicks: row.clicks || 0,
-        time: formatRelativeTime(row.claimed_at || row.created_at || new Date().toISOString()),
-        upvotes: row.upvotes || 0,
-        downvotes: row.downvotes || 0,
-        net_score: row.net_score || 0,
-        hot_score: row.hot_score || 0,
-        user_vote: userVotesMap.get(row.id) || 0,
-        category: row.category || 'SaaS',
-        claimed_at: row.claimed_at || row.created_at,
+        name: String(row.name || row.title || hostname),
+        bid: Number(row.bid_cents || 0) / 100,
+        url: urlStr,
+        clicks: Number(row.clicks || 0),
+        time: formatRelativeTime(String(row.claimed_at || row.created_at || new Date().toISOString())),
+        upvotes: Number(row.upvotes || 0),
+        downvotes: Number(row.downvotes || 0),
+        net_score: Number(row.net_score || 0),
+        hot_score: Number(row.hot_score || 0),
+        user_vote: userVotesMap.get(String(row.id || '')) || 0,
+        category: String(row.category || 'SaaS'),
+        claimed_at: String(row.claimed_at || row.created_at || ''),
+        favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
+        preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
       };
     });
   }
@@ -158,33 +161,36 @@ export async function fetchLeaderboardFromDatabase(
   const unrankedItems: LeaderboardItem[] = [];
 
   dbEntries.forEach((row) => {
+    const urlStr = String(row.url || '');
     let hostname = 'SaaS Product';
     try {
-      hostname = row.url ? new URL(row.url).hostname.replace(/^www\./, '') : 'SaaS Product';
+      hostname = urlStr ? new URL(urlStr).hostname.replace(/^www\./, '') : 'SaaS Product';
     } catch {
-      hostname = row.url || 'SaaS Product';
+      hostname = urlStr || 'SaaS Product';
     }
 
     const assignedRank = Number(row.rank || row.target_rank) || 0;
     const item: LeaderboardItem = {
-      id: row.id,
+      id: String(row.id || ''),
       rank: assignedRank,
-      name: row.name || row.title || hostname,
-      bid: (row.bid_cents || 0) / 100,
-      url: row.url,
-      clicks: row.clicks || 0,
-      time: formatRelativeTime(row.claimed_at || row.created_at || new Date().toISOString()),
-      upvotes: row.upvotes || 0,
-      downvotes: row.downvotes || 0,
-      net_score: row.net_score || 0,
-      hot_score: row.hot_score || 0,
-      user_vote: userVotesMap.get(row.id) || 0,
-      category: row.category || 'SaaS',
-      claimed_at: row.claimed_at || row.created_at,
+      name: String(row.name || row.title || hostname),
+      bid: Number(row.bid_cents || 0) / 100,
+      url: urlStr,
+      clicks: Number(row.clicks || 0),
+      time: formatRelativeTime(String(row.claimed_at || row.created_at || new Date().toISOString())),
+      upvotes: Number(row.upvotes || 0),
+      downvotes: Number(row.downvotes || 0),
+      net_score: Number(row.net_score || 0),
+      hot_score: Number(row.hot_score || 0),
+      user_vote: userVotesMap.get(String(row.id || '')) || 0,
+      category: String(row.category || 'SaaS'),
+      claimed_at: String(row.claimed_at || row.created_at || ''),
+      favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
+      preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
     };
 
-    if (row.url) {
-      realUrlSet.add(row.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
+    if (urlStr) {
+      realUrlSet.add(urlStr.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
     }
 
     if (assignedRank > 0 && !realItemsMap.has(assignedRank)) {

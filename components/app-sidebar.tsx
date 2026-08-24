@@ -16,8 +16,9 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { title: 'Leaderboard', href: '/' },
-  { title: 'Buy/Sell', href: '/buy-sell' },
-  { title: 'Pricing', href: '/pricing' },
+  { title: 'Advertise', href: '/advertise' },
+  { title: 'Guidelines', href: '/rules' },
+  { title: 'About', href: '/about' },
 ];
 
 export function AppSidebar() {

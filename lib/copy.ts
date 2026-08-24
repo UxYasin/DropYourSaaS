@@ -2,46 +2,33 @@ export const IS_FREE_MODE = process.env.NEXT_PUBLIC_IS_FREE_MODE === 'true';
 
 export const siteCopy = {
   hero: {
-    headline: 'Drop Your SaaS for FREE',
-    description: 'Paying zero dollar for the perfect spot. Get free audience.',
-    subtext: 'Already listed? Re-submit your project link after 24 hours to refresh your placement.',
-    cta: 'Claim #1',
-    urlPlaceholder: 'Your SaaS URL or X',
+    headline: 'Drop Your SaaS & Pay to Rank',
+    description: 'The real-time software discovery & direct advertising platform. Instant indexation, permanent SEO backlinks, and pay-to-rank leaderboard exposure.',
+    subtext: 'Boost your ranking tier at any time to capture prime visibility on the leaderboard and side rails.',
+    cta: 'Claim #1 Spot',
+    urlPlaceholder: 'Your SaaS URL or domain (e.g. yourproduct.com)',
   },
   feed: {
-    podiumButton: 'Take this spot',
+    podiumButton: 'Claim this spot',
     listingButton: 'Claim',
     showPrices: !IS_FREE_MODE,
   },
   guidelines: {
-    indexingRules: IS_FREE_MODE
-      ? [
-          'Directory listings are 100% free with instant 1-click email verification.',
-          'To maintain high-quality listings and prevent spam, submissions are limited to 1 per 24 hours per account.',
-          'Submissions placed on the index are discoverable and indexed in the public feed immediately upon email confirmation.',
-          'Chronological priority applies to verified submissions.',
-        ]
-      : [
-          'Directory listings start at $1 USD minimum.',
-          'Products featured on the index maintain their verified placement tier based on their profile indexing level.',
-          'Submissions placed at any tier are indexed in the public directory and discoverable immediately.',
-          'Equal indexing tiers maintain chronologically ordered placements (earlier verified profiles maintain priority).',
-        ],
-    upgradeRules: IS_FREE_MODE
-      ? [
-          'Enter your previously listed website URL to re-verify or refresh your metadata.',
-          'Refresh cooldown is 24 hours per tool.',
-          'All profile metadata, titles, and preview descriptions are dynamically refreshed.',
-        ]
-      : [
-          'Enter your previously listed website URL or handle to upgrade your project to a higher tier.',
-          'Upgrades require a minimum $1 increase over your current tier; you only pay the upgrade difference.',
-          'All profile metadata, titles, and preview descriptions are dynamically refreshed upon upgrade.',
-        ],
+    indexingRules: [
+      'Directory listings start with dynamic self-serve promotion starting from $1.',
+      'Featured products maintain verified placement on the real-time leaderboard based on their active advertising tier.',
+      'Submissions are indexed in the public directory and discoverable immediately upon payment confirmation.',
+      'Chronological priority applies to equal advertising tiers (earlier verified profiles maintain position).',
+    ],
+    upgradeRules: [
+      'Enter your previously listed website URL to boost your project to a higher advertising tier.',
+      'Upgrades only require the price difference over your current tier.',
+      'All product metadata, titles, and preview descriptions are dynamically refreshed upon upgrade.',
+    ],
   },
   about: {
-    modelDescription: IS_FREE_MODE
-      ? 'The indexing system is transparent and self-serve: submit your SaaS profile for free to secure an active directory slot. Verified listings receive discoverability across our directory and trending feeds. Listings can be updated or refreshed every 24 hours.'
-      : 'The indexing system is transparent and self-serve: submit your SaaS profile to secure an active directory tier. Products with higher indexing tiers receive prime placement across our directory, trending feeds, and discoverability channels. Existing listings can upgrade their tier at any time by paying the tier difference.',
+    modelDescription:
+      'The indexing system is transparent and self-serve: submit your SaaS profile to secure an active advertising tier. Products with higher promotional tiers receive prime placement across our directory, trending feeds, and high-visibility side rails. Existing listings can upgrade their tier at any time.',
   },
 };
+

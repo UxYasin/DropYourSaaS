@@ -22,27 +22,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Get or generate voter_token cookie
+    // 1. Get or create persistent voter token in cookies
     const cookieStore = await cookies();
     let voterToken = cookieStore.get('voter_token')?.value;
-    let isNewCookie = false;
+    let setCookie = false;
 
     if (!voterToken) {
       voterToken = crypto.randomUUID();
-      isNewCookie = true;
+      setCookie = true;
     }
 
     const supabase = getSupabaseServerClient();
 
-    // 2. Perform vote action (0 = remove vote, 1/-1 = upsert vote)
+    // 2. Perform database operation
     if (direction === 0) {
-      await supabase
+      const { error: deleteErr } = await supabase
         .from('listing_votes')
         .delete()
         .eq('listing_id', listingId)
         .eq('voter_token', voterToken);
+
+      if (deleteErr) {
+        console.warn('listing_votes delete error:', deleteErr.message);
+      }
     } else {
-      await supabase
+      const { error: upsertErr } = await supabase
         .from('listing_votes')
         .upsert(
           {
@@ -53,66 +57,108 @@ export async function POST(req: NextRequest) {
           },
           { onConflict: 'listing_id,voter_token' }
         );
+
+      if (upsertErr) {
+        console.warn('listing_votes upsert error:', upsertErr.message);
+      }
     }
 
-    // 3. Query updated upvotes/downvotes/net_score for this listing
-    const { data: voteRows } = await supabase
-      .from('listing_votes')
-      .select('vote_type')
-      .eq('listing_id', listingId);
+    // 3. Recount and query latest scores
+    let netScore: number | null = null;
 
-    let upvotes = 0;
-    let downvotes = 0;
-    if (voteRows) {
-      voteRows.forEach((r) => {
-        if (r.vote_type === 1) upvotes++;
-        if (r.vote_type === -1) downvotes--;
-      });
-    }
-
-    const netScore = upvotes + downvotes; // upvotes + negative downvotes
-
-    // Update score columns on leaderboard_entries directly
-    await supabase
+    // Check leaderboard_entries
+    const { data: updatedEntry } = await supabase
       .from('leaderboard_entries')
-      .update({
-        upvotes,
-        downvotes: Math.abs(downvotes),
-        net_score: netScore,
-      })
-      .eq('id', listingId);
+      .select('net_score, upvotes, downvotes')
+      .eq('id', listingId)
+      .maybeSingle();
+
+    if (updatedEntry && typeof updatedEntry.net_score === 'number') {
+      netScore = updatedEntry.net_score;
+    } else {
+      // Check listings table
+      const { data: updatedListing } = await supabase
+        .from('listings')
+        .select('net_score, upvotes, downvotes')
+        .eq('id', listingId)
+        .maybeSingle();
+
+      if (updatedListing && typeof updatedListing.net_score === 'number') {
+        netScore = updatedListing.net_score;
+      }
+    }
+
+    // If trigger did not calculate or tables don't have columns yet, compute manually
+    if (netScore === null || netScore === undefined) {
+      const { data: voteRows } = await supabase
+        .from('listing_votes')
+        .select('vote_type')
+        .eq('listing_id', listingId);
+
+      let upvotes = 0;
+      let downvotes = 0;
+      if (voteRows) {
+        voteRows.forEach((r) => {
+          if (r.vote_type === 1) upvotes++;
+          if (r.vote_type === -1) downvotes++;
+        });
+      }
+      netScore = upvotes - downvotes;
+
+      // Best effort update on tables
+      try {
+        await supabase
+          .from('leaderboard_entries')
+          .update({
+            upvotes,
+            downvotes,
+            net_score: netScore,
+          })
+          .eq('id', listingId);
+      } catch {}
+
+      try {
+        await supabase
+          .from('listings')
+          .update({
+            upvotes,
+            downvotes,
+            net_score: netScore,
+          })
+          .eq('id', listingId);
+      } catch {}
+    }
 
     // Invalidate leaderboard cache
     await invalidateLeaderboardCache().catch(() => {});
 
-    // Prepare response
+    // 4. Return response with persistent cookie if new
     const response = NextResponse.json({
       success: true,
       listingId,
-      netScore,
+      netScore: netScore ?? 0,
       userVote: direction,
       voterToken,
     });
 
-    // Set voter_token cookie if new (1 year max-age)
-    if (isNewCookie) {
-      response.cookies.set({
-        name: 'voter_token',
-        value: voterToken,
+    if (setCookie) {
+      response.cookies.set('voter_token', voterToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 365,
+        maxAge: 60 * 60 * 24 * 365, // 1 year
         path: '/',
+        sameSite: 'lax',
       });
     }
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Vote API error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to process vote';
     return NextResponse.json(
-      { error: error.message || 'Failed to process vote' },
+      { error: message },
       { status: 500 }
     );
   }
 }
+

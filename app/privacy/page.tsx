@@ -1,98 +1,144 @@
 import Link from 'next/link';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, ShieldCheck, Cookie, Database, Mail } from 'lucide-react';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { MobileLayout } from '@/components/mobile-layout';
 
 export const metadata = {
   title: 'Privacy Policy | DropYourSaaS',
-  description: 'Privacy Policy and data protection details for DropYourSaaS users.',
+  description: 'Privacy Policy, data protection practices, and cookie disclosures for DropYourSaaS.',
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans">
-      <div className="max-w-3xl mx-auto py-16 px-6 space-y-12">
+    <MobileLayout>
+      <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors">
+        <Header />
+
+      <main className="flex-1 max-w-4xl mx-auto py-10 sm:py-16 px-4 sm:px-6 space-y-12">
         {/* Top Back Link */}
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-[#08F9C9] transition-colors group"
+            className="inline-flex items-center gap-2 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="size-3.5 group-hover:-translate-x-1 transition-transform" />
-            ← Back to Home
+            ← Back to Leaderboard
           </Link>
         </div>
 
         {/* Header */}
-        <div className="space-y-4 border-b border-zinc-800 pb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[#08F9C9] text-xs font-mono font-bold">
+        <div className="space-y-4 border-b border-border/80 pb-8">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
             <Lock className="size-3.5" />
-            Data Protection
+            Data Protection &amp; GDPR / CCPA Compliance
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground">
             Privacy Policy
           </h1>
-          <p className="text-xs font-mono text-zinc-500">Last Updated: August 2026</p>
+          <p className="text-xs font-mono text-muted-foreground">
+            Effective Date: August 24, 2026 · Version 3.2
+          </p>
         </div>
 
-        {/* Long-form Legal Content */}
-        <div className="text-zinc-300 text-sm leading-relaxed space-y-8">
+        {/* Policy Body */}
+        <div className="text-muted-foreground text-sm leading-relaxed space-y-10 font-sans">
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">1. Introduction</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">1. Privacy Commitment &amp; Scope</h2>
             <p>
-              At DropYourSaaS, safeguarding your privacy is a core priority. This Privacy Policy outlines the types of information collected and how we use it, in compliance with global data protection standards including the GDPR and CCPA.
+              DropYourSaaS (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) is committed to transparent and minimal data collection. We respect your digital privacy and design our platform so users can discover software, cast community votes, and advertise products without invasive tracking.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">2. Information We Collect &amp; How It Is Used</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-2">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <Database className="size-4 text-blue-500" />
+                  Product Submission Data
+                </div>
+                <p className="text-xs">
+                  When you submit a software product, we collect the public URL, product title, description, favicon, and category for directory publication.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-2">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <Mail className="size-4 text-amber-500" />
+                  Email &amp; Invoicing Details
+                </div>
+                <p className="text-xs">
+                  Contact emails are collected solely for ad delivery confirmations, order receipts, verification tokens, and critical administrative notices.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-2">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <Cookie className="size-4 text-purple-500" />
+                  Anonymous Voter Token Cookies
+                </div>
+                <p className="text-xs">
+                  We issue a secure, pseudonymous <code>voter_token</code> cookie. This allows the community voting system to prevent duplicate votes without requiring personal registration or tracking personal identities.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-2">
+                <div className="font-bold text-foreground flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-emerald-500" />
+                  Zero Sale of Data
+                </div>
+                <p className="text-xs">
+                  <strong>We do NOT sell, rent, monetize, or trade your personal data</strong> to data brokers, advertising networks, or third parties under any circumstances.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">3. Payment &amp; Financial Security</h2>
+            <p>
+              All advertising transactions and digital payments are processed through PCI-DSS Level 1 certified merchant-of-record providers (including Polar.sh, Creem, and Stripe). DropYourSaaS never stores, sees, or handles raw credit card or banking numbers on our servers.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">2. Information We Collect</h2>
-            <ul className="space-y-3 pl-4 list-disc marker:text-[#08F9C9]">
-              <li>
-                <strong className="text-white">Voluntary Data:</strong> When you submit your startup or buy an ad slot, we collect your email address, startup name, website URL, description, and optional social handles.
-              </li>
-              <li>
-                <strong className="text-white">Transaction Data:</strong> Payment details are handled securely and directly by our payment processors. We never store or process raw credit card numbers on our servers.
-              </li>
-              <li>
-                <strong className="text-white">Log Files &amp; Analytics:</strong> Standard internet log data including IP addresses, browser types, and referral pages to monitor site performance and security.
-              </li>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">4. Analytics &amp; Cookies</h2>
+            <p>
+              We utilize privacy-focused, GDPR-compliant analytics (such as Umami Analytics and DataFast) that do not use invasive tracking cookies or collect Personally Identifiable Information (PII). We capture aggregated metrics like page views, referrers, and outbound link clicks to measure public directory visibility.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Your Data Rights (GDPR &amp; CCPA)</h2>
+            <p>
+              Under global data privacy regulations, you have the right to:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 marker:text-emerald-500 text-xs sm:text-sm">
+              <li>Request confirmation of any personal information held about you.</li>
+              <li>Request correction or updates to your listing metadata or contact email.</li>
+              <li>Request immediate permanent deletion of your email records or product listings.</li>
             </ul>
           </section>
 
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">3. How We Use Your Information</h2>
+          <section className="space-y-3 pt-6 border-t border-border/80">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">6. Contact Our Privacy Team</h2>
             <p>
-              We use collected information to operate the directory, display your startup listing, process secure transactions, and send operational updates regarding your submission.
+              To exercise your privacy rights or request data removal, please contact our Data Protection Officer at:
             </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">4. Cookies and Web Beacons</h2>
-            <p>
-              DropYourSaaS uses &apos;cookies&apos; to store information including visitors&apos; preferences and the pages on the website that the visitor accessed or visited, optimizing the user experience.
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-white">5. Data Security &amp; Retention</h2>
-            <p>
-              We implement industry-standard security protocols and encrypted HTTPS channels. We retain your data only for as long as necessary to provide you with our services and for legitimate and essential business purposes.
-            </p>
-          </section>
-
-          <section className="space-y-3 pt-4 border-t border-zinc-900">
-            <h2 className="text-xl font-bold text-white">6. Your Data Rights</h2>
-            <p>
-              Depending on your location, you may have the right to access, correct, or delete your personal data. Contact us at{' '}
-              <a
-                href="mailto:yasin@dropyoursaas.com"
-                className="text-[#08F9C9] font-mono hover:underline"
-              >
-                yasin@dropyoursaas.com
-              </a>{' '}
-              to exercise these rights.
-            </p>
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">
+              <Mail className="size-4" />
+              <a href="mailto:privacy@dropyoursaas.com" className="hover:underline">
+                privacy@dropyoursaas.com
+              </a>
+            </div>
           </section>
         </div>
+      </main>
+
+      <Footer />
       </div>
-    </div>
+    </MobileLayout>
   );
 }

@@ -98,7 +98,7 @@ export function PinAdModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleReset()}>
+    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && handleReset()}>
       <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-card text-foreground border border-border shadow-xl">
         <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between">

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Flame } from 'lucide-react';
 import { TrendingSkeleton } from '@/components/trending-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
+import { FaviconImage } from '@/components/favicon-image';
 
 export function TrendingSection() {
   const [items, setItems] = useState<LeaderboardItem[]>([]);
@@ -78,13 +78,11 @@ export function TrendingSection() {
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <span className="text-[10px] font-mono text-muted-foreground w-3.5">{i + 1}</span>
-                    <Image
-                      src={`https://www.google.com/s2/favicons?domain=${item.name}&sz=32`}
-                      alt={item.name}
-                      width={14}
-                      height={14}
-                      className="rounded flex-shrink-0"
-                      unoptimized
+                    <FaviconImage
+                      url={item.url}
+                      name={item.name}
+                      size={15}
+                      containerClassName="rounded size-3.5 shrink-0"
                     />
                     <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
                       {item.name}
