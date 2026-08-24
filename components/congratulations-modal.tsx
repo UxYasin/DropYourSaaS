@@ -20,9 +20,15 @@ export function CongratulationsModal({
   rank: propRank,
 }: CongratulationsModalProps = {}) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const [modalDetails, setModalDetails] = useState<{ title?: string; rank?: number }>({
+  const [modalDetails, setModalDetails] = useState<{
+    title?: string;
+    rank?: number;
+    type?: 'verified_boost' | 'pinned_ad' | 'free_listing';
+    slot?: string;
+  }>({
     title: propTitle,
     rank: propRank || 1,
+    type: 'free_listing',
   });
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
@@ -30,7 +36,16 @@ export function CongratulationsModal({
 
   useEffect(() => {
     setMounted(true);
-    if (searchParams.get('verified') === 'true') {
+    const isVerifiedParam = searchParams.get('verified') === 'true';
+    const isPaymentSuccess = searchParams.get('payment') === 'success' || searchParams.get('success') === 'true';
+    const slotParam = searchParams.get('slot');
+
+    if (isVerifiedParam || isPaymentSuccess || slotParam) {
+      setModalDetails({
+        type: slotParam ? 'pinned_ad' : 'verified_boost',
+        slot: slotParam || undefined,
+        rank: 1,
+      });
       setInternalIsOpen(true);
       router.refresh();
     } else if (propIsOpen) {
@@ -40,11 +55,12 @@ export function CongratulationsModal({
     }
 
     const handleCustomCongrats = (e: Event) => {
-      const customEvent = e as CustomEvent<{ title?: string; rank?: number; url?: string }>;
+      const customEvent = e as CustomEvent<{ title?: string; rank?: number; url?: string; type?: 'verified_boost' | 'pinned_ad' | 'free_listing' }>;
       if (customEvent.detail) {
         setModalDetails({
           title: customEvent.detail.title,
           rank: customEvent.detail.rank || 1,
+          type: customEvent.detail.type || 'free_listing',
         });
       }
       setInternalIsOpen(true);
@@ -60,12 +76,18 @@ export function CongratulationsModal({
 
   if (!isOpen || !mounted) return null;
 
+  const isVerifiedBoost = modalDetails.type === 'verified_boost';
+  const isPinnedAd = modalDetails.type === 'pinned_ad';
+
   const handleClose = () => {
     if (propOnClose) propOnClose();
     setInternalIsOpen(false);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.delete('verified');
+      url.searchParams.delete('payment');
+      url.searchParams.delete('success');
+      url.searchParams.delete('slot');
       window.history.replaceState({}, '', url.pathname + url.search);
 
       // Smoothly scroll down to feed
@@ -85,33 +107,63 @@ export function CongratulationsModal({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-md bg-card border border-border/80 text-foreground rounded-3xl shadow-2xl p-6 sm:p-8 text-center overflow-hidden z-10 animate-in zoom-in-95 duration-200 space-y-6">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#181a1e] border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-3xl shadow-2xl p-6 sm:p-8 text-center overflow-hidden z-10 animate-in zoom-in-95 duration-200 space-y-6">
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 dark:hover:text-white p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           aria-label="Close modal"
         >
           <X className="size-5" />
         </button>
 
         {/* Glowing Badge */}
-        <div className="size-16 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-[0_0_28px_rgba(0,102,255,0.3)] shrink-0">
-          <CheckCircle2 className="size-8 text-blue-600 dark:text-blue-400" />
+        <div className={`size-16 mx-auto rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
+          isVerifiedBoost
+            ? 'bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 shadow-blue-500/20'
+            : isPinnedAd
+            ? 'bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 shadow-orange-500/20'
+            : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20'
+        }`}>
+          <CheckCircle2 className="size-8" />
         </div>
 
         {/* Header Text */}
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono font-bold text-xs">
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-mono font-bold text-xs ${
+            isVerifiedBoost
+              ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/30'
+              : isPinnedAd
+              ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/30'
+              : 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
+          }`}>
             <Sparkles className="size-3.5" />
-            <span>Listing Published · Spot #{modalDetails.rank || 1}</span>
+            <span>
+              {isVerifiedBoost
+                ? '⚡ Fast-Track Verified'
+                : isPinnedAd
+                ? '📌 Sponsor Ad Confirmed'
+                : `Listing Published · Spot #${modalDetails.rank || 1}`}
+            </span>
           </div>
-          <h2 className="font-mono font-extrabold text-xl sm:text-2xl text-foreground tracking-tight">
-            {modalDetails.title ? `“${modalDetails.title}” is live!` : 'Congratulations! Your SaaS is live.'}
+
+          <h2 className="font-mono font-extrabold text-xl sm:text-2xl text-zinc-900 dark:text-white tracking-tight">
+            {isVerifiedBoost
+              ? 'Payment Confirmed! Your SaaS is Verified.'
+              : isPinnedAd
+              ? 'Payment Confirmed! Your Ad is Live.'
+              : modalDetails.title
+              ? `“${modalDetails.title}” is live!`
+              : 'Congratulations! Your SaaS is live.'}
           </h2>
-          <p className="font-body text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Your SaaS has been successfully published to DropYourSaaS at Spot #{modalDetails.rank || 1}.
+
+          <p className="font-body text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            {isVerifiedBoost
+              ? 'Your $5 Fast-Track has been processed. Your dofollow backlink and verified checkmark badge are now live on DropYourSaaS.'
+              : isPinnedAd
+              ? 'Your side-rail sponsor ad slot is now active and pinned on DropYourSaaS.'
+              : `Your SaaS has been successfully published to DropYourSaaS at Spot #${modalDetails.rank || 1}.`}
           </p>
         </div>
 
@@ -119,9 +171,15 @@ export function CongratulationsModal({
         <div className="pt-2">
           <Button
             onClick={handleClose}
-            className="w-full rounded-full bg-blue-600 hover:bg-blue-500 text-white font-sans font-bold text-xs sm:text-sm h-12 shadow-lg flex items-center justify-center gap-2 transition-all"
+            className={`w-full rounded-full text-white font-sans font-bold text-xs sm:text-sm h-12 shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              isVerifiedBoost
+                ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25'
+                : isPinnedAd
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/25'
+                : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25'
+            }`}
           >
-            <span>Check out your product listing</span>
+            <span>{isPinnedAd ? 'View Your Active Ad Spot' : 'Check out your product listing'}</span>
             <ArrowRight className="size-4" />
           </Button>
         </div>
