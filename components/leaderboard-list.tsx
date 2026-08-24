@@ -169,7 +169,8 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     setPage(1);
   };
 
-  const isFirstPage = page === 1 && selectedCategory === 'All' && sortBy === 'rank';
+  // Show tiered card layout (#1 big hero, #2-3 podium, #4-10 bento, #11+ feed) across ALL tabs
+  const isFirstPage = page === 1 && selectedCategory === 'All';
   const item1 = isFirstPage ? items[0] : null;
   const items2_3 = isFirstPage ? items.slice(1, 3) : [];
   const items4_10 = isFirstPage ? items.slice(3, 10) : [];
@@ -185,17 +186,17 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
         />
       </div>
 
-      {/* Reddit-Style Sort Engine Controls (Hot, Top, Recent, Rank) */}
+      {/* Light & Dark Mode Adaptive Sort Control Tabs */}
       <div className="flex items-center justify-between gap-3 px-1 py-2 flex-wrap border-b border-border/40 pb-3">
-        <div className="flex items-center gap-1 bg-zinc-900/60 dark:bg-zinc-900/80 p-1 rounded-full border border-zinc-800/80">
+        <div className="flex items-center gap-1 bg-zinc-200/70 dark:bg-zinc-900/80 p-1 rounded-full border border-zinc-300/80 dark:border-zinc-800/80 shadow-xs">
           <button
             type="button"
             onClick={() => { setSortBy('hot'); setPage(1); }}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
               sortBy === 'hot'
                 ? 'bg-[#FF4500] text-white shadow-xs'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
             )}
           >
             <Flame className="size-3.5" />
@@ -206,10 +207,10 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             type="button"
             onClick={() => { setSortBy('top'); setPage(1); }}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
               sortBy === 'top'
                 ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
             )}
           >
             <Trophy className="size-3.5" />
@@ -220,10 +221,10 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             type="button"
             onClick={() => { setSortBy('recent'); setPage(1); }}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
               sortBy === 'recent'
                 ? 'bg-emerald-500 text-white shadow-xs'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
             )}
           >
             <Clock className="size-3.5" />
@@ -234,10 +235,10 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             type="button"
             onClick={() => { setSortBy('rank'); setPage(1); }}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
               sortBy === 'rank'
                 ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
             )}
           >
             <BarChart2 className="size-3.5" />
