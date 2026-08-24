@@ -15,7 +15,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { title: 'Directory', href: '/' },
+  { title: 'Leaderboard', href: '/' },
   { title: 'Buy/Sell', href: '/buy-sell' },
   { title: 'Pricing', href: '/pricing' },
 ];

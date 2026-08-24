@@ -55,7 +55,7 @@ export function Header() {
                 pathname === '/' ? 'text-foreground font-semibold bg-muted/70' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
-              Directory
+              Leaderboard
             </Link>
             <Link
               href="/buy-sell"
