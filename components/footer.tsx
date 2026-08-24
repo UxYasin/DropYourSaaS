@@ -71,8 +71,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/buy-sell" className="hover:text-foreground transition-colors inline-block">
-                  Buy / Sell Startups
+                <Link href="/explore" className="hover:text-foreground transition-colors inline-block">
+                  Explore Directory
                 </Link>
               </li>
               <li>

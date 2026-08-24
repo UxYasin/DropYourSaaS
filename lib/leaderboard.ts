@@ -155,6 +155,9 @@ export async function fetchLeaderboardFromDatabase(
         is_verified: Boolean(row.is_verified),
         is_dofollow: Boolean(row.is_dofollow),
         verified_at: row.verified_at ? String(row.verified_at) : undefined,
+        is_for_sale: Boolean(row.is_for_sale || row.for_sale),
+        asking_price: Number(row.asking_price || 0),
+        description: row.description ? String(row.description) : (row.value_proposition ? String(row.value_proposition) : undefined),
       };
     });
   }
@@ -194,6 +197,9 @@ export async function fetchLeaderboardFromDatabase(
       is_verified: Boolean(row.is_verified),
       is_dofollow: Boolean(row.is_dofollow),
       verified_at: row.verified_at ? String(row.verified_at) : undefined,
+      is_for_sale: Boolean(row.is_for_sale || row.for_sale),
+      asking_price: Number(row.asking_price || 0),
+      description: row.description ? String(row.description) : (row.value_proposition ? String(row.value_proposition) : undefined),
     };
 
     if (urlStr) {

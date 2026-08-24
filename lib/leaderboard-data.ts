@@ -25,6 +25,9 @@ export interface LeaderboardItem {
   is_verified?: boolean;
   is_dofollow?: boolean;
   verified_at?: string;
+  is_for_sale?: boolean;
+  asking_price?: number;
+  description?: string;
 }
 
 // Seed data for `supabase/seed.sql` / local development when no database is

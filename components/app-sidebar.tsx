@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { title: 'Leaderboard', href: '/' },
-  { title: 'Buy / Sell', href: '/buy-sell' },
+  { title: 'Explore Directory', href: '/explore' },
   { title: 'Advertise', href: '/advertise' },
   { title: 'Guidelines', href: '/rules' },
   { title: 'About', href: '/about' },

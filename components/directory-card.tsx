@@ -11,24 +11,55 @@ import { VotePill } from '@/components/VotePill';
 import { FaviconImage } from '@/components/favicon-image';
 import { PreviewImage } from '@/components/preview-image';
 import { getListingSlug } from '@/lib/slug';
+import { cn } from '@/lib/utils';
 
 function formatBid(amount: number) {
   return `$${amount.toLocaleString()}`;
 }
 
-interface DirectoryCardProps {
-  item: LeaderboardItem;
-  variant: 'top1' | 'top2_3' | 'top4_10' | 'top11_20';
-  onClaimClick: (rank: number, bid: number) => void;
+function formatAskingPrice(amount?: number) {
+  if (!amount || amount <= 0) return null;
+  return `$${amount.toLocaleString('en-US')}`;
 }
 
-export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProps) {
+const PASTEL_THEMES = [
+  {
+    bg: 'bg-[#eff6ff] dark:bg-blue-950/25',
+    border: 'border-[#dbeafe] dark:border-blue-800/40',
+    title: 'text-blue-950 dark:text-blue-100',
+    subtext: 'text-blue-900/75 dark:text-blue-200/75',
+    categoryBg: 'bg-blue-100/80 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border-blue-200/80 dark:border-blue-800',
+  },
+  {
+    bg: 'bg-[#fefce8] dark:bg-yellow-950/25',
+    border: 'border-[#fef08a] dark:border-yellow-800/40',
+    title: 'text-yellow-950 dark:text-yellow-100',
+    subtext: 'text-yellow-900/75 dark:text-yellow-200/75',
+    categoryBg: 'bg-yellow-100/80 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border-yellow-200/80 dark:border-yellow-800',
+  },
+  {
+    bg: 'bg-[#f0fdf4] dark:bg-emerald-950/25',
+    border: 'border-[#bbf7d0] dark:border-emerald-800/40',
+    title: 'text-emerald-950 dark:text-emerald-100',
+    subtext: 'text-emerald-900/75 dark:text-emerald-200/75',
+    categoryBg: 'bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800',
+  },
+];
+
+export interface DirectoryCardProps {
+  item: LeaderboardItem;
+  index?: number;
+  variant?: 'grid' | 'top1' | 'top2_3' | 'top4_10' | 'top11_20';
+  onClaimClick?: (rank: number, bid: number) => void;
+}
+
+export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryCardProps) {
   const [meta, setMeta] = useState<MetaData | null>(null);
   const [clickedExtra, setClickedExtra] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const clicks = (item.clicks || 0) + clickedExtra;
-  const relAttribute = item.is_dofollow ? "noopener" : "nofollow noopener";
+  const relAttribute = item.is_verified || item.is_dofollow ? 'noopener' : 'nofollow noopener';
 
   useEffect(() => {
     let active = true;
@@ -48,7 +79,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   }, [item.url]);
 
   const title = meta?.title || item.name;
-  const description = meta?.description || `Explore ${item.name} — verified software tools & developer services listed on DropYourSaaS.`;
+  const description = item.description || meta?.description || `Explore ${item.name} — verified software tools & developer services listed on DropYourSaaS.`;
   const previewImageUrl = meta?.image || item.preview_image_url || null;
 
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
@@ -68,6 +99,122 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
       }).catch(() => {});
     }
   };
+
+  const askingPriceFormatted = formatAskingPrice(item.asking_price);
+  const forSaleBadgeText = askingPriceFormatted ? `🏷️ FOR SALE: ${askingPriceFormatted}` : '🏷️ FOR SALE';
+
+  /* -------------------------------------------------------------
+     VARIANT 0: GRID CARD (3-Column Directory Grid View)
+     ------------------------------------------------------------- */
+  if (variant === 'grid' || (!variant && typeof index === 'number')) {
+    const themeIndex = (index ?? (item.rank ? item.rank - 1 : 0)) % PASTEL_THEMES.length;
+    const currentTheme = PASTEL_THEMES[Math.max(0, Math.abs(themeIndex))];
+
+    return (
+      <div ref={containerRef} className="group relative h-full">
+        <div
+          className={cn(
+            'rounded-2xl border p-4 sm:p-5 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between h-full relative overflow-hidden',
+            currentTheme.border,
+            currentTheme.bg
+          )}
+        >
+          <div>
+            {/* Top Row: Flex container. Left side: App Logo (rounded-xl) and Title + Category Pill. Right side: Upvote/Downvote pill component */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <a
+                  href={href}
+                  target="_blank"
+                  rel={relAttribute}
+                  onClick={handleClick}
+                  className="shrink-0"
+                >
+                  <div className="size-12 rounded-xl bg-background/90 p-1 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                    <FaviconImage
+                      url={item.url}
+                      name={item.name}
+                      src={meta?.favicon}
+                      size={40}
+                      containerClassName="rounded-lg size-full"
+                    />
+                  </div>
+                </a>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel={relAttribute}
+                      onClick={handleClick}
+                      className={cn(
+                        'font-mono font-bold text-base hover:underline transition-colors inline-flex items-center gap-1 min-w-0 max-w-full',
+                        currentTheme.title
+                      )}
+                    >
+                      <span className="truncate">{title}</span>
+                      {item.is_verified && (
+                        <span className="inline-flex items-center text-blue-500 font-bold shrink-0 ml-0.5" title="$5 Verified Listing">
+                          <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
+                        </span>
+                      )}
+                      <ExternalLink className="size-3 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+                    </a>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    {item.category && (
+                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0', currentTheme.categoryBg)}>
+                        {item.category}
+                      </span>
+                    )}
+
+                    {item.is_for_sale && (
+                      <span className="inline-flex items-center text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0 tracking-wide">
+                        {forSaleBadgeText}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right side: Upvote/Downvote pill component */}
+              <div className="shrink-0">
+                <VotePill
+                  listingId={item.id || ''}
+                  initialScore={item.net_score || 0}
+                  initialUserVote={item.user_vote || 0}
+                  size="sm"
+                  className="bg-black/5 dark:bg-zinc-800/50"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Row: Truncated description text */}
+            <p className={cn('font-body text-xs mt-3.5 line-clamp-2 leading-relaxed', currentTheme.subtext)}>
+              {description}
+            </p>
+          </div>
+
+          {/* Footer Meta: time & details link */}
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-black/5 dark:border-white/5 text-[11px] font-sans">
+            <span className={cn('flex items-center gap-1 font-sans', currentTheme.subtext)}>
+              <Clock className="size-3 opacity-70" />
+              {item.time}
+            </span>
+
+            <Link
+              href={`/s/${getListingSlug(item)}`}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline inline-flex items-center gap-1 transition-colors"
+            >
+              Details →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* -------------------------------------------------------------
      VARIANT 1: #1 SPOT (Top Rank Card with Glow & VotePill)
@@ -114,7 +261,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   >
                     <span className="truncate">{title}</span>
                     {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
                         <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
                       </span>
                     )}
@@ -123,6 +270,11 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   <span className="font-sans text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
                     TOP SPOT #1
                   </span>
+                  {item.is_for_sale && (
+                    <span className="inline-flex items-center text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
+                      {forSaleBadgeText}
+                    </span>
+                  )}
                 </div>
                 <p className="font-body text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
                   {description}
@@ -151,13 +303,15 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   {formatBid(item.bid)}
                 </div>
               )}
-              <button
-                type="button"
-                onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer"
-              >
-                {siteCopy.feed.podiumButton}
-              </button>
+              {onClaimClick && (
+                <button
+                  type="button"
+                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer"
+                >
+                  {siteCopy.feed.podiumButton}
+                </button>
+              )}
             </div>
           </div>
 
@@ -255,7 +409,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   >
                     <span className="truncate">{title}</span>
                     {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
                         <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
                       </span>
                     )}
@@ -264,6 +418,11 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   <span className={`font-sans text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
                     {isRank2 ? 'PODIUM #2' : 'PODIUM #3'}
                   </span>
+                  {item.is_for_sale && (
+                    <span className="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
+                      {forSaleBadgeText}
+                    </span>
+                  )}
                 </div>
                 <p className={`font-body text-xs mt-1 line-clamp-2 leading-relaxed ${theme.subtext}`}>
                   {description}
@@ -301,13 +460,15 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   {formatBid(item.bid)}
                 </div>
               )}
-              <button
-                type="button"
-                onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
-              >
-                {siteCopy.feed.podiumButton}
-              </button>
+              {onClaimClick && (
+                <button
+                  type="button"
+                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                >
+                  {siteCopy.feed.podiumButton}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -357,7 +518,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 </div>
               </a>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <a
                     href={href}
                     target="_blank"
@@ -367,11 +528,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   >
                     <span>{title}</span>
                     {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
                         <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
                       </span>
                     )}
                   </a>
+                  {item.is_for_sale && (
+                    <span className="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
+                      {forSaleBadgeText}
+                    </span>
+                  )}
                 </div>
                 <p className={`font-body text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
                   {description}
@@ -407,13 +573,15 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   {formatBid(item.bid)}
                 </div>
               )}
-              <button
-                type="button"
-                onClick={() => onClaimClick(item.rank, item.bid + 1)}
-                className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
-              >
-                {siteCopy.feed.podiumButton}
-              </button>
+              {onClaimClick && (
+                <button
+                  type="button"
+                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
+                >
+                  {siteCopy.feed.podiumButton}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -450,7 +618,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               </div>
             </a>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <a
                   href={href}
                   target="_blank"
@@ -460,11 +628,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 >
                   <span>{title}</span>
                   {item.is_verified && (
-                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
                       <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
                     </span>
                   )}
                 </a>
+                {item.is_for_sale && (
+                  <span className="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
+                    {forSaleBadgeText}
+                  </span>
+                )}
               </div>
               <p className="font-body text-[11px] text-muted-foreground line-clamp-1">
                 {description}
@@ -492,17 +665,18 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 {formatBid(item.bid)}
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => onClaimClick(item.rank, item.bid + 1)}
-              className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
-            >
-              {siteCopy.feed.listingButton}
-            </button>
+            {onClaimClick && (
+              <button
+                type="button"
+                onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
+              >
+                {siteCopy.feed.listingButton}
+              </button>
+            )}
           </div>
         </div>
       </Card>
     </div>
   );
 }
-
