@@ -37,7 +37,7 @@ export default function AdvertisePage() {
       <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors">
         <Header />
 
-      <main className="flex-1 max-w-5xl mx-auto py-10 sm:py-16 px-4 sm:px-6 space-y-16 sm:space-y-20">
+      <main className="flex-1 max-w-5xl xl:max-w-6xl mx-auto py-10 sm:py-16 px-4 sm:px-6 lg:px-8 space-y-16 sm:space-y-20">
         {/* Top Back Link */}
         <div>
           <Link

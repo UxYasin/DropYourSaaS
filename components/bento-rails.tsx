@@ -177,7 +177,7 @@ export function BentoRails({ side }: BentoRailsProps) {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] shrink-0 sticky top-20 h-fit">
+      <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] xl:w-[295px] shrink-0 sticky top-20 h-fit">
         {cardsToRender.map((defaultCard, i) => {
           const slotPos = `${side}_${i + 1}`;
           // Check if active pinned ad exists for this specific slot position

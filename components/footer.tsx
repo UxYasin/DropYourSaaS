@@ -5,7 +5,7 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-border/80 py-8 bg-muted/20 backdrop-blur-xs">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
+      <div className="max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-muted-foreground">
         <div className="flex flex-col items-center md:items-start gap-2.5">
           <p className="font-mono">
             © 2026 DropYourSaaS · Pay-to-Rank Software Discovery &amp; Advertising Platform

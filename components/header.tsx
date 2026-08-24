@@ -23,7 +23,7 @@ export function Header() {
   } catch {}
 
   return (
-    <header className="sticky top-3 z-40 px-4 w-full max-w-4xl mx-auto flex justify-center">
+    <header className="sticky top-3 z-40 px-4 w-full max-w-5xl xl:max-w-6xl mx-auto flex justify-center">
       <div className="w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 bg-background/80 dark:bg-zinc-950/80 backdrop-blur-md border border-border/60 shadow-xs transition-colors">
         <div className="flex items-center gap-3">
           {isMobile && (

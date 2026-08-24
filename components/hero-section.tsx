@@ -97,26 +97,26 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const currentRank = selectedRank || 1;
 
   return (
-    <div className="text-center py-6 sm:py-10 max-w-2xl mx-auto space-y-4 sm:space-y-6">
+    <div className="text-center py-6 sm:py-10 max-w-3xl xl:max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* 5-Second Dynamic Status Pill */}
       <LiveStatsPill />
 
       {/* Main Hero Headline & Copy */}
       <div className="space-y-2 sm:space-y-3">
-        <h1 className="font-mono font-black text-4xl sm:text-6xl md:text-7xl tracking-tight text-foreground leading-[1.1]">
+        <h1 className="font-mono font-black text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight text-foreground leading-[1.08]">
           Rank higher.
           <span className="block mt-1 sm:mt-2">
             Get more clicks for{' '}
             <span className="text-[#E0674B] dark:text-[#F0785C]">FREE</span>
           </span>
         </h1>
-        <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
+        <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl xl:max-w-3xl mx-auto">
           {siteCopy.hero.description}
         </p>
       </div>
 
       {/* Unified Claim Form Container */}
-      <div className="pt-2 max-w-xl mx-auto">
+      <div className="pt-2 max-w-2xl xl:max-w-3xl mx-auto">
         <div className="p-3 sm:p-4 rounded-[26px] bg-zinc-200/90 dark:bg-[#25282c] border border-border/60 text-left shadow-xs space-y-3">
           {/* Top Row: Input with Link2 Icon & Single Accent Orange Claim Button */}
           <div className="flex items-center justify-between gap-3 h-12 sm:h-13 pl-2 sm:pl-3 pr-1">

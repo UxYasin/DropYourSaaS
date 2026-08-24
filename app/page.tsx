@@ -24,8 +24,11 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('verified') === 'true') {
-        setShowVerifiedBanner(true);
-        setShowCongratsModal(true);
+        const timer = setTimeout(() => {
+          setShowVerifiedBanner(true);
+          setShowCongratsModal(true);
+        }, 0);
+        return () => clearTimeout(timer);
       }
     }
   }, []);
@@ -43,11 +46,11 @@ export default function Home() {
     <MobileLayout>
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Header />
-        <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 py-8">
-          <div className="flex justify-center items-start gap-8">
+        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-start gap-6 lg:gap-8">
             <BentoRails side="left" />
 
-            <div className="max-w-3xl w-full mx-auto min-w-0">
+            <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0">
               {showVerifiedBanner && (
                 <div className="mb-6 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 text-xs sm:text-sm font-mono flex items-center justify-between shadow-lg animate-in fade-in-50 duration-300">
                   <div className="flex items-center gap-2.5">

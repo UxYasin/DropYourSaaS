@@ -156,11 +156,11 @@ export default function ListingDetailPage() {
       <div className="min-h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-white transition-colors duration-200">
         <Header />
 
-        <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 py-8">
-          <div className="flex justify-center items-start gap-8">
+        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-start gap-6 lg:gap-8">
             <BentoRails side="left" />
 
-            <div className="max-w-4xl w-full mx-auto min-w-0 space-y-8">
+            <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0 space-y-8">
               {/* Top Sticky / Highlight Banner with Amber/Orange #FF8B06 Glow */}
               <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
                 <div className="flex items-center gap-3 text-center sm:text-left">

@@ -186,11 +186,11 @@ export default function BuySellPage() {
       <div className="min-h-screen flex flex-col bg-white dark:bg-black text-zinc-900 dark:text-white transition-colors duration-200">
         <Header />
 
-        <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 py-8">
-          <div className="flex justify-center items-start gap-8">
+        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-start gap-6 lg:gap-8">
             <BentoRails side="left" />
 
-            <div className="max-w-4xl w-full mx-auto min-w-0 space-y-10">
+            <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0 space-y-10">
               {/* Header Section */}
               <div className="text-center space-y-4 max-w-3xl mx-auto pt-4">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-[#08F9C9] text-xs font-mono font-bold">
