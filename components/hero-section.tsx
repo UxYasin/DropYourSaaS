@@ -117,7 +117,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
 
       {/* Unified Claim Form Container */}
       <div className="pt-2 max-w-2xl xl:max-w-3xl mx-auto">
-        <div className="p-3 sm:p-4 rounded-[26px] bg-zinc-200/90 dark:bg-[#25282c] border border-border/60 text-left shadow-xs space-y-3">
+        <div className="p-3 sm:p-4 rounded-[26px] bg-white dark:bg-[#25282c] border border-border/80 text-left shadow-sm space-y-3">
           {/* Top Row: Input with Link2 Icon & Single Accent Orange Claim Button */}
           <div className="flex items-center justify-between gap-3 h-12 sm:h-13 pl-2 sm:pl-3 pr-1">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -167,7 +167,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-11 rounded-[16px] bg-background/90 border border-border/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors cursor-pointer shadow-xs"
+                    className="w-full h-11 rounded-[16px] bg-zinc-50 dark:bg-background/90 border border-border/80 text-foreground font-sans text-xs sm:text-sm px-3.5 pr-10 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors cursor-pointer shadow-xs"
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat} className="bg-card text-foreground py-1.5">
@@ -181,7 +181,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 </div>
 
                 {/* Right: Instant Perks Pill */}
-                <div className="h-11 px-3.5 py-2 rounded-[16px] bg-background/90 border border-border/80 flex items-center justify-between gap-2 flex-1">
+                <div className="h-11 px-3.5 py-2 rounded-[16px] bg-zinc-50 dark:bg-background/90 border border-border/80 flex items-center justify-between gap-2 flex-1">
                   <div className="min-w-0 text-left">
                     <div className="text-xs font-bold font-sans text-foreground truncate flex items-center gap-1">
                       <Sparkles className="size-3 text-amber-500 shrink-0" />
