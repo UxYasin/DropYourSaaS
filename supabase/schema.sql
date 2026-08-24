@@ -139,15 +139,38 @@ CREATE TRIGGER trg_update_leaderboard_votes
 AFTER INSERT OR UPDATE OR DELETE ON listing_votes
 FOR EACH ROW EXECUTE FUNCTION update_leaderboard_vote_counts();
 
--- 4. Create ad_requests table for Pin Ad monetization
+-- 4. Create ad_requests table for Pin Ad monetization with slot_position
 CREATE TABLE IF NOT EXISTS ad_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   site_url TEXT NOT NULL,
   project_name TEXT NOT NULL,
   one_liner TEXT NOT NULL,
   contact_email TEXT NOT NULL,
+  slot_position TEXT DEFAULT 'left_1',
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'invoiced', 'active', 'rejected')),
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure slot_position column exists if table was created previously
+ALTER TABLE ad_requests ADD COLUMN IF NOT EXISTS slot_position TEXT DEFAULT 'left_1';
+
+-- 5. Table for currently active pinned ads overriding rail slots
+CREATE TABLE IF NOT EXISTS pinned_ads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_url TEXT NOT NULL,
+  project_name TEXT NOT NULL,
+  one_liner TEXT NOT NULL,
+  logo_url TEXT,
+  slot_position TEXT UNIQUE NOT NULL, -- 'left_1' .. 'left_5', 'right_1' .. 'right_5'
+  contact_email TEXT,
+  duration_days INT DEFAULT 30,
+  starts_at TIMESTAMPTZ DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pinned_ads_active ON pinned_ads(slot_position, is_active);
+
 
 

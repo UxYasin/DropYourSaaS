@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AdminPlaceAdModal } from '@/components/admin-place-ad-modal';
+import { formatSlotLabel } from '@/components/pin-ad-modal';
 import {
   Pin,
   ExternalLink,
@@ -18,7 +20,10 @@ import {
   CheckCircle,
   Clock,
   Send,
+  Plus,
+  Trash2,
   SlidersHorizontal,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,30 +33,69 @@ interface AdRequest {
   project_name: string;
   one_liner: string;
   contact_email: string;
+  slot_position: string;
   status: 'pending' | 'invoiced' | 'active' | 'rejected';
+  created_at: string;
+}
+
+interface PinnedAd {
+  id: string;
+  site_url: string;
+  project_name: string;
+  one_liner: string;
+  logo_url?: string;
+  slot_position: string;
+  contact_email?: string;
+  duration_days: number;
+  starts_at: string;
+  expires_at: string;
+  is_active: boolean;
   created_at: string;
 }
 
 export default function AdminDashboardPage() {
   const [requests, setRequests] = useState<AdRequest[]>([]);
+  const [pinnedAds, setPinnedAds] = useState<PinnedAd[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'requests' | 'active_ads'>('requests');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Place Ad Modal State
+  const [placeModalState, setPlaceModalState] = useState<{
+    isOpen: boolean;
+    slotPosition?: string;
+    siteUrl?: string;
+    projectName?: string;
+    oneLiner?: string;
+    contactEmail?: string;
+  }>({ isOpen: false });
+
   const router = useRouter();
   const { theme, setTheme } = useTheme();
 
-  const fetchRequests = async () => {
+  const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/ads');
-      if (res.status === 401) {
+      const [resReq, resPinned] = await Promise.all([
+        fetch('/api/admin/ads'),
+        fetch('/api/admin/ads/place'),
+      ]);
+
+      if (resReq.status === 401 || resPinned.status === 401) {
         router.push('/admin/login');
         return;
       }
-      const data = await res.json();
-      if (res.ok && Array.isArray(data.requests)) {
-        setRequests(data.requests);
+
+      const dataReq = await resReq.json();
+      if (resReq.ok && Array.isArray(dataReq.requests)) {
+        setRequests(dataReq.requests);
+      }
+
+      const dataPinned = await resPinned.json();
+      if (resPinned.ok && Array.isArray(dataPinned.pinnedAds)) {
+        setPinnedAds(dataPinned.pinnedAds);
       }
     } catch {
       // network error
@@ -61,7 +105,7 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
+    fetchDashboardData();
   }, []);
 
   const handleLogout = async () => {
@@ -89,11 +133,24 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleRemovePinnedAd = async (id: string) => {
+    if (!confirm('Are you sure you want to deactivate and remove this pinned ad?')) return;
+    try {
+      const res = await fetch(`/api/admin/ads/place?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setPinnedAds((prev) => prev.filter((p) => p.id !== id));
+      }
+    } catch {}
+  };
+
   const createMailtoLink = (req: AdRequest) => {
-    const subject = encodeURIComponent(`Your DropYourSaaS Ad Spot is Approved!`);
+    const slotText = formatSlotLabel(req.slot_position || 'left_1');
+    const subject = encodeURIComponent(`Your DropYourSaaS Ad Spot (${slotText}) is Approved!`);
     const body = encodeURIComponent(
       `Hi ${req.project_name},\n\n` +
-        `Great news! Your spot request for ${req.site_url} on DropYourSaaS has been reviewed and approved.\n\n` +
+        `Great news! Your spot request for ${req.site_url} on DropYourSaaS for position ${slotText} has been reviewed and approved.\n\n` +
         `Please complete your payment of $100 for 30 days of featured sidebar placement:\n` +
         `https://creem.io/checkout/...\n\n` +
         `Once paid, your ad will go live on the sidebar immediately.\n\n` +
@@ -107,9 +164,18 @@ export default function AdminDashboardPage() {
     const matchesSearch =
       r.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.site_url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.contact_email.toLowerCase().includes(searchTerm.toLowerCase());
+      r.contact_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.slot_position && r.slot_position.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
     return matchesSearch && matchesStatus;
+  });
+
+  const filteredPinnedAds = pinnedAds.filter((p) => {
+    return (
+      p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.site_url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.slot_position && p.slot_position.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   });
 
   const statusBadge = (status: AdRequest['status']) => {
@@ -151,15 +217,24 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <h1 className="font-mono font-bold text-base sm:text-lg tracking-tight">
-              Admin Dashboard
+              Admin Ad Manager
             </h1>
             <p className="text-[11px] text-muted-foreground font-mono">
-              DropYourSaaS · Ad Requests & Monetization
+              DropYourSaaS · Ad Requests & Active Rail Pins
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          {/* Place an Ad Button */}
+          <Button
+            onClick={() => setPlaceModalState({ isOpen: true })}
+            className="h-9 gap-1.5 rounded-xl font-mono text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-xs cursor-pointer"
+          >
+            <Plus className="size-4" />
+            <span>Place an Ad</span>
+          </Button>
+
           {/* Theme Toggle Button */}
           <Button
             variant="outline"
@@ -180,7 +255,7 @@ export default function AdminDashboardPage() {
             className="h-9 gap-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
           >
             <LogOut className="size-3.5" />
-            <span>Logout</span>
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
       </header>
@@ -192,16 +267,17 @@ export default function AdminDashboardPage() {
           <Card className="rounded-2xl border-border bg-card p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Total Requests
+                Total Inquiries
               </span>
               <Pin className="size-4 text-blue-500" />
             </div>
             <div className="text-2xl font-mono font-black mt-2">{requests.length}</div>
           </Card>
+
           <Card className="rounded-2xl border-border bg-card p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Pending
+                Pending Review
               </span>
               <Clock className="size-4 text-amber-500" />
             </div>
@@ -209,6 +285,7 @@ export default function AdminDashboardPage() {
               {requests.filter((r) => r.status === 'pending').length}
             </div>
           </Card>
+
           <Card className="rounded-2xl border-border bg-card p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
@@ -220,181 +297,368 @@ export default function AdminDashboardPage() {
               {requests.filter((r) => r.status === 'invoiced').length}
             </div>
           </Card>
+
           <Card className="rounded-2xl border-border bg-card p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Active Pins
+                Active Rail Pins
               </span>
-              <CheckCircle className="size-4 text-emerald-500" />
+              <Sparkles className="size-4 text-emerald-500" />
             </div>
             <div className="text-2xl font-mono font-black text-emerald-500 mt-2">
-              {requests.filter((r) => r.status === 'active').length}
+              {pinnedAds.length}
             </div>
           </Card>
         </div>
 
-        {/* Filter Controls & Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative flex-1 w-full sm:w-auto">
-            <Search className="absolute left-3.5 top-3 size-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by product name, URL, or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 h-10 rounded-xl border border-border bg-card text-xs font-sans focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
+        {/* Tab Switcher: Requests vs Active Pins */}
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-3 flex-wrap">
+          <div className="flex items-center gap-2 bg-muted/60 p-1 rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => setActiveTab('requests')}
+              className={cn(
+                'px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer',
+                activeTab === 'requests'
+                  ? 'bg-card text-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Spot Inquiries ({requests.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('active_ads')}
+              className={cn(
+                'px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5',
+                activeTab === 'active_ads'
+                  ? 'bg-card text-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Pin className="size-3.5 text-blue-500 fill-current" />
+              <span>Active Pinned Ads ({pinnedAds.length})</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border text-xs">
-              <SlidersHorizontal className="size-3.5 text-muted-foreground ml-2" />
-              {['all', 'pending', 'invoiced', 'active', 'rejected'].map((st) => (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => setStatusFilter(st)}
-                  className={cn(
-                    'px-3 py-1 rounded-lg font-bold capitalize transition-all cursor-pointer text-xs',
-                    statusFilter === st
-                      ? 'bg-card text-foreground shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {st}
-                </button>
-              ))}
+            <div className="relative flex-1 sm:w-64">
+              <Search className="absolute left-3 top-2.5 size-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search name, URL, slot..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 h-9 rounded-xl border border-border bg-card text-xs focus:outline-none"
+              />
             </div>
+
+            {activeTab === 'requests' && (
+              <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border text-xs hidden md:flex">
+                <SlidersHorizontal className="size-3 text-muted-foreground ml-1" />
+                {['all', 'pending', 'invoiced', 'active'].map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setStatusFilter(st)}
+                    className={cn(
+                      'px-2.5 py-0.5 rounded-md font-bold capitalize transition-all cursor-pointer text-[11px]',
+                      statusFilter === st
+                        ? 'bg-card text-foreground shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchRequests}
+              onClick={fetchDashboardData}
               disabled={isLoading}
-              className="size-10 p-0 rounded-xl cursor-pointer"
-              title="Refresh requests"
+              className="size-9 p-0 rounded-xl cursor-pointer"
+              title="Refresh data"
             >
-              <RefreshCw className={cn('size-4', isLoading && 'animate-spin')} />
+              <RefreshCw className={cn('size-3.5', isLoading && 'animate-spin')} />
             </Button>
           </div>
         </div>
 
-        {/* Requests Table */}
-        <Card className="rounded-2xl border-border bg-card overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/40 border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="p-4">Product Name & URL</th>
-                  <th className="p-4">One-Liner</th>
-                  <th className="p-4">Contact Email</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Requested At</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {isLoading ? (
+        {/* TAB 1: SPOT INQUIRIES */}
+        {activeTab === 'requests' && (
+          <Card className="rounded-2xl border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/40 border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-muted-foreground font-mono">
-                      Loading ad requests...
-                    </td>
+                    <th className="p-4">Requested Slot</th>
+                    <th className="p-4">Product Name & URL</th>
+                    <th className="p-4">One-Liner</th>
+                    <th className="p-4">Contact Email</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Date</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ) : filteredRequests.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-8 text-center text-muted-foreground font-mono">
-                      No ad requests found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-muted/30 transition-colors">
-                      {/* Name & URL */}
-                      <td className="p-4 font-medium">
-                        <div className="font-bold text-foreground text-sm font-mono">
-                          {req.project_name}
-                        </div>
-                        <a
-                          href={req.site_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:underline inline-flex items-center gap-1 mt-0.5"
-                        >
-                          <span className="truncate max-w-[180px]">{req.site_url}</span>
-                          <ExternalLink className="size-3" />
-                        </a>
-                      </td>
-
-                      {/* One Liner */}
-                      <td className="p-4 max-w-[260px]">
-                        <p className="line-clamp-2 leading-relaxed text-muted-foreground">
-                          {req.one_liner}
-                        </p>
-                      </td>
-
-                      {/* Contact Email */}
-                      <td className="p-4 font-mono text-foreground">
-                        <a
-                          href={`mailto:${req.contact_email}`}
-                          className="hover:underline flex items-center gap-1.5"
-                        >
-                          <Mail className="size-3.5 text-muted-foreground" />
-                          <span>{req.contact_email}</span>
-                        </a>
-                      </td>
-
-                      {/* Status */}
-                      <td className="p-4">{statusBadge(req.status)}</td>
-
-                      {/* Date */}
-                      <td className="p-4 font-mono text-muted-foreground">
-                        {new Date(req.created_at).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Send Invoice Email Button */}
-                          <a
-                            href={createMailtoLink(req)}
-                            onClick={() => {
-                              if (req.status === 'pending') {
-                                handleStatusChange(req.id, 'invoiced');
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold font-mono text-[11px] inline-flex items-center gap-1.5 shadow-xs transition-transform active:scale-95"
-                            title="Send pre-filled payment link invoice email"
-                          >
-                            <Send className="size-3" />
-                            <span>Send Invoice</span>
-                          </a>
-
-                          {/* Status Dropdown Selector */}
-                          <select
-                            value={req.status}
-                            disabled={updatingId === req.id}
-                            onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                            className="h-8 px-2 rounded-xl border border-border bg-card text-[11px] font-mono font-semibold text-foreground focus:outline-none cursor-pointer"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="invoiced">Invoiced</option>
-                            <option value="active">Active</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-muted-foreground font-mono">
+                        Loading ad inquiries...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                  ) : filteredRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-muted-foreground font-mono">
+                        No spot inquiries found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRequests.map((req) => (
+                      <tr key={req.id} className="hover:bg-muted/30 transition-colors">
+                        {/* Requested Slot */}
+                        <td className="p-4 font-mono font-bold">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-[11px]">
+                            <Pin className="size-3 fill-current" />
+                            <span>{formatSlotLabel(req.slot_position || 'left_1')}</span>
+                          </span>
+                        </td>
+
+                        {/* Name & URL */}
+                        <td className="p-4 font-medium">
+                          <div className="font-bold text-foreground text-sm font-mono">
+                            {req.project_name}
+                          </div>
+                          <a
+                            href={req.site_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline inline-flex items-center gap-1 mt-0.5"
+                          >
+                            <span className="truncate max-w-[160px]">{req.site_url}</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </td>
+
+                        {/* One Liner */}
+                        <td className="p-4 max-w-[220px]">
+                          <p className="line-clamp-2 leading-relaxed text-muted-foreground">
+                            {req.one_liner}
+                          </p>
+                        </td>
+
+                        {/* Contact Email */}
+                        <td className="p-4 font-mono text-foreground">
+                          <a
+                            href={`mailto:${req.contact_email}`}
+                            className="hover:underline flex items-center gap-1.5"
+                          >
+                            <Mail className="size-3.5 text-muted-foreground" />
+                            <span>{req.contact_email}</span>
+                          </a>
+                        </td>
+
+                        {/* Status */}
+                        <td className="p-4">{statusBadge(req.status)}</td>
+
+                        {/* Date */}
+                        <td className="p-4 font-mono text-muted-foreground text-[11px]">
+                          {new Date(req.created_at).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Publish Pin Direct Action */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setPlaceModalState({
+                                  isOpen: true,
+                                  slotPosition: req.slot_position || 'left_1',
+                                  siteUrl: req.site_url,
+                                  projectName: req.project_name,
+                                  oneLiner: req.one_liner,
+                                  contactEmail: req.contact_email,
+                                });
+                              }}
+                              className="h-8 px-2.5 rounded-xl font-mono text-[11px] font-bold border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 cursor-pointer"
+                              title="Directly assign and publish to pinned ads"
+                            >
+                              <Plus className="size-3" />
+                              <span>Publish</span>
+                            </Button>
+
+                            {/* Send Invoice Email Button */}
+                            <a
+                              href={createMailtoLink(req)}
+                              onClick={() => {
+                                if (req.status === 'pending') {
+                                  handleStatusChange(req.id, 'invoiced');
+                                }
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold font-mono text-[11px] inline-flex items-center gap-1.5 shadow-xs transition-transform active:scale-95"
+                              title="Send pre-filled payment link invoice email"
+                            >
+                              <Send className="size-3" />
+                              <span>Invoice</span>
+                            </a>
+
+                            {/* Status Selector */}
+                            <select
+                              value={req.status}
+                              disabled={updatingId === req.id}
+                              onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                              className="h-8 px-2 rounded-xl border border-border bg-card text-[11px] font-mono font-semibold text-foreground focus:outline-none cursor-pointer"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="invoiced">Invoiced</option>
+                              <option value="active">Active</option>
+                              <option value="rejected">Rejected</option>
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+
+        {/* TAB 2: ACTIVE PINNED ADS */}
+        {activeTab === 'active_ads' && (
+          <Card className="rounded-2xl border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-muted/40 border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="p-4">Locked Slot</th>
+                    <th className="p-4">Product & URL</th>
+                    <th className="p-4">One-Liner</th>
+                    <th className="p-4">Customer Email</th>
+                    <th className="p-4">Duration / Expires</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-muted-foreground font-mono">
+                        Loading active pinned ads...
+                      </td>
+                    </tr>
+                  ) : filteredPinnedAds.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-muted-foreground font-mono">
+                        No active rail pinned ads right now. Click "+ Place an Ad" to feature a sponsor spot!
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPinnedAds.map((pinned) => (
+                      <tr key={pinned.id} className="hover:bg-muted/30 transition-colors">
+                        {/* Locked Slot */}
+                        <td className="p-4 font-mono font-bold">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs">
+                            <Pin className="size-3.5 fill-current" />
+                            <span>{formatSlotLabel(pinned.slot_position)}</span>
+                          </span>
+                        </td>
+
+                        {/* Product & URL */}
+                        <td className="p-4 font-medium">
+                          <div className="font-bold text-foreground text-sm font-mono">
+                            {pinned.project_name}
+                          </div>
+                          <a
+                            href={pinned.site_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline inline-flex items-center gap-1 mt-0.5"
+                          >
+                            <span className="truncate max-w-[180px]">{pinned.site_url}</span>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        </td>
+
+                        {/* One Liner */}
+                        <td className="p-4 max-w-[240px]">
+                          <p className="line-clamp-2 leading-relaxed text-muted-foreground">
+                            {pinned.one_liner}
+                          </p>
+                        </td>
+
+                        {/* Customer Email */}
+                        <td className="p-4 font-mono text-foreground">
+                          {pinned.contact_email ? (
+                            <a
+                              href={`mailto:${pinned.contact_email}`}
+                              className="hover:underline flex items-center gap-1.5"
+                            >
+                              <Mail className="size-3.5 text-muted-foreground" />
+                              <span>{pinned.contact_email}</span>
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground italic">N/A</span>
+                          )}
+                        </td>
+
+                        {/* Duration & Expiration */}
+                        <td className="p-4 font-mono text-xs">
+                          <div className="font-bold text-foreground">
+                            {pinned.duration_days} Days
+                          </div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5">
+                            Expires:{' '}
+                            {new Date(pinned.expires_at).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </div>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="p-4 text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleRemovePinnedAd(pinned.id)}
+                            className="h-8 px-3 rounded-xl font-mono text-xs font-bold border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 cursor-pointer gap-1"
+                          >
+                            <Trash2 className="size-3.5" />
+                            <span>Remove</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
       </main>
+
+      {/* Admin Place an Ad Modal */}
+      <AdminPlaceAdModal
+        isOpen={placeModalState.isOpen}
+        onClose={() => setPlaceModalState({ isOpen: false })}
+        onSuccess={fetchDashboardData}
+        defaultSlotPosition={placeModalState.slotPosition}
+        defaultSiteUrl={placeModalState.siteUrl}
+        defaultProjectName={placeModalState.projectName}
+        defaultOneLiner={placeModalState.oneLiner}
+        defaultContactEmail={placeModalState.contactEmail}
+      />
     </div>
   );
 }

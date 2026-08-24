@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,13 +17,24 @@ import { Pin, Sparkles, CheckCircle2 } from 'lucide-react';
 interface PinAdModalProps {
   isOpen: boolean;
   onClose: () => void;
+  slotPosition?: string; // e.g. 'left_1', 'left_3', 'right_2'
   defaultSiteUrl?: string;
   defaultProjectName?: string;
+}
+
+export function formatSlotLabel(slot: string = 'left_1') {
+  const parts = slot.split('_');
+  if (parts.length === 2) {
+    const side = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+    return `${side} Rail • Slot #${parts[1]}`;
+  }
+  return slot;
 }
 
 export function PinAdModal({
   isOpen,
   onClose,
+  slotPosition = 'left_1',
   defaultSiteUrl = '',
   defaultProjectName = '',
 }: PinAdModalProps) {
@@ -34,6 +45,11 @@ export function PinAdModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (defaultSiteUrl) setSiteUrl(defaultSiteUrl);
+    if (defaultProjectName) setProjectName(defaultProjectName);
+  }, [defaultSiteUrl, defaultProjectName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +71,7 @@ export function PinAdModal({
           project_name: projectName.trim(),
           one_liner: oneLiner.trim(),
           contact_email: contactEmail.trim(),
+          slot_position: slotPosition,
         }),
       });
 
@@ -87,14 +104,15 @@ export function PinAdModal({
           <div className="flex items-center justify-between">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold font-mono border border-blue-500/20">
               <Pin className="size-3.5 fill-current" />
-              <span>SPONSOR PIN</span>
+              <span>{formatSlotLabel(slotPosition)}</span>
             </div>
           </div>
           <DialogTitle className="text-2xl sm:text-3xl font-mono font-extrabold tracking-tight">
             Grab a spot
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            Paste the URL, name, and one-liner. We will review and send a payment link.
+            Paste your URL, name, and one-liner. We will review your spot request for{' '}
+            <span className="font-bold text-foreground font-mono">{formatSlotLabel(slotPosition)}</span> and send a payment link.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,10 +120,10 @@ export function PinAdModal({
         <div className="my-2 p-4 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/30 flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-blue-800 dark:text-blue-300 block uppercase tracking-wider">
-              30-Day Sidebar Feature
+              30-Day Sidebar Pin ({formatSlotLabel(slotPosition)})
             </span>
             <span className="text-2xl sm:text-3xl font-mono font-black text-blue-600 dark:text-blue-400 tracking-tight">
-              $100 <span className="text-sm font-normal text-muted-foreground">for a month</span>
+              $100 <span className="text-sm font-normal text-muted-foreground">for 30 days</span>
             </span>
           </div>
           <Sparkles className="size-7 text-blue-500 animate-pulse" />
@@ -119,7 +137,7 @@ export function PinAdModal({
             <div className="space-y-1">
               <h3 className="text-xl font-bold font-mono">Spot Requested!</h3>
               <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
-                Thank you! We received your request. Our team will review your submission and email a payment link to <span className="font-semibold text-foreground">{contactEmail}</span>.
+                Thank you! We received your request for <span className="font-bold text-foreground">{formatSlotLabel(slotPosition)}</span>. Our team will review your submission and email a payment link to <span className="font-semibold text-foreground">{contactEmail}</span>.
               </p>
             </div>
             <Button
@@ -203,7 +221,7 @@ export function PinAdModal({
               disabled={isSubmitting}
               className="w-full h-12 mt-3 rounded-2xl font-mono font-bold text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md active:scale-95 transition-all cursor-pointer"
             >
-              {isSubmitting ? 'Submitting...' : 'Request Spot • $100 for a month'}
+              {isSubmitting ? 'Submitting...' : `Request Spot (${formatSlotLabel(slotPosition)}) • $100`}
             </Button>
           </form>
         )}

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
-import { PinAdModal } from '@/components/pin-ad-modal';
-import { Pin } from 'lucide-react';
+import { PinAdModal, formatSlotLabel } from '@/components/pin-ad-modal';
+import { Pin, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface RailCardItem {
@@ -16,6 +16,8 @@ export interface RailCardItem {
   net_score: number;
   user_vote?: 1 | -1 | 0;
   category?: string;
+  is_pinned?: boolean;
+  slot_position?: string;
 }
 
 interface BentoRailsProps {
@@ -71,11 +73,13 @@ let globalPool: RailCardItem[] = [];
 
 export function BentoRails({ side }: BentoRailsProps) {
   const [displayedItems, setDisplayedItems] = useState<RailCardItem[]>([]);
+  const [pinnedAds, setPinnedAds] = useState<Record<string, RailCardItem>>({});
   const [pinModalState, setPinModalState] = useState<{
     isOpen: boolean;
+    slotPosition: string;
     siteUrl: string;
     projectName: string;
-  }>({ isOpen: false, siteUrl: '', projectName: '' });
+  }>({ isOpen: false, slotPosition: `${side}_1`, siteUrl: '', projectName: '' });
 
   useEffect(() => {
     let isMounted = true;
@@ -86,12 +90,16 @@ export function BentoRails({ side }: BentoRailsProps) {
         const res = await fetch('/api/rails-pool');
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data.pool) && data.pool.length > 0 && isMounted) {
-            globalPool = data.pool;
-
-            const startIdx = side === 'left' ? 0 : 5;
-            const slice = data.pool.slice(startIdx, startIdx + 5);
-            setDisplayedItems(slice);
+          if (isMounted) {
+            if (data.pinnedAds) {
+              setPinnedAds(data.pinnedAds);
+            }
+            if (Array.isArray(data.pool) && data.pool.length > 0) {
+              globalPool = data.pool;
+              const startIdx = side === 'left' ? 0 : 5;
+              const slice = data.pool.slice(startIdx, startIdx + 5);
+              setDisplayedItems(slice);
+            }
           }
         }
       } catch {}
@@ -115,9 +123,18 @@ export function BentoRails({ side }: BentoRailsProps) {
 
           const updated = [...prevDisplayed];
 
-          // 80% chance to flip 1 card, 20% chance to flip 2 cards
-          const countToFlip = Math.random() > 0.8 && unshownCandidates.length >= 2 ? 2 : 1;
-          const availableSlots = [0, 1, 2, 3, 4];
+          // Determine indices that do NOT have a pinned ad
+          const availableSlots: number[] = [];
+          for (let i = 0; i < 5; i++) {
+            const slotPos = `${side}_${i + 1}`;
+            if (!pinnedAds[slotPos]) {
+              availableSlots.push(i);
+            }
+          }
+
+          if (availableSlots.length === 0) return prevDisplayed;
+
+          const countToFlip = Math.random() > 0.8 && unshownCandidates.length >= 2 && availableSlots.length >= 2 ? 2 : 1;
 
           for (let c = 0; c < countToFlip; c++) {
             if (availableSlots.length === 0 || unshownCandidates.length === 0) break;
@@ -145,7 +162,7 @@ export function BentoRails({ side }: BentoRailsProps) {
       isMounted = false;
       if (timerId) clearTimeout(timerId);
     };
-  }, [side]);
+  }, [side, pinnedAds]);
 
   // Fallback cards if pool is loading
   const fallbackCards: RailCardItem[] = [
@@ -161,14 +178,19 @@ export function BentoRails({ side }: BentoRailsProps) {
   return (
     <>
       <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] shrink-0 sticky top-20 h-fit">
-        {cardsToRender.map((card, i) => {
+        {cardsToRender.map((defaultCard, i) => {
+          const slotPos = `${side}_${i + 1}`;
+          // Check if active pinned ad exists for this specific slot position
+          const card = pinnedAds[slotPos] || defaultCard;
+          const isPinnedAd = Boolean(pinnedAds[slotPos]);
+
           const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
           const theme = BENTO_THEMES[themeIndex];
           const favicon = `https://www.google.com/s2/favicons?domain=${card.name}&sz=128`;
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
           return (
-            <div key={card.id || `slot-${i}`} className="relative h-auto group">
+            <div key={slotPos} className="relative h-auto group">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={card.id || card.url}
@@ -178,11 +200,12 @@ export function BentoRails({ side }: BentoRailsProps) {
                   transition={{ duration: 0.45, ease: 'easeInOut' }}
                   className={cn(
                     'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden relative',
-                    theme.bg,
-                    theme.border
+                    isPinnedAd
+                      ? 'bg-gradient-to-br from-blue-500/10 via-background to-blue-500/5 border-blue-500/40 dark:border-blue-400/50 shadow-md ring-1 ring-blue-500/20'
+                      : cn(theme.bg, theme.border)
                   )}
                 >
-                  {/* Top Row: Favicon, Title, Category Badge & VotePill */}
+                  {/* Top Row: Favicon, Title, Category Badge / Sponsored Badge & VotePill */}
                   <div className="flex items-start justify-between gap-2.5">
                     <a
                       href={href}
@@ -204,9 +227,18 @@ export function BentoRails({ side }: BentoRailsProps) {
                         <h3 className={cn('font-bold text-sm sm:text-base truncate hover:underline transition-all', theme.text)}>
                           {card.name}
                         </h3>
-                        <span className={cn('inline-block mt-0.5 text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border', theme.badge)}>
-                          {card.category || 'SaaS'}
-                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {isPinnedAd ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-blue-600 text-white border border-blue-400/50 shadow-2xs">
+                              <Pin className="size-2.5 fill-current" />
+                              <span>Sponsored Pin</span>
+                            </span>
+                          ) : (
+                            <span className={cn('inline-block text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold border', theme.badge)}>
+                              {card.category || 'SaaS'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </a>
 
@@ -241,15 +273,16 @@ export function BentoRails({ side }: BentoRailsProps) {
                       e.preventDefault();
                       setPinModalState({
                         isOpen: true,
+                        slotPosition: slotPos,
                         siteUrl: card.url,
                         projectName: card.name,
                       });
                     }}
-                    title="Pin your Ads for 30 days"
-                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/90 text-foreground border border-border/80 shadow-sm hover:scale-105 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 z-10 text-[10px] font-mono font-bold"
+                    title={`Pin this spot (${formatSlotLabel(slotPos)}) • $100/mo`}
+                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-full bg-background/95 text-foreground border border-border/80 shadow-md hover:scale-105 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 z-10 text-[10px] font-mono font-bold"
                   >
-                    <Pin className="size-3 fill-current shrink-0" />
-                    <span className="hidden sm:inline">Pin Ad • $100</span>
+                    <Pin className="size-3 fill-current shrink-0 text-blue-500 group-hover:text-white" />
+                    <span className="hidden sm:inline">Pin Spot ({formatSlotLabel(slotPos)}) • $100</span>
                   </button>
                 </motion.div>
               </AnimatePresence>
@@ -260,7 +293,8 @@ export function BentoRails({ side }: BentoRailsProps) {
 
       <PinAdModal
         isOpen={pinModalState.isOpen}
-        onClose={() => setPinModalState({ isOpen: false, siteUrl: '', projectName: '' })}
+        onClose={() => setPinModalState({ isOpen: false, slotPosition: `${side}_1`, siteUrl: '', projectName: '' })}
+        slotPosition={pinModalState.slotPosition}
         defaultSiteUrl={pinModalState.siteUrl}
         defaultProjectName={pinModalState.projectName}
       />

@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { site_url, project_name, one_liner, contact_email } = body;
+    const { site_url, project_name, one_liner, contact_email, slot_position } = body;
 
     if (!site_url || !project_name || !one_liner || !contact_email) {
       return NextResponse.json(
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         project_name: project_name.trim(),
         one_liner: one_liner.trim(),
         contact_email: contact_email.trim(),
+        slot_position: slot_position || 'left_1',
         status: 'pending',
       })
       .select()

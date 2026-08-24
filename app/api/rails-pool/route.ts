@@ -29,6 +29,42 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
+    // 0. Fetch active Pinned Ads for rail slots
+    let pinnedAdsMap: Record<string, any> = {};
+    try {
+      const { data: activePinned } = await supabase
+        .from('pinned_ads')
+        .select('*')
+        .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString());
+
+      if (activePinned) {
+        activePinned.forEach((ad) => {
+          let hostname = 'SaaS Product';
+          try {
+            hostname = ad.site_url ? new URL(ad.site_url).hostname.replace(/^www\./, '') : ad.project_name;
+          } catch {
+            hostname = ad.project_name;
+          }
+
+          pinnedAdsMap[ad.slot_position] = {
+            id: ad.id,
+            name: ad.project_name || hostname,
+            url: ad.site_url,
+            tagline: ad.one_liner,
+            net_score: 99,
+            user_vote: 0,
+            category: 'Sponsored',
+            is_pinned: true,
+            slot_position: ad.slot_position,
+            expires_at: ad.expires_at,
+          };
+        });
+      }
+    } catch (err) {
+      console.warn('Pinned ads fetch warning:', err);
+    }
+
     // 1. Fetch 60% Evergreen Pool (Ordered by hot_score DESC, net_score DESC)
     const { data: hotData } = await supabase
       .from('leaderboard_entries')
@@ -95,7 +131,12 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ pool, hotCount: hotList.length, recentCount: recentList.length });
+    return NextResponse.json({
+      pool,
+      pinnedAds: pinnedAdsMap,
+      hotCount: hotList.length,
+      recentCount: recentList.length,
+    });
   } catch (error: any) {
     console.error('Rails pool error:', error);
     return NextResponse.json({ error: 'Failed to fetch rails pool' }, { status: 500 });
