@@ -1,9 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { leaderboardItems as seedLeaderboardItems } from '@/lib/leaderboard-data';
 
-export async function GET(req: NextRequest) {
+export interface PinnedAdItem {
+  id: string;
+  name: string;
+  url: string;
+  tagline: string;
+  net_score: number;
+  user_vote: number;
+  category: string;
+  is_pinned: boolean;
+  slot_position: string;
+  expires_at: string;
+  logo_url?: string;
+}
+
+export interface PoolListingItem {
+  id: string;
+  name: string;
+  url: string;
+  tagline: string;
+  net_score: number;
+  hot_score: number;
+  user_vote: 1 | -1 | 0;
+  category: string;
+}
+
+export async function GET() {
   try {
     const supabase = getSupabaseServerClient();
 
@@ -13,7 +38,7 @@ export async function GET(req: NextRequest) {
       voterToken = cookieStore.get('voter_token')?.value;
     } catch {}
 
-    let userVotesMap = new Map<string, 1 | -1>();
+    const userVotesMap = new Map<string, 1 | -1>();
     if (voterToken) {
       try {
         const { data: votes } = await supabase
@@ -30,12 +55,12 @@ export async function GET(req: NextRequest) {
     }
 
     // 0. Fetch active Pinned Ads for rail slots
-    let pinnedAdsMap: Record<string, any> = {};
+    const pinnedAdsMap: Record<string, PinnedAdItem> = {};
     try {
       const { data: activePinned } = await supabase
         .from('pinned_ads')
         .select('*')
-        .eq('is_active', true)
+        .or('status.eq.active,is_active.eq.true')
         .gt('expires_at', new Date().toISOString());
 
       if (activePinned) {
@@ -58,6 +83,7 @@ export async function GET(req: NextRequest) {
             is_pinned: true,
             slot_position: ad.slot_position,
             expires_at: ad.expires_at,
+            logo_url: ad.logo_url || undefined,
           };
         });
       }
@@ -84,22 +110,23 @@ export async function GET(req: NextRequest) {
       .order('claimed_at', { ascending: false })
       .limit(20);
 
-    const mapRow = (row: any) => {
+    const mapRow = (row: Record<string, unknown>): PoolListingItem => {
+      const urlStr = String(row.url || '');
       let hostname = 'SaaS Product';
       try {
-        hostname = row.url ? new URL(row.url).hostname.replace(/^www\./, '') : 'SaaS Product';
+        hostname = urlStr ? new URL(urlStr).hostname.replace(/^www\./, '') : 'SaaS Product';
       } catch {
-        hostname = row.url || 'SaaS Product';
+        hostname = urlStr || 'SaaS Product';
       }
       return {
-        id: row.id,
-        name: row.name || hostname,
-        url: row.url,
-        tagline: row.value_proposition || row.additional_info || `Verified ${row.category || 'SaaS'} tool on DropYourSaaS`,
-        net_score: row.net_score || 0,
-        hot_score: row.hot_score || 0,
-        user_vote: userVotesMap.get(row.id) || 0,
-        category: row.category || 'SaaS',
+        id: String(row.id || ''),
+        name: String(row.name || hostname),
+        url: urlStr,
+        tagline: String(row.value_proposition || row.additional_info || `Verified ${row.category || 'SaaS'} tool on DropYourSaaS`),
+        net_score: Number(row.net_score || 0),
+        hot_score: Number(row.hot_score || 0),
+        user_vote: userVotesMap.get(String(row.id || '')) || 0,
+        category: String(row.category || 'SaaS'),
       };
     };
 
@@ -107,11 +134,11 @@ export async function GET(req: NextRequest) {
     const recentList = (recentData || []).map(mapRow);
 
     // Combine and deduplicate
-    const combinedMap = new Map<string, any>();
+    const combinedMap = new Map<string, PoolListingItem>();
     hotList.forEach((item) => combinedMap.set(item.id || item.url, item));
     recentList.forEach((item) => combinedMap.set(item.id || item.url, item));
 
-    let pool = Array.from(combinedMap.values());
+    const pool = Array.from(combinedMap.values());
 
     // Fallback fill with seed items if pool is small
     if (pool.length < 10) {
@@ -137,7 +164,7 @@ export async function GET(req: NextRequest) {
       hotCount: hotList.length,
       recentCount: recentList.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Rails pool error:', error);
     return NextResponse.json({ error: 'Failed to fetch rails pool' }, { status: 500 });
   }

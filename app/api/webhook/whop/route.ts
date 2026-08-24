@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       const projectName = String(metadata.project_name || metadata.projectName || '');
       const oneLiner = String(metadata.one_liner || metadata.oneLiner || '');
       const customerEmail = String(data.email || (data.user as Record<string, unknown>)?.email || '');
+      const logoUrl = String(metadata.logo_url || metadata.logoUrl || metadata.favicon || metadata.faviconUrl || '');
 
       // 1. Sidebar Pinned Ad Placement
       if (rawSlot !== undefined && rawSlot !== null && String(rawSlot) !== '') {
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
             site_url: siteUrl || 'https://dropyoursaas.com',
             project_name: projectName || 'Sponsored Listing',
             one_liner: oneLiner || 'Verified sponsor on DropYourSaaS',
+            logo_url: logoUrl || undefined,
             paid_amount: amountPaid,
             status: 'active',
             starts_at: now.toISOString(),
