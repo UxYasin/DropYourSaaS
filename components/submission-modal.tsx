@@ -158,11 +158,28 @@ export function SubmissionModal({
       // 3. Free tier or fallback
       onSuccess?.();
       onClose();
-      if (data.immediate || data.verified) {
-        router.push('/?verified=true');
-      } else {
-        router.push(data.redirectUrl || `/thank-you?email=${encodeURIComponent(email.trim())}`);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('show-congratulations', {
+            detail: {
+              title: title.trim() || url,
+              url,
+              rank: selectedRank,
+            },
+          })
+        );
+        window.dispatchEvent(new CustomEvent('listing-submitted'));
+
+        setTimeout(() => {
+          const feedElement = document.querySelector('#index-feed') || document.querySelector('.mt-8');
+          if (feedElement) {
+            feedElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 200);
       }
+
+      router.refresh();
     } catch (err: unknown) {
       console.error('Submission catch error:', err);
       setError('An unexpected network error occurred. Please try again.');
@@ -214,7 +231,7 @@ export function SubmissionModal({
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-left">
+        <form id="submission-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-left">
           {rateLimitError && (
             <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 font-mono text-xs flex items-center gap-2.5 animate-in fade-in-50 duration-200">
               <AlertCircle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -491,7 +508,8 @@ export function SubmissionModal({
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            type="submit"
+            form="submission-form"
             disabled={isSubmitting || Boolean(rateLimitError)}
             className={`flex-1 rounded-full text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
               selectedTier === 'fast_track'

@@ -84,8 +84,9 @@ export async function POST(request: NextRequest) {
 
         const { data: recentEntries } = await supabaseAdmin
           .from('leaderboard_entries')
-          .select('id, email, submitter_email, url, claimed_at')
+          .select('id, email, submitter_email, url, claimed_at, status')
           .or(query)
+          .eq('status', 'published')
           .gte('claimed_at', twentyFourHoursAgo);
 
         if (recentEntries && recentEntries.length > 0) {

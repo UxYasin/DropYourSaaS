@@ -9,13 +9,21 @@ import { Button } from '@/components/ui/button';
 interface CongratulationsModalProps {
   isOpen?: boolean;
   onClose?: () => void;
+  title?: string;
+  rank?: number;
 }
 
 export function CongratulationsModal({
   isOpen: propIsOpen,
   onClose: propOnClose,
+  title: propTitle,
+  rank: propRank,
 }: CongratulationsModalProps = {}) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const [modalDetails, setModalDetails] = useState<{ title?: string; rank?: number }>({
+    title: propTitle,
+    rank: propRank || 1,
+  });
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -30,6 +38,22 @@ export function CongratulationsModal({
     } else if (propIsOpen === false) {
       setInternalIsOpen(false);
     }
+
+    const handleCustomCongrats = (e: Event) => {
+      const customEvent = e as CustomEvent<{ title?: string; rank?: number; url?: string }>;
+      if (customEvent.detail) {
+        setModalDetails({
+          title: customEvent.detail.title,
+          rank: customEvent.detail.rank || 1,
+        });
+      }
+      setInternalIsOpen(true);
+    };
+
+    window.addEventListener('show-congratulations', handleCustomCongrats);
+    return () => {
+      window.removeEventListener('show-congratulations', handleCustomCongrats);
+    };
   }, [searchParams, propIsOpen, router]);
 
   const isOpen = propIsOpen !== undefined ? propIsOpen : internalIsOpen;
@@ -81,13 +105,13 @@ export function CongratulationsModal({
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono font-bold text-xs">
             <Sparkles className="size-3.5" />
-            <span>Listing Verified</span>
+            <span>Listing Published · Spot #{modalDetails.rank || 1}</span>
           </div>
           <h2 className="font-mono font-extrabold text-xl sm:text-2xl text-foreground tracking-tight">
-            Congratulations! Your SaaS is live.
+            {modalDetails.title ? `“${modalDetails.title}” is live!` : 'Congratulations! Your SaaS is live.'}
           </h2>
           <p className="font-body text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Your submission has been verified and your account has been automatically created.
+            Your SaaS has been successfully published to DropYourSaaS at Spot #{modalDetails.rank || 1}.
           </p>
         </div>
 

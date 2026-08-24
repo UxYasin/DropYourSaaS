@@ -129,8 +129,19 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
   const [totalPages, setTotalPages] = useState(1);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const searchParams = useSearchParams();
   const isVerified = searchParams?.get('verified') === 'true';
+
+  useEffect(() => {
+    const handleListingSubmitted = () => {
+      setRefreshTrigger((prev) => prev + 1);
+    };
+    window.addEventListener('listing-submitted', handleListingSubmitted);
+    return () => {
+      window.removeEventListener('listing-submitted', handleListingSubmitted);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -156,7 +167,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     return () => {
       cancelled = true;
     };
-  }, [page, selectedCategory, sortBy, isVerified]);
+  }, [page, selectedCategory, sortBy, isVerified, refreshTrigger]);
 
   const handleClaimClick = (rank: number, bid: number) => {
     if (onClaimClick) {
