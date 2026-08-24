@@ -24,7 +24,7 @@ export function Header() {
 
   return (
     <header className="sticky top-3 z-40 px-4 w-full max-w-5xl xl:max-w-6xl mx-auto flex justify-center">
-      <div className="w-full px-3.5 sm:px-5 py-2 rounded-[12px] flex items-center justify-between gap-4 bg-background/80 dark:bg-zinc-950/80 backdrop-blur-md border border-border/60 shadow-xs transition-colors">
+      <div className="w-full px-3.5 sm:px-5 py-2.5 rounded-[14px] flex items-center justify-between gap-4 bg-background/80 dark:bg-zinc-950/80 backdrop-blur-md transition-colors">
         <div className="flex items-center gap-3">
           {isMobile && (
             <Button variant="ghost" size="icon-sm" onClick={toggleSidebar}>
