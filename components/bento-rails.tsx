@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
 import { PinAdModal } from '@/components/pin-ad-modal';
-import { Pin } from 'lucide-react';
+import { Pin, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaviconImage } from '@/components/favicon-image';
 
@@ -74,6 +74,7 @@ let globalPool: RailCardItem[] = [];
 export function BentoRails({ side }: BentoRailsProps) {
   const [displayedItems, setDisplayedItems] = useState<RailCardItem[]>([]);
   const [pinnedAds, setPinnedAds] = useState<Record<string, RailCardItem>>({});
+  const [isAdSelectionMode, setIsAdSelectionMode] = useState(false);
   const [pinModalState, setPinModalState] = useState<{
     isOpen: boolean;
     slotPosition: string;
@@ -102,71 +103,49 @@ export function BentoRails({ side }: BentoRailsProps) {
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        console.warn('Failed to load rails pool:', err);
+      }
     };
 
     fetchPool();
 
-    // Staggered card flip interval (every 5 to 12 seconds)
-    const scheduleNextFlip = () => {
-      const randomDelay = Math.floor(Math.random() * 7000) + 5000;
+    // Rotate cards every 10 seconds smoothly
+    const startRotation = () => {
+      timerId = setInterval(() => {
+        if (!isMounted || globalPool.length < 5) return;
 
-      timerId = setTimeout(() => {
-        if (!isMounted) return;
+        // Pick a random slot to rotate (0 to 4)
+        const slotToReplace = Math.floor(Math.random() * 5);
 
-        setDisplayedItems((prevDisplayed) => {
-          if (prevDisplayed.length < 5 || globalPool.length <= 10) return prevDisplayed;
+        setDisplayedItems((current) => {
+          if (current.length === 0) return current;
 
-          const currentlyShownUrls = new Set(prevDisplayed.map((i) => i.url));
-          const unshownCandidates = globalPool.filter((item) => !currentlyShownUrls.has(item.url));
-          if (unshownCandidates.length === 0) return prevDisplayed;
+          // Find an item from pool not currently displayed
+          const currentUrls = new Set(current.map((c) => c.url));
+          const available = globalPool.filter((p) => !currentUrls.has(p.url));
 
-          const updated = [...prevDisplayed];
+          if (available.length === 0) return current;
 
-          // Determine indices that do NOT have a pinned ad
-          const availableSlots: number[] = [];
-          for (let i = 0; i < 5; i++) {
-            const slotPos = `${side}_${i + 1}`;
-            if (!pinnedAds[slotPos]) {
-              availableSlots.push(i);
-            }
-          }
-
-          if (availableSlots.length === 0) return prevDisplayed;
-
-          const countToFlip = Math.random() > 0.8 && unshownCandidates.length >= 2 && availableSlots.length >= 2 ? 2 : 1;
-
-          for (let c = 0; c < countToFlip; c++) {
-            if (availableSlots.length === 0 || unshownCandidates.length === 0) break;
-            const slotIdx = Math.floor(Math.random() * availableSlots.length);
-            const targetSlotIndex = availableSlots[slotIdx];
-            availableSlots.splice(slotIdx, 1);
-
-            const candidateIdx = Math.floor(Math.random() * unshownCandidates.length);
-            const newItem = unshownCandidates[candidateIdx];
-            unshownCandidates.splice(candidateIdx, 1);
-
-            updated[targetSlotIndex] = newItem;
-          }
-
-          return updated;
+          const replacement = available[Math.floor(Math.random() * available.length)];
+          const next = [...current];
+          next[slotToReplace] = replacement;
+          return next;
         });
-
-        scheduleNextFlip();
-      }, randomDelay);
+      }, 10000);
     };
 
-    scheduleNextFlip();
+    startRotation();
 
     return () => {
       isMounted = false;
-      if (timerId) clearTimeout(timerId);
+      clearInterval(timerId);
     };
-  }, [side, pinnedAds]);
+  }, [side]);
 
-  // Fallback cards if pool is loading
+  // Fallback items if database hasn't loaded yet
   const fallbackCards: RailCardItem[] = [
-    { id: 'fb-1', name: side === 'left' ? 'outrank.so' : 'orynth.dev', url: 'https://outrank.so', tagline: 'Verified SaaS · SEO & AI Visibility Platform for modern founders.', net_score: 14, user_vote: 0, category: 'AI Tools' },
+    { id: 'fb-1', name: side === 'left' ? 'redreplier.com' : 'whop.com', url: 'https://redreplier.com', tagline: 'Verified SaaS · AI-powered Reddit lead generation & social listening tool.', net_score: 15, user_vote: 0, category: 'AI Tools' },
     { id: 'fb-2', name: side === 'left' ? 'trycomp.ai' : 'lathire.com', url: 'https://trycomp.ai', tagline: 'Verified SaaS · Autonomous AI Agents & Intelligent Workflows.', net_score: 9, user_vote: 0, category: 'Developer' },
     { id: 'fb-3', name: side === 'left' ? 'mytb.ai' : 'fiber.so', url: 'https://mytb.ai', tagline: 'Verified SaaS · Productivity & Workspace Automation Suite.', net_score: 12, user_vote: 0, category: 'Productivity' },
     { id: 'fb-4', name: side === 'left' ? 'prelint.com' : 'ranked.ai', url: 'https://prelint.com', tagline: 'Verified SaaS · Developer Code Quality & Automated Linting.', net_score: 7, user_vote: 0, category: 'DevOps' },
@@ -174,6 +153,16 @@ export function BentoRails({ side }: BentoRailsProps) {
   ];
 
   const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackCards;
+
+  const handleSelectSlot = (slotPos: string) => {
+    setIsAdSelectionMode(false);
+    setPinModalState({
+      isOpen: true,
+      slotPosition: slotPos,
+      siteUrl: '',
+      projectName: '',
+    });
+  };
 
   return (
     <>
@@ -189,7 +178,14 @@ export function BentoRails({ side }: BentoRailsProps) {
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
           return (
-            <div key={slotPos} className="relative h-auto group">
+            <div
+              key={slotPos}
+              className={cn(
+                'relative h-auto group transition-all duration-200',
+                isAdSelectionMode && 'cursor-pointer'
+              )}
+              onClick={isAdSelectionMode ? () => handleSelectSlot(slotPos) : undefined}
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={card.id || card.url}
@@ -198,19 +194,32 @@ export function BentoRails({ side }: BentoRailsProps) {
                   exit={{ rotateX: 90, opacity: 0 }}
                   transition={{ duration: 0.45, ease: 'easeInOut' }}
                   className={cn(
-                    'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden relative',
-                    isPinnedAd
-                      ? 'bg-gradient-to-br from-blue-500/10 via-background to-blue-500/5 border-blue-500/40 dark:border-blue-400/50 shadow-md ring-1 ring-blue-500/20'
-                      : cn(theme.bg, theme.border)
+                    'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden relative',
+                    isAdSelectionMode
+                      ? 'border-blue-500/80 bg-blue-500/10 ring-2 ring-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500 hover:scale-[1.02] shadow-lg'
+                      : isPinnedAd
+                      ? 'bg-gradient-to-br from-blue-500/10 via-background to-blue-500/5 border-blue-500/40 dark:border-blue-400/50 shadow-md ring-1 ring-blue-500/20 hover:shadow-md'
+                      : cn(theme.bg, theme.border, 'hover:shadow-md')
                   )}
                 >
+                  {/* Selection Mode Overlay Button */}
+                  {isAdSelectionMode && (
+                    <div className="absolute inset-0 z-30 bg-blue-600/15 dark:bg-blue-900/40 backdrop-blur-[1px] rounded-2xl flex items-center justify-center p-3 text-center transition-all animate-in fade-in duration-150">
+                      <div className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-mono font-black text-xs shadow-xl border border-blue-400/50 flex items-center gap-1.5 transform hover:scale-105 active:scale-95 transition-all">
+                        <Target className="size-3.5" />
+                        <span>Select Slot #{i + 1}</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Top Row: Favicon, Title, Category Badge / Sponsored Badge & VotePill */}
                   <div className="flex items-start justify-between gap-2.5">
                     <a
-                      href={href}
-                      target="_blank"
+                      href={isAdSelectionMode ? undefined : href}
+                      target={isAdSelectionMode ? undefined : '_blank'}
                       rel="sponsored noopener noreferrer"
                       className="flex items-center gap-2.5 min-w-0 flex-1"
+                      onClick={isAdSelectionMode ? (e) => e.preventDefault() : undefined}
                     >
                       <div className="size-10 sm:size-11 rounded-xl bg-background/90 border border-border/60 p-1 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
                         <FaviconImage
@@ -240,7 +249,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                     </a>
 
                     {/* VotePill */}
-                    <div className="shrink-0 pt-0.5">
+                    <div className="shrink-0 pt-0.5" onClick={isAdSelectionMode ? (e) => e.stopPropagation() : undefined}>
                       <VotePill
                         listingId={card.id}
                         initialScore={card.net_score}
@@ -252,42 +261,55 @@ export function BentoRails({ side }: BentoRailsProps) {
 
                   {/* Bottom Row: 2-Line Truncated Tagline/Description */}
                   <a
-                    href={href}
-                    target="_blank"
+                    href={isAdSelectionMode ? undefined : href}
+                    target={isAdSelectionMode ? undefined : '_blank'}
                     rel="sponsored noopener noreferrer"
                     className="block pr-6"
+                    onClick={isAdSelectionMode ? (e) => e.preventDefault() : undefined}
                   >
                     <p className={cn('text-xs line-clamp-2 leading-relaxed', theme.subtext)}>
                       {card.tagline || `Verified ${card.name} SaaS tool on DropYourSaaS.`}
                     </p>
                   </a>
 
-                  {/* Hover-to-Reveal Pin Icon Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setPinModalState({
-                        isOpen: true,
-                        slotPosition: slotPos,
-                        siteUrl: '',
-                        projectName: '',
-                      });
-                    }}
-                    title="Place an Ad in this spot"
-                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center justify-center gap-1.5 h-8 px-2 rounded-full bg-orange-500/50 hover:bg-orange-500/85 text-white shadow-md border border-orange-400/40 backdrop-blur-md font-mono group/pin overflow-hidden"
-                  >
-                    <span className="text-sm leading-none shrink-0 select-none">📌</span>
-                    <span className="max-w-0 group-hover/pin:max-w-[180px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight pr-1">
-                      Place an Ad in this spot
-                    </span>
-                  </button>
+                  {/* Hover-to-Reveal Pin Icon Button (Normal Mode) */}
+                  {!isAdSelectionMode && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleSelectSlot(slotPos);
+                      }}
+                      title="Place an Ad in this spot"
+                      className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center justify-center gap-1.5 h-8 px-2 rounded-full bg-orange-500/50 hover:bg-orange-500/85 text-white shadow-md border border-orange-400/40 backdrop-blur-md font-mono group/pin overflow-hidden"
+                    >
+                      <span className="text-sm leading-none shrink-0 select-none">📌</span>
+                      <span className="max-w-0 group-hover/pin:max-w-[180px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight pr-1">
+                        Place an Ad in this spot
+                      </span>
+                    </button>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
           );
         })}
+
+        {/* Interactive "Place an Ad" / "Cancel Selection" Footer Link */}
+        <button
+          type="button"
+          onClick={() => setIsAdSelectionMode((prev) => !prev)}
+          className={cn(
+            'w-full mt-1.5 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed cursor-pointer active:scale-95',
+            isAdSelectionMode
+              ? 'bg-blue-500/15 border-blue-500 text-blue-600 dark:text-[#08F9C9] font-bold shadow-xs animate-pulse'
+              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-muted/20 hover:bg-muted/40'
+          )}
+        >
+          <span>📌</span>
+          <span>{isAdSelectionMode ? 'Cancel Selection' : 'Place an Ad'}</span>
+        </button>
       </aside>
 
       <PinAdModal
