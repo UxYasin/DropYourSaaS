@@ -278,12 +278,12 @@ export function BentoRails({ side }: BentoRailsProps) {
                         projectName: card.name,
                       });
                     }}
-                    title="Pin my Ads $100/m"
-                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center gap-1.5 h-7 sm:h-8 px-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-md border border-blue-400/40 backdrop-blur-xs font-mono group/pin overflow-hidden"
+                    title="Place an Ad in this spot"
+                    className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center justify-center gap-1.5 h-8 px-2 rounded-full bg-orange-500/50 hover:bg-orange-500/85 text-white shadow-md border border-orange-400/40 backdrop-blur-md font-mono group/pin overflow-hidden"
                   >
-                    <span className="text-xs sm:text-sm leading-none shrink-0 select-none">📌</span>
-                    <span className="max-w-0 group-hover/pin:max-w-[140px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight">
-                      Pin my Ads $100/m
+                    <span className="text-sm leading-none shrink-0 select-none">📌</span>
+                    <span className="max-w-0 group-hover/pin:max-w-[180px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight pr-1">
+                      Place an Ad in this spot
                     </span>
                   </button>
                 </motion.div>
