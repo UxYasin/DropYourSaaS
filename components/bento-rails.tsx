@@ -271,8 +271,8 @@ export function BentoRails({ side }: BentoRailsProps) {
                       setPinModalState({
                         isOpen: true,
                         slotPosition: slotPos,
-                        siteUrl: card.url,
-                        projectName: card.name,
+                        siteUrl: '',
+                        projectName: '',
                       });
                     }}
                     title="Place an Ad in this spot"
