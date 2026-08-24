@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
       category,
       marketCategory,
       isForSale,
+      forSale,
       askingPrice,
       asking_price,
       mrr,
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const entryName = title || name || parsedDomain || 'SaaS Product';
     const targetRank = Math.max(1, Number(requestedRank || selectedRank || 1));
-    const isMarketplaceListing = Boolean(isForSale);
+    const isMarketplaceListing = Boolean(isForSale || forSale);
     const supabaseAdmin = getSupabaseServerClient();
 
     const parsedAskingPrice = Number(askingPrice || asking_price) || 0;
