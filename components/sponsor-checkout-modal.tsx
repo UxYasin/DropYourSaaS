@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Loader2, Zap, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,13 +21,8 @@ export function SponsorCheckoutModal({
   const [email, setEmail] = useState(defaultEmail);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,18 +35,23 @@ export function SponsorCheckoutModal({
     setError('');
 
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/checkout/whop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({
+          amount: 100,
+          email: email.trim(),
+          slotPosition: slotTitle,
+        }),
       });
 
       const data = await res.json();
+      const redirectUrl = data.url || data.checkoutUrl || data.checkout_url;
 
-      if (res.ok && (data.url || data.checkout_url)) {
-        window.location.href = data.url || data.checkout_url;
+      if (res.ok && redirectUrl) {
+        window.location.href = redirectUrl;
       } else {
-        setError(data.error || 'Failed to create Creem checkout session');
+        setError(data.error || 'Failed to create Whop checkout session');
         setIsLoading(false);
       }
     } catch {

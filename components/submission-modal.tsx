@@ -138,25 +138,29 @@ export function SubmissionModal({
     }
 
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/checkout/whop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url,
-          bid,
-          title: title.trim() || undefined,
-          description: description.trim() || undefined,
+          amount: bid,
+          email: email.trim() || undefined,
+          projectName: title.trim() || undefined,
+          oneLiner: description.trim() || undefined,
+          slotPosition: selectedRank ? `rank_${selectedRank}` : undefined,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
+      const redirectUrl = data.url || data.checkoutUrl || data.checkout_url;
+
+      if (!res.ok || !redirectUrl) {
         setError(data.error || 'Failed to initiate submission checkout');
         return;
       }
 
       onSuccess?.();
-      window.location.href = data.checkoutUrl;
+      window.location.href = redirectUrl;
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {

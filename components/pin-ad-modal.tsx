@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -46,10 +46,12 @@ export function PinAdModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  useEffect(() => {
-    if (defaultSiteUrl) setSiteUrl(defaultSiteUrl);
-    if (defaultProjectName) setProjectName(defaultProjectName);
-  }, [defaultSiteUrl, defaultProjectName]);
+  const [prevDefaultUrl, setPrevDefaultUrl] = useState(defaultSiteUrl);
+  if (defaultSiteUrl !== prevDefaultUrl) {
+    setPrevDefaultUrl(defaultSiteUrl);
+    setSiteUrl(defaultSiteUrl);
+    setProjectName(defaultProjectName);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +65,8 @@ export function PinAdModal({
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/ads/request', {
+      // 1. Record lead in ad_requests
+      await fetch('/api/ads/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,17 +76,33 @@ export function PinAdModal({
           contact_email: contactEmail.trim(),
           slot_position: slotPosition,
         }),
+      }).catch(() => {});
+
+      // 2. Generate dynamic Whop Checkout URL
+      const checkoutRes = await fetch('/api/checkout/whop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: 100,
+          email: contactEmail.trim(),
+          slotPosition,
+          siteUrl: siteUrl.trim(),
+          projectName: projectName.trim(),
+          oneLiner: oneLiner.trim(),
+        }),
       });
 
-      const data = await res.json();
+      const checkoutData = await checkoutRes.json();
+      const redirectUrl = checkoutData?.url || checkoutData?.checkoutUrl;
 
-      if (res.ok && data.success) {
-        setIsSuccess(true);
-      } else {
-        setErrorMsg(data.error || 'Failed to submit ad request. Please try again.');
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
       }
+
+      setIsSuccess(true);
     } catch {
-      setErrorMsg('An unexpected network error occurred.');
+      setErrorMsg('An unexpected network error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
