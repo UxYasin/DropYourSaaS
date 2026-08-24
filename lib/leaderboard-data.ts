@@ -37,6 +37,8 @@ export const leaderboardItems: LeaderboardItem[] = [
     url: 'https://outrank.so',
     clicks: 0,
     time: '3 minutes ago',
+    is_verified: true,
+    is_dofollow: true,
   },
   {
     rank: 2,
@@ -53,6 +55,8 @@ export const leaderboardItems: LeaderboardItem[] = [
     url: 'https://trycomp.ai',
     clicks: 0,
     time: '14 hours ago',
+    is_verified: true,
+    is_dofollow: true,
   },
   {
     rank: 4,
