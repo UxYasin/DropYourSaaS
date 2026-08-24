@@ -53,6 +53,7 @@ export function SubmissionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<'free' | 'fast_track'>('fast_track');
 
   // Sync state when new initialData arrives
   const initialUrl = initialData?.url;
@@ -72,8 +73,6 @@ export function SubmissionModal({
   }
 
   if (!isOpen || !initialData || typeof document === 'undefined') return null;
-
-  const [selectedTier, setSelectedTier] = useState<'free' | 'fast_track'>('fast_track');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
