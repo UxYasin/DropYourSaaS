@@ -22,6 +22,7 @@ export interface ScrapedData {
   isForSale?: boolean;
   askingPrice?: string;
   email?: string;
+  twitterHandle?: string;
 }
 
 interface SubmissionModalProps {
@@ -50,6 +51,7 @@ export function SubmissionModal({
   const [category, setCategory] = useState(initialData?.category || 'SaaS');
   const [isForSale, setIsForSale] = useState(initialData?.isForSale || false);
   const [email, setEmail] = useState(initialData?.email || '');
+  const [twitterHandle, setTwitterHandle] = useState(initialData?.twitterHandle || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
@@ -70,6 +72,7 @@ export function SubmissionModal({
     setIsForSale(initialData?.isForSale || false);
     setAskingPrice(initialData?.askingPrice || '');
     setEmail(initialData?.email || '');
+    setTwitterHandle(initialData?.twitterHandle || '');
     setError(null);
     setRateLimitError(null);
   }
@@ -109,6 +112,7 @@ export function SubmissionModal({
           forSale: isForSale,
           askingPrice: isForSale ? askingPrice.trim() : undefined,
           email: email.trim() || undefined,
+          twitterHandle: twitterHandle.trim() || undefined,
           targetRank: selectedRank,
           tier: selectedTier,
         }),
@@ -376,8 +380,8 @@ export function SubmissionModal({
             </div>
           </div>
 
-          {/* Grid Row 3: Founder Email & Asking Price (if for sale) */}
-          <div className={`grid grid-cols-1 ${isForSale ? 'sm:grid-cols-2' : ''} gap-3`}>
+          {/* Grid Row 3: Founder Email, X/Twitter Handle & Asking Price (if for sale) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
                 Contact / Founder Email {isForSale ? <span className="text-emerald-600 dark:text-emerald-400 font-bold">(Required for Marketplace)</span> : <span className="text-zinc-400 dark:text-zinc-500 font-normal">(Optional)</span>}
@@ -397,8 +401,21 @@ export function SubmissionModal({
               )}
             </div>
 
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
+                X / Twitter Handle <span className="text-zinc-400 dark:text-zinc-500 font-normal">(Optional)</span>
+              </label>
+              <Input
+                type="text"
+                value={twitterHandle}
+                onChange={(e) => setTwitterHandle(e.target.value)}
+                placeholder="@yourhandle (optional)"
+                className="bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans text-xs sm:text-sm h-10.5 rounded-xl focus-visible:ring-amber-500"
+              />
+            </div>
+
             {isForSale && (
-              <div className="space-y-1 animate-in fade-in-50 duration-200">
+              <div className="space-y-1 animate-in fade-in-50 duration-200 sm:col-span-2">
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
                   Asking Price ($ USD) <span className="text-emerald-600 dark:text-emerald-400 font-bold">*</span>
                 </label>

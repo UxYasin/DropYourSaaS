@@ -28,6 +28,7 @@ export interface Database {
           clicks: number;
           verification_token: string | null;
           status: string | null;
+          twitter_handle: string | null;
           claimed_at: string;
           created_at: string;
         };
@@ -49,6 +50,7 @@ export interface Database {
           clicks?: number;
           verification_token?: string | null;
           status?: string | null;
+          twitter_handle?: string | null;
           claimed_at?: string;
           created_at?: string;
         };
@@ -70,6 +72,7 @@ export interface Database {
           clicks?: number;
           verification_token?: string | null;
           status?: string | null;
+          twitter_handle?: string | null;
           claimed_at?: string;
           created_at?: string;
         };
@@ -90,6 +93,7 @@ export interface Database {
           clicks: number;
           verification_token: string | null;
           status: string | null;
+          twitter_handle: string | null;
           claimed_at: string;
         };
         Insert: {
@@ -107,6 +111,7 @@ export interface Database {
           clicks?: number;
           verification_token?: string | null;
           status?: string | null;
+          twitter_handle?: string | null;
           claimed_at?: string;
         };
         Update: {
@@ -124,6 +129,7 @@ export interface Database {
           clicks?: number;
           verification_token?: string | null;
           status?: string | null;
+          twitter_handle?: string | null;
           claimed_at?: string;
         };
       };
@@ -148,4 +154,5 @@ export interface ListingType {
   user_vote?: 1 | -1 | 0;
   favicon?: string;
   preview_image_url?: string;
+  twitter_handle?: string | null;
 }

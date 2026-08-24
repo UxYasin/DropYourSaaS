@@ -21,6 +21,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const [url, setUrl] = useState('');
   const [bid] = useState(selectedBid || 1);
   const [category, setCategory] = useState<string>('SaaS');
+  const [twitterHandle, setTwitterHandle] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         category,
         isForSale: false,
         email: '',
+        twitterHandle,
       });
       setError(null);
       setIsModalOpen(true);
@@ -63,6 +65,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           category,
           isForSale: false,
           email: '',
+          twitterHandle,
         });
       } else {
         let hostname = '';
@@ -79,6 +82,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           category,
           isForSale: false,
           email: '',
+          twitterHandle,
         });
       }
       setIsModalOpen(true);
@@ -97,6 +101,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         category,
         isForSale: false,
         email: '',
+        twitterHandle,
       });
       setIsModalOpen(true);
     } finally {
@@ -171,10 +176,9 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               {/* Divider line */}
               <div className="border-t border-border/60 my-2" />
 
-              {/* Row 1: Category Dropdown & Quick Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
-                {/* Left: Category dropdown */}
-                <div className="relative flex-1 flex items-center">
+              {/* Row 1: Category Dropdown */}
+              <div className="flex items-center gap-3">
+                <div className="relative w-full sm:w-1/2 flex items-center">
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -190,31 +194,37 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     <ChevronDown className="size-4" />
                   </div>
                 </div>
-
-                {/* Right: Instant Perks Pill */}
-                <div className="h-11 px-3.5 py-2 rounded-[16px] bg-zinc-50 dark:bg-background/90 border border-border/80 flex items-center justify-between gap-2 flex-1">
-                  <div className="min-w-0 text-left">
-                    <div className="text-xs font-bold font-sans text-foreground truncate flex items-center gap-1">
-                      <Sparkles className="size-3 text-amber-500 shrink-0" />
-                      Instant Indexation &amp; Fast-Track
-                    </div>
-                    <div className="text-[10px] font-body text-muted-foreground truncate">
-                      ⚡ $5 Fast-Track (Do-Follow + Badge) or Free
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Row 2: Footer Actions (Collapse only) */}
-              <div className="flex items-center justify-between pt-1">
+              {/* Bottom Row: Collapse, Twitter Handle, Tier Selection */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full pt-3 gap-3 border-t border-border/60">
+                {/* Left: Collapse Button */}
                 <button
                   type="button"
                   onClick={() => setIsExpanded(false)}
-                  className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-1.5 rounded-full hover:bg-muted transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-muted-foreground hover:text-foreground font-sans px-3 py-1.5 rounded-full hover:bg-muted transition-colors inline-flex items-center gap-1 cursor-pointer shrink-0"
                 >
                   <ChevronUp className="size-3.5" />
                   Collapse
                 </button>
+
+                {/* Right Side Group */}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 w-full sm:w-auto justify-end">
+                  {/* New Twitter Input */}
+                  <input
+                    type="text"
+                    value={twitterHandle}
+                    onChange={(e) => setTwitterHandle(e.target.value)}
+                    placeholder="@yourhandle (optional)"
+                    className="bg-transparent border-b border-border/80 px-2 py-1 focus:outline-none focus:border-orange-500 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70"
+                  />
+
+                  {/* Tier Selection - FLAT STYLE, NO BORDER */}
+                  <div className="bg-transparent border-0 p-0 m-0 text-xs sm:text-sm flex flex-col text-left sm:text-right">
+                    <span className="font-bold text-foreground">Instant Indexation &amp; Fast-Track</span>
+                    <span className="text-muted-foreground text-[11px] sm:text-xs">$5 Fast-Track (Do-Follow + Badge) or Free</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

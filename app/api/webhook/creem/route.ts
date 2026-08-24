@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 import { revalidatePath } from 'next/cache';
+import { postToX } from '@/lib/twitter';
 
 export async function POST(req: Request) {
   try {
@@ -57,6 +58,25 @@ export async function POST(req: Request) {
         } catch {}
 
         await invalidateLeaderboardCache().catch(() => {});
+
+        // Fire-and-forget auto-post to X
+        try {
+          const { data: entry } = await supabase
+            .from('leaderboard_entries')
+            .select('id, name, value_proposition, url, twitter_handle')
+            .or(`url.ilike.%${targetUrl}%,email.eq.${customerEmail}`)
+            .maybeSingle();
+
+          if (entry) {
+            postToX(
+              entry.name,
+              `https://www.dropyoursaas.com/s/${entry.id}`,
+              entry.value_proposition || entry.name,
+              true,
+              entry.twitter_handle
+            ).catch(() => {});
+          }
+        } catch {}
       }
     }
 

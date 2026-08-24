@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
+import { postToX } from '@/lib/twitter';
 
 export async function POST(req: Request) {
   try {
@@ -128,6 +129,38 @@ export async function POST(req: Request) {
 
         // Invalidate leaderboard cache for instant real-time ranking & verified badge update
         await invalidateLeaderboardCache();
+
+        // Fire-and-forget auto-post to X (Twitter)
+        try {
+          const listingIdToSearch = listingId || targetIdentifier;
+          const { data: listingData } = await supabase
+            .from('listings')
+            .select('id, name, title, description, url, twitter_handle')
+            .or(`id.eq.${listingIdToSearch},url.ilike.%${listingIdToSearch}%`)
+            .maybeSingle();
+
+          const { data: entryData } = !listingData
+            ? await supabase
+                .from('leaderboard_entries')
+                .select('id, name, value_proposition, url, twitter_handle')
+                .or(`id.eq.${listingIdToSearch},url.ilike.%${listingIdToSearch}%`)
+                .maybeSingle()
+            : { data: null };
+
+          const nameToPost = listingData?.name || listingData?.title || entryData?.name || projectName || 'New SaaS';
+          const tagline = listingData?.description || entryData?.value_proposition || oneLiner || 'Live on DropYourSaaS!';
+          const matchedId = listingData?.id || entryData?.id || listingId;
+          const handleToMention = listingData?.twitter_handle || entryData?.twitter_handle || null;
+          const listingUrl = matchedId
+            ? `https://www.dropyoursaas.com/s/${matchedId}`
+            : siteUrl || 'https://www.dropyoursaas.com';
+
+          postToX(nameToPost, listingUrl, tagline, true, handleToMention).catch((err) =>
+            console.error('[Whop Webhook] X auto-post error:', err)
+          );
+        } catch (xErr) {
+          console.error('[Whop Webhook] Error triggering X post:', xErr);
+        }
       }
 
       console.log(`[Whop Webhook] Successfully processed payment of $${amountPaid}`);
@@ -139,3 +172,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }
+

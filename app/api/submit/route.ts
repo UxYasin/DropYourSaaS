@@ -5,6 +5,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 import { IS_FREE_MODE } from '@/lib/copy';
 import { savePendingToken } from '@/lib/token-store';
+import { postToX } from '@/lib/twitter';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +42,13 @@ export async function POST(request: NextRequest) {
       requestedRank,
       selectedRank,
       tier,
+      twitterHandle,
+      twitter_handle,
     } = body || {};
+
+    const cleanTwitterHandle = twitterHandle || twitter_handle
+      ? String(twitterHandle || twitter_handle).trim().replace(/^@/, '')
+      : null;
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -141,6 +148,7 @@ export async function POST(request: NextRequest) {
         is_dofollow: false,
         status: isFastTrack ? 'pending' : 'published',
         is_for_sale: false,
+        twitter_handle: cleanTwitterHandle,
         claimed_at: new Date().toISOString(),
       };
 
@@ -161,6 +169,7 @@ export async function POST(request: NextRequest) {
           is_verified: false,
           is_dofollow: false,
           status: isFastTrack ? 'pending' : 'published',
+          twitter_handle: cleanTwitterHandle,
           claimed_at: new Date().toISOString(),
         };
         const { data: fallbackListing } = await supabaseAdmin
@@ -177,6 +186,21 @@ export async function POST(request: NextRequest) {
       } catch {}
 
       await invalidateLeaderboardCache().catch(() => {});
+
+      if (!isFastTrack) {
+        try {
+          const matchedId = newListing?.id;
+          const listingUrl = matchedId
+            ? `https://www.dropyoursaas.com/s/${matchedId}`
+            : formattedUrl;
+
+          postToX(entryName, listingUrl, entryName, false, cleanTwitterHandle).catch((err) =>
+            console.error('[Submit Route] X auto-post error:', err)
+          );
+        } catch (xErr) {
+          console.error('[Submit Route] Error triggering X post:', xErr);
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -245,6 +269,7 @@ export async function POST(request: NextRequest) {
       status: 'published',
       is_verified: true,
       is_for_sale: true,
+      twitter_handle: cleanTwitterHandle,
       claimed_at: new Date().toISOString(),
     };
 
