@@ -80,31 +80,53 @@ export async function POST(req: Request) {
         }
       }
 
-      // 2. Leaderboard Outbid / Boost
+      // 2. Listing Verification / Outbid / Fast-Track Boost
       if (listingId || siteUrl) {
         const targetIdentifier = listingId || siteUrl;
-        
-        // Try RPC
+        const nowIso = new Date().toISOString();
+        const amountCents = Math.round(amountPaid * 100);
+
+        // Try RPC for bidding boost if applicable
         try {
           await supabase.rpc('increment_listing_bid', {
             p_listing_id: targetIdentifier,
             p_amount: amountPaid,
           });
         } catch (rpcErr) {
-          console.warn('[Whop Webhook] RPC fallback to direct update:', rpcErr);
-          
-          // Direct fallback update
-          const amountCents = Math.round(amountPaid * 100);
+          console.warn('[Whop Webhook] RPC notice:', rpcErr);
+        }
+
+        // Direct update for is_verified, is_dofollow, status, and verified_at
+        try {
           await supabase
             .from('leaderboard_entries')
             .update({
-              bid_cents: amountCents,
-              claimed_at: new Date().toISOString(),
+              is_verified: true,
+              is_dofollow: true,
+              status: 'published',
+              verified_at: nowIso,
+              bid_cents: amountCents > 100 ? amountCents : undefined,
+              claimed_at: nowIso,
             })
             .or(`id.eq.${targetIdentifier},url.ilike.%${targetIdentifier}%`);
+        } catch (updateErr) {
+          console.warn('[Whop Webhook] Leaderboard update notice:', updateErr);
         }
 
-        // Invalidate leaderboard cache for instant real-time ranking update
+        // Also update listings table if present
+        try {
+          await supabase
+            .from('listings')
+            .update({
+              is_verified: true,
+              is_dofollow: true,
+              status: 'published',
+              verified_at: nowIso,
+            })
+            .or(`id.eq.${targetIdentifier},url.ilike.%${targetIdentifier}%`);
+        } catch {}
+
+        // Invalidate leaderboard cache for instant real-time ranking & verified badge update
         await invalidateLeaderboardCache();
       }
 

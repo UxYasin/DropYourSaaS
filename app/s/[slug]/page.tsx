@@ -9,7 +9,7 @@ import { FaviconImage } from '@/components/favicon-image';
 import { PreviewImage } from '@/components/preview-image';
 import { getListingBySlug } from '@/lib/leaderboard';
 import { ProfileActions } from './profile-actions';
-import { ArrowLeft, ExternalLink, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ShieldCheck, BadgeCheck } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -111,14 +111,22 @@ export default async function ListingProfilePage({ params }: PageProps) {
                       #{listing.rank} on dropyoursaas.com
                     </div>
 
-                    <h1 className="text-2xl sm:text-4xl font-mono font-black tracking-tight text-foreground truncate">
-                      {cleanDomain}
-                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h1 className="text-2xl sm:text-4xl font-mono font-black tracking-tight text-foreground truncate">
+                        {cleanDomain}
+                      </h1>
+                      {listing.is_verified && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-[#08F9C9] text-xs font-mono font-bold border border-blue-500/20 shadow-2xs shrink-0">
+                          <BadgeCheck className="size-3.5 fill-current" />
+                          <span>Verified Fast-Track</span>
+                        </span>
+                      )}
+                    </div>
 
                     <a
                       href={targetHref}
                       target="_blank"
-                      rel="sponsored noopener noreferrer"
+                      rel={listing.is_dofollow ? "noopener" : "nofollow noopener"}
                       className="text-xs sm:text-sm font-mono text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group/host"
                     >
                       <span>{cleanDomain}</span>

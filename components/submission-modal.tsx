@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon, AlertCircle, Check, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
@@ -73,6 +73,8 @@ export function SubmissionModal({
 
   if (!isOpen || !initialData || typeof document === 'undefined') return null;
 
+  const [selectedTier, setSelectedTier] = useState<'free' | 'fast_track'>('fast_track');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) {
@@ -88,81 +90,79 @@ export function SubmissionModal({
       url,
       bid,
       title,
+      tier: selectedTier,
     });
 
-    if (IS_FREE_MODE) {
-      try {
-        const res = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url,
-            title: title.trim() || undefined,
-            description: description.trim() || undefined,
-            faviconUrl: favicon || undefined,
-            screenshotUrl: screenshotUrl || undefined,
-            category: category || 'SaaS',
-            forSale: isForSale,
-            email: email.trim() || undefined,
-            targetRank: selectedRank,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          if (data.rateLimited) {
-            setRateLimitError(data.error || 'Submission limit reached for this domain. Please try again later.');
-            setIsSubmitting(false);
-            return;
-          }
-          setError(data.error || 'Failed to submit listing. Please try again.');
-          setIsSubmitting(false);
-          return;
-        }
-
-        onSuccess?.();
-        onClose();
-        if (data.immediate || data.verified) {
-          router.push('/?verified=true');
-        } else {
-          router.push(data.redirectUrl || `/thank-you?email=${encodeURIComponent(email.trim())}`);
-        }
-      } catch (err: unknown) {
-        console.error('Submission catch error:', err);
-        setError('An unexpected network error occurred. Please try again.');
-      } finally {
-        setIsSubmitting(false);
-      }
-      return;
-    }
-
     try {
-      const res = await fetch('/api/checkout/whop', {
+      // 1. Submit listing record to /api/submit
+      const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url,
-          amount: bid,
+          title: title.trim() || undefined,
+          description: description.trim() || undefined,
+          faviconUrl: favicon || undefined,
+          screenshotUrl: screenshotUrl || undefined,
+          category: category || 'SaaS',
+          forSale: isForSale,
           email: email.trim() || undefined,
-          projectName: title.trim() || undefined,
-          oneLiner: description.trim() || undefined,
-          slotPosition: selectedRank ? `rank_${selectedRank}` : undefined,
+          targetRank: selectedRank,
+          tier: selectedTier,
         }),
       });
 
       const data = await res.json();
-      const redirectUrl = data.url || data.checkoutUrl || data.checkout_url;
 
-      if (!res.ok || !redirectUrl) {
-        setError(data.error || 'Failed to initiate submission checkout');
+      if (!res.ok || !data.success) {
+        if (data.rateLimited) {
+          setRateLimitError(data.error || 'Submission limit reached for this domain. Please try again later.');
+          setIsSubmitting(false);
+          return;
+        }
+        setError(data.error || 'Failed to submit listing. Please try again.');
+        setIsSubmitting(false);
         return;
       }
 
+      const listingId = data.id || data.listingId || url;
+
+      // 2. If Fast-Track ($5), route to Whop checkout immediately
+      if (selectedTier === 'fast_track') {
+        const checkoutRes = await fetch('/api/checkout/whop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: 5,
+            listingId,
+            siteUrl: url.trim(),
+            projectName: title.trim() || url.trim(),
+            oneLiner: description.trim() || undefined,
+            logoUrl: favicon || undefined,
+          }),
+        });
+
+        const checkoutData = await checkoutRes.json();
+        const redirectUrl = checkoutData?.url || checkoutData?.checkoutUrl;
+
+        if (checkoutRes.ok && redirectUrl) {
+          onSuccess?.();
+          window.location.href = redirectUrl;
+          return;
+        }
+      }
+
+      // 3. Free tier or fallback
       onSuccess?.();
-      window.location.href = redirectUrl;
-    } catch {
-      setError('An unexpected error occurred. Please try again.');
+      onClose();
+      if (data.immediate || data.verified) {
+        router.push('/?verified=true');
+      } else {
+        router.push(data.redirectUrl || `/thank-you?email=${encodeURIComponent(email.trim())}`);
+      }
+    } catch (err: unknown) {
+      console.error('Submission catch error:', err);
+      setError('An unexpected network error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -389,6 +389,70 @@ export function SubmissionModal({
             </div>
           )}
 
+          {/* Tier Selection (Free vs $5 Fast-Track) */}
+          <div className="space-y-2 pt-2 text-left">
+            <label className="block text-xs font-semibold text-zinc-300 font-sans">
+              Choose Publishing Tier
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* $5 Fast-Track Tier */}
+              <div
+                onClick={() => setSelectedTier('fast_track')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left ${
+                  selectedTier === 'fast_track'
+                    ? 'bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/40 shadow-md'
+                    : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 opacity-75'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                    <span className="text-amber-400 font-mono">⚡</span>
+                    <span>Fast-Track</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-600 text-white shadow-xs">
+                    $5 One-Time
+                  </span>
+                </div>
+                <ul className="text-[11px] text-zinc-300 space-y-1 font-sans leading-snug">
+                  <li className="flex items-center gap-1.5 text-blue-400 font-medium">
+                    <Check className="size-3.5 shrink-0 text-blue-400" />
+                    <span>Instant Go-Live (Skip queue)</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="size-3.5 shrink-0 text-blue-400" />
+                    <span>Permanent Do-Follow Backlink</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="size-3.5 shrink-0 text-blue-400" />
+                    <span>Verified Blue Badge</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Free Tier */}
+              <div
+                onClick={() => setSelectedTier('free')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left ${
+                  selectedTier === 'free'
+                    ? 'bg-zinc-800/80 border-zinc-500 ring-2 ring-zinc-500/40 shadow-sm'
+                    : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 opacity-75'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-white">Standard Free</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    $0 Free
+                  </span>
+                </div>
+                <ul className="text-[11px] text-zinc-400 space-y-1 font-sans leading-snug">
+                  <li>• Standard review queue</li>
+                  <li>• Nofollow SEO backlink</li>
+                  <li>• No verified checkmark</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="pt-3 flex items-center gap-3">
             <Button
@@ -401,20 +465,26 @@ export function SubmissionModal({
             <Button
               type="submit"
               disabled={isSubmitting || Boolean(rateLimitError)}
-              className="flex-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className={`flex-1 rounded-full text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
+                selectedTier === 'fast_track'
+                  ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20'
+                  : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600'
+              }`}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
                   <span>Processing...</span>
                 </>
+              ) : selectedTier === 'fast_track' ? (
+                <>
+                  <Zap className="size-4 text-amber-300 fill-amber-300" />
+                  <span>Fast-Track &amp; Verify ($5)</span>
+                  <ArrowRight className="size-4" />
+                </>
               ) : (
                 <>
-                  <span>
-                    {IS_FREE_MODE
-                      ? `Publish Listing #${selectedRank}`
-                      : `Boost Listing · $${bid}`}
-                  </span>
+                  <span>Publish Free Listing #{selectedRank}</span>
                   <ArrowRight className="size-4" />
                 </>
               )}

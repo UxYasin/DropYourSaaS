@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LatestActivitySkeleton } from '@/components/latest-activity-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
-import { siteCopy } from '@/lib/copy';
 import { FaviconImage } from '@/components/favicon-image';
+import { BadgeCheck } from 'lucide-react';
 
 export function LatestActivity() {
-  const [items, setItems] = useState<{ name: string; rank: number; amount: string; time: string; url: string }[]>([]);
+  const [items, setItems] = useState<{ name: string; rank: number; amount: string; time: string; url: string; is_verified?: boolean; is_dofollow?: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +26,8 @@ export function LatestActivity() {
               amount: `$${(it.bid || 0).toLocaleString()}`,
               time: it.time,
               url: it.url,
+              is_verified: it.is_verified,
+              is_dofollow: it.is_dofollow,
             }));
             setItems(mapped);
           }
@@ -74,7 +76,7 @@ export function LatestActivity() {
                   key={item.name + i}
                   href={href}
                   target="_blank"
-                  rel="sponsored noopener noreferrer"
+                  rel={item.is_dofollow ? "noopener" : "nofollow noopener"}
                   onClick={() => {
                     trackEvent('outbound_click', { url: item.url, source: 'recent_submissions' });
                     fetch('/api/click', {
@@ -92,15 +94,15 @@ export function LatestActivity() {
                       size={15}
                       containerClassName="rounded size-3.5 shrink-0"
                     />
-                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
-                      {item.name}
+                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors inline-flex items-center gap-1">
+                      <span>{item.name}</span>
+                      {item.is_verified && (
+                        <BadgeCheck className="size-3 text-blue-500 fill-blue-500 shrink-0" />
+                      )}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground font-mono">
                       #{item.rank}
                     </span>
-                    {siteCopy.feed.showPrices && (
-                      <span className="text-[10px] text-muted-foreground font-mono">{item.amount}</span>
-                    )}
                   </div>
                   <span className="text-[10px] text-muted-foreground font-sans shrink-0">{item.time}</span>
                 </a>

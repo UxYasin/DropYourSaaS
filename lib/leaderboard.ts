@@ -152,6 +152,9 @@ export async function fetchLeaderboardFromDatabase(
         claimed_at: String(row.claimed_at || row.created_at || ''),
         favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
         preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
+        is_verified: Boolean(row.is_verified),
+        is_dofollow: Boolean(row.is_dofollow),
+        verified_at: row.verified_at ? String(row.verified_at) : undefined,
       };
     });
   }
@@ -188,6 +191,9 @@ export async function fetchLeaderboardFromDatabase(
       claimed_at: String(row.claimed_at || row.created_at || ''),
       favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
       preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
+      is_verified: Boolean(row.is_verified),
+      is_dofollow: Boolean(row.is_dofollow),
+      verified_at: row.verified_at ? String(row.verified_at) : undefined,
     };
 
     if (urlStr) {
@@ -313,6 +319,9 @@ export async function getListingBySlug(slug: string): Promise<LeaderboardItem | 
         claimed_at: String(row.claimed_at || row.created_at || ''),
         favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
         preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : undefined),
+        is_verified: Boolean(row.is_verified),
+        is_dofollow: Boolean(row.is_dofollow),
+        verified_at: row.verified_at ? String(row.verified_at) : undefined,
       };
     }
   } catch {}

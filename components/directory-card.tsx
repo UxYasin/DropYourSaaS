@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Clock, ExternalLink } from 'lucide-react';
+import { Sparkles, Clock, ExternalLink, BadgeCheck } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
 import { siteCopy } from '@/lib/copy';
@@ -28,6 +28,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
   const containerRef = useRef<HTMLDivElement>(null);
 
   const clicks = (item.clicks || 0) + clickedExtra;
+  const relAttribute = item.is_dofollow ? "noopener" : "nofollow noopener";
 
   useEffect(() => {
     let active = true;
@@ -88,7 +89,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <a
                 href={href}
                 target="_blank"
-                rel="sponsored noopener noreferrer"
+                rel={relAttribute}
                 onClick={handleClick}
                 className="shrink-0"
               >
@@ -107,11 +108,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   <a
                     href={href}
                     target="_blank"
-                    rel="sponsored noopener noreferrer"
+                    rel={relAttribute}
                     onClick={handleClick}
                     className="font-mono font-black text-base sm:text-lg text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
                   >
                     <span className="truncate">{title}</span>
+                    {item.is_verified && (
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                        <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
+                      </span>
+                    )}
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
                   <span className="font-sans text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
@@ -224,7 +230,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <a
                 href={href}
                 target="_blank"
-                rel="sponsored noopener noreferrer"
+                rel={relAttribute}
                 onClick={handleClick}
                 className="shrink-0"
               >
@@ -243,11 +249,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   <a
                     href={href}
                     target="_blank"
-                    rel="sponsored noopener noreferrer"
+                    rel={relAttribute}
                     onClick={handleClick}
                     className={`font-mono font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 min-w-0 max-w-full ${theme.text}`}
                   >
                     <span className="truncate">{title}</span>
+                    {item.is_verified && (
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                        <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
+                      </span>
+                    )}
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
                   <span className={`font-sans text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
@@ -331,7 +342,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
               <a
                 href={href}
                 target="_blank"
-                rel="sponsored noopener noreferrer"
+                rel={relAttribute}
                 onClick={handleClick}
                 className="shrink-0"
               >
@@ -350,11 +361,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                   <a
                     href={href}
                     target="_blank"
-                    rel="sponsored noopener noreferrer"
+                    rel={relAttribute}
                     onClick={handleClick}
-                    className={`font-mono font-bold text-xs sm:text-sm hover:underline transition-colors truncate ${currentStyle.text}`}
+                    className={`font-mono font-bold text-xs sm:text-sm hover:underline transition-colors truncate inline-flex items-center gap-1 ${currentStyle.text}`}
                   >
-                    {title}
+                    <span>{title}</span>
+                    {item.is_verified && (
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                        <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
+                      </span>
+                    )}
                   </a>
                 </div>
                 <p className={`font-body text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
@@ -419,7 +435,7 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
             <a
               href={href}
               target="_blank"
-              rel="sponsored noopener noreferrer"
+              rel={relAttribute}
               onClick={handleClick}
               className="shrink-0"
             >
@@ -438,11 +454,16 @@ export function DirectoryCard({ item, variant, onClaimClick }: DirectoryCardProp
                 <a
                   href={href}
                   target="_blank"
-                  rel="sponsored noopener noreferrer"
+                  rel={relAttribute}
                   onClick={handleClick}
-                  className="font-mono font-bold text-xs text-foreground hover:text-primary transition-colors truncate"
+                  className="font-mono font-bold text-xs text-foreground hover:text-primary transition-colors truncate inline-flex items-center gap-1"
                 >
-                  {title}
+                  <span>{title}</span>
+                  {item.is_verified && (
+                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
+                      <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
+                    </span>
+                  )}
                 </a>
               </div>
               <p className="font-body text-[11px] text-muted-foreground line-clamp-1">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Flame } from 'lucide-react';
+import { Flame, BadgeCheck } from 'lucide-react';
 import { TrendingSkeleton } from '@/components/trending-skeleton';
 import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { trackEvent } from '@/lib/analytics';
@@ -65,7 +65,7 @@ export function TrendingSection() {
                   key={item.name + i}
                   href={href}
                   target="_blank"
-                  rel="sponsored noopener noreferrer"
+                  rel={item.is_dofollow ? "noopener" : "nofollow noopener"}
                   onClick={() => {
                     trackEvent('outbound_click', { url: item.url, source: 'trending' });
                     fetch('/api/click', {
@@ -76,7 +76,7 @@ export function TrendingSection() {
                   }}
                   className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-muted/60 transition-colors group"
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     <span className="text-[10px] font-mono text-muted-foreground w-3.5">{i + 1}</span>
                     <FaviconImage
                       url={item.url}
@@ -84,8 +84,11 @@ export function TrendingSection() {
                       size={15}
                       containerClassName="rounded size-3.5 shrink-0"
                     />
-                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors">
-                      {item.name}
+                    <span className="font-medium text-xs truncate text-foreground group-hover:text-primary transition-colors inline-flex items-center gap-1">
+                      <span>{item.name}</span>
+                      {item.is_verified && (
+                        <BadgeCheck className="size-3 text-blue-500 fill-blue-500 shrink-0" />
+                      )}
                     </span>
                   </div>
                   <Badge variant="secondary" className="text-[10px] font-mono font-normal px-2 py-0 h-4 bg-muted/80 text-muted-foreground shrink-0">

@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       bid,
       requestedRank,
       selectedRank,
+      tier,
     } = body || {};
 
     if (!url) {
@@ -121,9 +122,10 @@ export async function POST(request: NextRequest) {
 
     // CASE A: Standard Directory Listing (isForSale === false)
     if (!isMarketplaceListing) {
-      console.log(`Standard directory listing for ${formattedUrl} claiming position #${targetRank}.`);
+      console.log(`Standard directory listing for ${formattedUrl} claiming position #${targetRank} (tier: ${tier || 'free'}).`);
 
       const submitterEmail = email ? email.trim() : 'guest@dropyoursaas.com';
+      const isFastTrack = tier === 'fast_track';
 
       const corePayload = {
         url: formattedUrl,
@@ -133,8 +135,9 @@ export async function POST(request: NextRequest) {
         bid_cents: calculatedBidCents,
         target_rank: targetRank,
         rank: targetRank,
-        is_verified: true,
-        status: 'published',
+        is_verified: false,
+        is_dofollow: false,
+        status: isFastTrack ? 'pending' : 'published',
         is_for_sale: false,
         claimed_at: new Date().toISOString(),
       };
@@ -153,8 +156,9 @@ export async function POST(request: NextRequest) {
           bid_cents: calculatedBidCents,
           rank: targetRank,
           target_rank: targetRank,
-          is_verified: true,
-          status: 'published',
+          is_verified: false,
+          is_dofollow: false,
+          status: isFastTrack ? 'pending' : 'published',
           claimed_at: new Date().toISOString(),
         };
         const { data: fallbackListing } = await supabaseAdmin
@@ -174,9 +178,14 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        verified: true,
-        immediate: true,
-        message: `Listing published immediately at position #${targetRank}!`,
+        id: newListing?.id || formattedUrl,
+        listingId: newListing?.id || formattedUrl,
+        tier: isFastTrack ? 'fast_track' : 'free',
+        verified: !isFastTrack,
+        immediate: !isFastTrack,
+        message: isFastTrack
+          ? 'Fast-Track record created. Proceed to payment.'
+          : `Listing published at position #${targetRank}!`,
       });
     }
 

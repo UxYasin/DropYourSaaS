@@ -22,6 +22,9 @@ export interface LeaderboardItem {
   claimed_at?: string;
   favicon?: string;
   preview_image_url?: string;
+  is_verified?: boolean;
+  is_dofollow?: boolean;
+  verified_at?: string;
 }
 
 // Seed data for `supabase/seed.sql` / local development when no database is
