@@ -18,6 +18,8 @@ export interface RailCardItem {
   category?: string;
   is_pinned?: boolean;
   slot_position?: string;
+  is_verified?: boolean;
+  bid_cents?: number;
 }
 
 interface BentoRailsProps {
@@ -92,7 +94,9 @@ export function BentoRails({ side }: BentoRailsProps) {
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
+            let activePinnedMap: Record<string, RailCardItem> = {};
             if (data.pinnedAds) {
+              activePinnedMap = data.pinnedAds;
               setPinnedAds(data.pinnedAds);
             }
             if (Array.isArray(data.pool) && data.pool.length > 0) {
@@ -110,29 +114,52 @@ export function BentoRails({ side }: BentoRailsProps) {
 
     fetchPool();
 
-    // Rotate cards every 10 seconds smoothly
+    // Fast & frequent rotation every 3.5 seconds (skipping active pinned ads)
     const startRotation = () => {
       timerId = setInterval(() => {
         if (!isMounted || globalPool.length < 5) return;
 
-        // Pick a random slot to rotate (0 to 4)
-        const slotToReplace = Math.floor(Math.random() * 5);
-
         setDisplayedItems((current) => {
           if (current.length === 0) return current;
 
-          // Find an item from pool not currently displayed
+          // Exclude slots that are active Pinned Ads
+          const availableSlotIndices = [0, 1, 2, 3, 4].filter((idx) => {
+            const slotPos = `${side}_${idx + 1}`;
+            return !pinnedAds[slotPos];
+          });
+
+          if (availableSlotIndices.length === 0) return current;
+
+          // Pick a random unpinned slot to rotate
+          const slotToReplace = availableSlotIndices[Math.floor(Math.random() * availableSlotIndices.length)];
+
+          // Filter pool items not currently displayed
           const currentUrls = new Set(current.map((c) => c.url));
-          const available = globalPool.filter((p) => !currentUrls.has(p.url));
+          const candidates = globalPool.filter((p) => !currentUrls.has(p.url));
 
-          if (available.length === 0) return current;
+          if (candidates.length === 0) return current;
 
-          const replacement = available[Math.floor(Math.random() * available.length)];
+          // 33% Weighted probability selection ($5 Fast-Track / is_verified = 1.33 weight vs 1.0 for free)
+          const weights = candidates.map((item) =>
+            item.is_verified || (item.bid_cents && item.bid_cents >= 500) ? 1.33 : 1.0
+          );
+          const totalWeight = weights.reduce((acc, w) => acc + w, 0);
+
+          let random = Math.random() * totalWeight;
+          let replacement = candidates[candidates.length - 1];
+          for (let i = 0; i < candidates.length; i++) {
+            if (random < weights[i]) {
+              replacement = candidates[i];
+              break;
+            }
+            random -= weights[i];
+          }
+
           const next = [...current];
           next[slotToReplace] = replacement;
           return next;
         });
-      }, 10000);
+      }, 3500);
     };
 
     startRotation();
@@ -141,7 +168,7 @@ export function BentoRails({ side }: BentoRailsProps) {
       isMounted = false;
       clearInterval(timerId);
     };
-  }, [side]);
+  }, [side, pinnedAds]);
 
   // Fallback items if database hasn't loaded yet
   const fallbackCards: RailCardItem[] = [

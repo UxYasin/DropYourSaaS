@@ -26,6 +26,8 @@ export interface PoolListingItem {
   hot_score: number;
   user_vote: 1 | -1 | 0;
   category: string;
+  is_verified?: boolean;
+  bid_cents?: number;
 }
 
 export async function GET() {
@@ -94,7 +96,7 @@ export async function GET() {
     // 1. Fetch 60% Evergreen Pool (Ordered by hot_score DESC, net_score DESC)
     const { data: hotData } = await supabase
       .from('leaderboard_entries')
-      .select('*')
+      .select('id, url, name, category, value_proposition, additional_info, net_score, hot_score, is_verified, bid_cents')
       .neq('status', 'rejected')
       .order('hot_score', { ascending: false, nullsFirst: false })
       .order('net_score', { ascending: false })
@@ -104,7 +106,7 @@ export async function GET() {
     const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
     const { data: recentData } = await supabase
       .from('leaderboard_entries')
-      .select('*')
+      .select('id, url, name, category, value_proposition, additional_info, net_score, hot_score, is_verified, bid_cents')
       .neq('status', 'rejected')
       .gte('claimed_at', fortyEightHoursAgo)
       .order('claimed_at', { ascending: false })
@@ -127,6 +129,8 @@ export async function GET() {
         hot_score: Number(row.hot_score || 0),
         user_vote: userVotesMap.get(String(row.id || '')) || 0,
         category: String(row.category || 'SaaS'),
+        is_verified: Boolean(row.is_verified || Number(row.bid_cents || 0) >= 500),
+        bid_cents: Number(row.bid_cents || 0),
       };
     };
 
