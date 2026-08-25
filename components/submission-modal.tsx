@@ -174,16 +174,16 @@ export function SubmissionModal({
           })
         );
         window.dispatchEvent(new CustomEvent('listing-submitted'));
-
-        setTimeout(() => {
-          const feedElement = document.querySelector('#index-feed') || document.querySelector('.mt-8');
-          if (feedElement) {
-            feedElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 200);
       }
 
-      router.refresh();
+      const congratsParams = new URLSearchParams({
+        name: title.trim() || url,
+        url: url.trim(),
+        rank: String(selectedRank),
+        verified: 'true',
+      });
+
+      router.push(`/congrats?${congratsParams.toString()}`);
     } catch (err: unknown) {
       console.error('Submission catch error:', err);
       setError('An unexpected network error occurred. Please try again.');
