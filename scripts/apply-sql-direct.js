@@ -29,20 +29,22 @@ alter table leaderboard_entries add column if not exists for_sale boolean defaul
 alter table leaderboard_entries add column if not exists is_for_sale boolean default false;
 alter table leaderboard_entries add column if not exists is_verified boolean default false;
 alter table leaderboard_entries add column if not exists asking_price numeric default 0;
+alter table leaderboard_entries add column if not exists twitter_handle text;
 alter table leaderboard_entries add column if not exists verification_token text;
 alter table leaderboard_entries add column if not exists status text default 'pending_verification';
 
 alter table listings add column if not exists is_for_sale boolean default false;
 alter table listings add column if not exists is_verified boolean default false;
 alter table listings add column if not exists asking_price numeric default 0;
+alter table listings add column if not exists twitter_handle text;
 
 create index if not exists idx_leaderboard_entries_verification_token on leaderboard_entries(verification_token);
 create index if not exists idx_listings_verification_token on listings(verification_token);
 `;
 
 const connectionStrings = [
+  'postgresql://postgres.naflsoqdvllbnffghkdv:jhLON3g6mAQxpvx5@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres',
   'postgresql://postgres.naflsoqdvllbnffghkdv:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmxzb3FkdmxsYm5mZmdoa2R2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzM5NDI1MSwiZXhwIjoyMTAyOTcwMjUxfQ.aiN-DIx_lMXHQQhSlyP2MS4Doz1XdqBLfrFnIppnAro@aws-0-us-east-1.pooler.supabase.com:6543/postgres',
-  'postgresql://postgres:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmxzb3FkdmxsYm5mZmdoa2R2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzM5NDI1MSwiZXhwIjoyMTAyOTcwMjUxfQ.aiN-DIx_lMXHQQhSlyP2MS4Doz1XdqBLfrFnIppnAro@db.naflsoqdvllbnffghkdv.supabase.co:5432/postgres'
 ];
 
 async function main() {
