@@ -36,16 +36,19 @@ export const postToX = async (
   const rwClient = client.readWrite;
   const verifiedTag = isVerified ? 'VERIFIED FAST-TRACK LISTING' : 'NEW LISTING';
 
-  // Format the mention (handles @username, @x.com/username, x.com/username, https://x.com/username)
-  const cleanHandle = twitterHandle
-    ? twitterHandle
-        .trim()
-        .replace(/^@/, '')
-        .replace(/^(https?:\/\/)?(www\.)?x\.com\//i, '')
-        .replace(/^(https?:\/\/)?(www\.)?twitter\.com\//i, '')
-        .replace(/^@/, '')
-        .trim()
-    : '';
+  // Format the mention robustly
+  let cleanHandle = twitterHandle ? twitterHandle.trim() : '';
+
+  if (cleanHandle) {
+    // Remove URL prefixes (http, https, www, x.com, twitter.com)
+    cleanHandle = cleanHandle.replace(/(https?:\/\/)?(www\.)?(x\.com|twitter\.com)\//i, '');
+    // Remove @ symbol
+    cleanHandle = cleanHandle.replace(/@/g, '');
+    // Remove query parameters like ?s=21
+    cleanHandle = cleanHandle.split('?')[0];
+    // Remove any trailing slashes
+    cleanHandle = cleanHandle.split('/')[0].trim();
+  }
 
   const mentionText = cleanHandle ? ` by @${cleanHandle}` : '';
   const tweetText = `YOO ${verifiedTag}\n\n${listingName}${mentionText} is live on DropYourSaaS.\n\n"${tagline}"\n\nCheck it out here: ${listingUrl}\n\n#buildinpublic #indiehackers #saas`;
