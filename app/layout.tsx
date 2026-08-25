@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { UmamiAnalytics } from '@/components/umami-analytics';
 import { DataFastAnalytics } from '@/components/datafast-analytics';
 import { WhopAnalytics } from '@/components/whop-analytics';
+import { CloudFastAnalytics } from '@/components/cloudfast-analytics';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -65,6 +66,7 @@ export default function RootLayout({
         <UmamiAnalytics />
         <DataFastAnalytics />
         <WhopAnalytics />
+        <CloudFastAnalytics />
       </body>
     </html>
   );
