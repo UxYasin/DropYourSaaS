@@ -403,13 +403,13 @@ export function SubmissionModal({
 
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
-                X / Twitter Handle <span className="text-zinc-400 dark:text-zinc-500 font-normal">(Optional)</span>
+                X / Twitter Username
               </label>
               <Input
                 type="text"
                 value={twitterHandle}
                 onChange={(e) => setTwitterHandle(e.target.value)}
-                placeholder="@yourhandle (optional)"
+                placeholder="@x.com/username"
                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans text-xs sm:text-sm h-10.5 rounded-xl focus-visible:ring-amber-500"
               />
             </div>

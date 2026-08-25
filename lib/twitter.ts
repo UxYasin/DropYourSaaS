@@ -28,8 +28,16 @@ export const postToX = async (
 
   const verifiedTag = isVerified ? 'VERIFIED FAST-TRACK LISTING' : 'NEW LISTING';
 
-  // Format the mention
-  const cleanHandle = twitterHandle ? twitterHandle.replace(/^@/, '').trim() : '';
+  // Format the mention (handles @username, @x.com/username, x.com/username, https://x.com/username)
+  const cleanHandle = twitterHandle
+    ? twitterHandle
+        .trim()
+        .replace(/^@/, '')
+        .replace(/^(https?:\/\/)?(www\.)?x\.com\//i, '')
+        .replace(/^(https?:\/\/)?(www\.)?twitter\.com\//i, '')
+        .replace(/^@/, '')
+        .trim()
+    : '';
   const mentionText = cleanHandle ? ` by @${cleanHandle}` : '';
 
   const tweetText = `YOO ${verifiedTag}\n\n${listingName}${mentionText} is live on DropYourSaaS.\n\n"${tagline}"\n\nCheck it out here: ${listingUrl}\n\n#buildinpublic #indiehackers #saas`;

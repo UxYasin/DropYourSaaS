@@ -202,7 +202,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     type="text"
                     value={twitterHandle}
                     onChange={(e) => setTwitterHandle(e.target.value)}
-                    placeholder="@yourhandle (optional)"
+                    placeholder="@x.com/username"
                     className="w-full h-11 rounded-[16px] bg-zinc-50 dark:bg-background/90 border border-border/80 text-foreground font-sans text-xs sm:text-sm px-3.5 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-xs placeholder:text-muted-foreground/70"
                   />
                 </div>
