@@ -193,7 +193,7 @@ export function BentoRails({ side }: BentoRailsProps) {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col gap-3 w-72 sm:w-[285px] xl:w-[295px] shrink-0 sticky top-20 h-fit">
+      <aside className="hidden lg:flex flex-col gap-3 w-[290px] sm:w-[305px] lg:w-[315px] xl:w-[325px] shrink-0 sticky top-20 h-fit">
         {cardsToRender.map((defaultCard, i) => {
           const slotPos = `${side}_${i + 1}`;
           // Check if active pinned ad exists for this specific slot position
@@ -208,7 +208,7 @@ export function BentoRails({ side }: BentoRailsProps) {
             <div
               key={slotPos}
               className={cn(
-                'relative h-auto group transition-all duration-200',
+                'relative h-[124px] sm:h-[128px] w-full group transition-all duration-200',
                 isAdSelectionMode && 'cursor-pointer'
               )}
               onClick={isAdSelectionMode ? () => handleSelectSlot(slotPos) : undefined}
@@ -221,7 +221,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                   exit={{ rotateX: 90, opacity: 0 }}
                   transition={{ duration: 0.45, ease: 'easeInOut' }}
                   className={cn(
-                    'w-full p-4 sm:p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between gap-2.5 overflow-hidden relative',
+                    'w-full h-full min-h-[124px] sm:min-h-[128px] p-4 sm:p-4.5 rounded-2xl border shadow-xs transition-all duration-200 flex flex-col justify-between gap-2 overflow-hidden relative',
                     isAdSelectionMode
                       ? 'border-blue-500/80 bg-blue-500/10 ring-2 ring-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500 hover:scale-[1.02] shadow-lg'
                       : isPinnedAd
@@ -294,7 +294,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                     className="block pr-6"
                     onClick={isAdSelectionMode ? (e) => e.preventDefault() : undefined}
                   >
-                    <p className={cn('text-xs line-clamp-2 leading-relaxed', theme.subtext)}>
+                    <p className={cn('text-xs line-clamp-2 leading-relaxed min-h-[32px] flex items-start', theme.subtext)}>
                       {card.tagline || `Verified ${card.name} SaaS tool on DropYourSaaS.`}
                     </p>
                   </a>
@@ -328,7 +328,7 @@ export function BentoRails({ side }: BentoRailsProps) {
           type="button"
           onClick={() => setIsAdSelectionMode((prev) => !prev)}
           className={cn(
-            'w-full mt-1.5 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed cursor-pointer active:scale-95',
+            'w-full mt-1.5 py-2.5 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed cursor-pointer active:scale-95 shadow-2xs',
             isAdSelectionMode
               ? 'bg-blue-500/15 border-blue-500 text-blue-600 dark:text-[#08F9C9] font-bold shadow-xs animate-pulse'
               : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-muted/20 hover:bg-muted/40'
