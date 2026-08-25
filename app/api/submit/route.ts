@@ -194,9 +194,10 @@ export async function POST(request: NextRequest) {
             ? `https://www.dropyoursaas.com/s/${matchedId}`
             : formattedUrl;
 
-          postToX(entryName, listingUrl, entryName, false, cleanTwitterHandle).catch((err) =>
-            console.error('[Submit Route] X auto-post error:', err)
-          );
+          console.log('[Submit Route] Free/Published status confirmed, calling postToX with await...');
+          const tagline = valueProposition || entryName;
+          await postToX(entryName, listingUrl, tagline, false, cleanTwitterHandle);
+          console.log('[Submit Route] Finished postToX execution.');
         } catch (xErr) {
           console.error('[Submit Route] Error triggering X post:', xErr);
         }

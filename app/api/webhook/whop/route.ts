@@ -155,9 +155,9 @@ export async function POST(req: Request) {
             ? `https://www.dropyoursaas.com/s/${matchedId}`
             : siteUrl || 'https://www.dropyoursaas.com';
 
-          postToX(nameToPost, listingUrl, tagline, true, handleToMention).catch((err) =>
-            console.error('[Whop Webhook] X auto-post error:', err)
-          );
+          console.log('[Whop Webhook] Calling postToX with await...');
+          await postToX(nameToPost, listingUrl, tagline, true, handleToMention);
+          console.log('[Whop Webhook] Finished postToX execution.');
         } catch (xErr) {
           console.error('[Whop Webhook] Error triggering X post:', xErr);
         }

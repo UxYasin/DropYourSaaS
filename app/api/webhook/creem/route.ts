@@ -68,13 +68,15 @@ export async function POST(req: Request) {
             .maybeSingle();
 
           if (entry) {
-            postToX(
+            console.log('[Creem Webhook] Listing confirmed published, calling postToX with await...');
+            await postToX(
               entry.name,
               `https://www.dropyoursaas.com/s/${entry.id}`,
               entry.value_proposition || entry.name,
               true,
               entry.twitter_handle
-            ).catch(() => {});
+            );
+            console.log('[Creem Webhook] Finished postToX execution.');
           }
         } catch {}
       }
