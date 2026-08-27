@@ -78,8 +78,8 @@ export function CategoryFilterBar({
             className={cn(
               'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer',
               isActive
-                ? 'bg-[#E0674B] text-white shadow-xs'
-                : 'text-zinc-800 dark:text-zinc-200 hover:text-[#E0674B] dark:hover:text-[#E0674B] hover:bg-zinc-100/80 dark:hover:bg-zinc-900/60'
+                ? 'bg-[#fe4103] text-white shadow-xs'
+                : 'text-zinc-800 dark:text-zinc-200 hover:text-[#fe4103] dark:hover:text-[#fe4103] hover:bg-zinc-100/80 dark:hover:bg-zinc-900/60'
             )}
           >
             <Icon

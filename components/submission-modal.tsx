@@ -545,16 +545,16 @@ export function SubmissionModal({
             type="submit"
             form="submission-form"
             disabled={isSubmitting}
-            className="flex-1 rounded-full text-black font-mono font-black text-xs sm:text-sm h-11 shadow-lg bg-[#FFFC00] hover:bg-[#e6e300] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="flex-1 rounded-full text-white font-mono font-black text-xs sm:text-sm h-11 shadow-lg bg-[#fe4103] hover:bg-[#e03800] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="size-4 animate-spin text-black" />
+                <Loader2 className="size-4 animate-spin text-white" />
                 <span>Redirecting to Whop...</span>
               </>
             ) : (
               <>
-                <Zap className="size-4 fill-black" />
+                <Zap className="size-4 fill-white text-white" />
                 <span>Pay &amp; Secure Rank #{activeRank} (${activeAmount})</span>
                 <ArrowRight className="size-4" />
               </>
