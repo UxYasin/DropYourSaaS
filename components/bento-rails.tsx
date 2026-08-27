@@ -195,20 +195,20 @@ export function BentoRails({ side }: BentoRailsProps) {
                 onClick={() => handleOpenPlaceAd(slotPos)}
                 className="relative h-[124px] sm:h-[128px] w-full group cursor-pointer select-none"
               >
-                <div className="w-full h-full min-h-[124px] sm:min-h-[128px] p-4 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#18191c] hover:border-zinc-400 dark:hover:border-zinc-700 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col items-center justify-center relative overflow-hidden text-center">
+                <div className="w-full h-full min-h-[124px] sm:min-h-[128px] p-4 rounded-2xl border border-dashed border-zinc-400/40 dark:border-zinc-700/50 bg-white/15 dark:bg-zinc-900/20 hover:bg-white/30 dark:hover:bg-zinc-900/40 hover:border-zinc-500/70 dark:hover:border-zinc-600/70 backdrop-blur-[2px] transition-all duration-200 flex flex-col items-center justify-center relative overflow-hidden text-center">
                   {/* Default Monochromatic Resting State: Shows only "Place an Ad" */}
-                  <div className="space-y-1 transition-all duration-200 group-hover:blur-[3px] group-hover:opacity-15 flex flex-col items-center justify-center">
-                    <div className="size-8 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 flex items-center justify-center">
+                  <div className="space-y-1.5 transition-all duration-200 group-hover:blur-[3px] group-hover:opacity-15 flex flex-col items-center justify-center">
+                    <div className="size-8 rounded-xl bg-zinc-200/40 dark:bg-zinc-800/40 text-zinc-600 dark:text-zinc-400 flex items-center justify-center">
                       <Pin className="size-4 fill-current" />
                     </div>
-                    <h3 className="font-mono font-bold text-xs sm:text-sm text-zinc-700 dark:text-zinc-200">
+                    <h3 className="font-mono font-bold text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
                       Place an Ad
                     </h3>
                   </div>
 
                   {/* Hover Overlay: Monochromatic details + Vibrant Orange Pill Button */}
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-white/90 dark:bg-[#18191c]/90 backdrop-blur-xs space-y-1.5 pointer-events-none">
-                    <p className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-tight">
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-background/85 dark:bg-zinc-950/85 backdrop-blur-xs space-y-1.5 pointer-events-none">
+                    <p className="text-[11px] font-mono text-muted-foreground leading-tight">
                       $100 · 30 days (1st buyer gets 60d!)
                     </p>
                     <div className="px-4 py-1.5 rounded-full bg-[#fe4103] hover:bg-[#e03800] text-white font-mono font-bold text-xs shadow-md flex items-center gap-1.5 transform scale-95 group-hover:scale-100 transition-transform duration-150">
