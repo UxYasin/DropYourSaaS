@@ -11,11 +11,26 @@ import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: {
-    default: 'DropYourSaaS.com · Rank higher. Get more clicks for FREE',
+    default: 'DropYourSaaS.com · Rank higher. Claim #1 for $1',
     template: '%s · DropYourSaaS.com',
   },
   description:
-    'The real-time discovery & promotional platform for software founders. Rank higher, get more clicks for FREE with instant indexation, permanent SEO backlinks, and community-ranked leaderboard exposure.',
+    'The real-time discovery & promotional platform for software founders. Rank higher with instant indexation, permanent dofollow SEO backlinks, and community-ranked leaderboard exposure on DropYourSaaS.com.',
+  applicationName: 'DropYourSaaS.com',
+  openGraph: {
+    siteName: 'DropYourSaaS.com',
+    title: 'DropYourSaaS.com · Rank higher. Claim #1',
+    description: 'The real-time pay-to-rank SaaS leaderboard. Instant placement, dofollow backlinks & live exposure.',
+    url: 'https://www.dropyoursaas.com',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@dropyoursaas',
+    creator: '@dropyoursaas',
+    title: 'DropYourSaaS.com · Rank higher. Claim #1',
+    description: 'The real-time pay-to-rank SaaS leaderboard.',
+  },
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png' },
@@ -49,6 +64,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'DropYourSaaS.com',
+    alternateName: ['DropYourSaaS', 'Drop Your SaaS'],
+    url: 'https://www.dropyoursaas.com',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://www.dropyoursaas.com/explore?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html
       lang="en"
@@ -58,11 +86,19 @@ export default function RootLayout({
         fontMono.variable,
         inter.variable,
         inconsolata.variable,
-        'font-body'
+        'font-sans'
       )}
     >
-      <body className="font-body">
-        <ThemeProvider>{children}</ThemeProvider>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className="min-h-screen bg-background text-foreground font-sans">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <UmamiAnalytics />
         <DataFastAnalytics />
         <WhopAnalytics />
