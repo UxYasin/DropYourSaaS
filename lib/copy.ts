@@ -2,7 +2,7 @@ export const IS_FREE_MODE = false;
 
 export const siteCopy = {
   hero: {
-    headline: 'Outrank competitors. Get verified traffic',
+    headline: 'Rank higher. Claim #1 for',
     description: 'The real-time pay-to-rank software leaderboard. Starting from $1, outbid the listing above you to climb rankings. Every listing gets live placement, verified badge, dedicated SEO page & dofollow backlink.',
     subtext: 'Bids start from $1. Anyone who pays more climbs higher on the leaderboard.',
     cta: 'Claim Spot',

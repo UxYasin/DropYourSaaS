@@ -119,7 +119,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       {/* Main Hero Headline & Dynamic Outbid Interactive Title */}
       <div className="space-y-2 sm:space-y-3">
         <h1 className="font-mono font-black text-3xl sm:text-5xl md:text-6xl lg:text-[68px] tracking-tight text-foreground leading-[1.1]">
-          Claim #{displayRank} for{' '}
+          Rank higher. Claim #{displayRank} for{' '}
           <span className="inline-flex items-center gap-1.5 sm:gap-2.5 text-[#FFFC00] align-middle justify-center flex-wrap bg-black px-3 py-0.5 rounded-2xl border border-[#FFFC00]/40 shadow-sm">
             <button
               type="button"
