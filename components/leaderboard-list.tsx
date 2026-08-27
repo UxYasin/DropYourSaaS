@@ -124,6 +124,7 @@ function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10'
 export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'rank' | 'hot' | 'top' | 'recent'>('rank');
   const [page, setPage] = useState(1);
@@ -153,6 +154,9 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
           setItems(data.items);
+          if (Array.isArray(data.activeCategories)) {
+            setActiveCategories(data.activeCategories);
+          }
           if (typeof data.totalCount === 'number') setTotalCount(data.totalCount);
           if (typeof data.totalPages === 'number') setTotalPages(data.totalPages);
         }
@@ -194,6 +198,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
         <CategoryFilterBar
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
+          activeCategories={activeCategories}
         />
       </div>
 

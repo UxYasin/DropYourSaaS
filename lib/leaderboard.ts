@@ -4,7 +4,7 @@ import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { cookies } from 'next/headers';
 import { getListingSlug } from '@/lib/slug';
 
-const CACHE_KEY = 'leaderboard:v7';
+const CACHE_KEY = 'leaderboard:v8';
 const CACHE_TTL_SECONDS = 2; // 2s TTL for real-time responsiveness
 
 export async function getLeaderboard(
@@ -44,6 +44,7 @@ export async function invalidateLeaderboardCache() {
     await redis.del('leaderboard:v5');
     await redis.del('leaderboard:v6');
     await redis.del('leaderboard:v7');
+    await redis.del('leaderboard:v8');
   } catch {}
 }
 
@@ -53,7 +54,15 @@ export async function getPaginatedLeaderboard(
   category?: string,
   sortBy: 'rank' | 'hot' | 'top' | 'recent' = 'rank'
 ) {
-  const items = await getLeaderboard(category, sortBy);
+  const allBaseItems = await getLeaderboard(undefined, sortBy);
+  const activeCategories = Array.from(
+    new Set(allBaseItems.map((i) => i.category).filter((c): c is string => Boolean(c && c.trim())))
+  );
+
+  const items = category && category !== 'All'
+    ? await getLeaderboard(category, sortBy)
+    : allBaseItems;
+
   const start = (page - 1) * limit;
   const end = start + limit;
   const paginated = items.slice(start, end);
@@ -65,6 +74,7 @@ export async function getPaginatedLeaderboard(
     page,
     limit,
     totalPages: Math.max(1, Math.ceil(total / limit)),
+    activeCategories,
   };
 }
 
