@@ -21,13 +21,13 @@ interface DirectoryListProps {
 
 function SectionDivider({ title, count }: { title: string; count?: string }) {
   return (
-    <div className="relative my-8 flex items-center justify-center">
+    <div className="relative my-3 sm:my-4 flex items-center justify-center">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-border/80" />
+        <div className="w-full border-t border-border/70" />
       </div>
-      <div className="relative flex items-center gap-1.5 px-4 py-1 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white font-bold text-xs shadow-xs tracking-wide">
+      <div className="relative flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white font-bold text-[11px] shadow-2xs tracking-wide">
         <span>{title}</span>
-        {count && <span className="opacity-80 font-normal text-[11px]">({count})</span>}
+        {count && <span className="opacity-80 font-normal text-[10px]">({count})</span>}
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ export function CategoryFilterBar({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 overflow-x-auto py-2.5 px-1 no-scrollbar scroll-smooth',
+        'flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar scroll-smooth',
         className
       )}
     >
@@ -76,7 +76,7 @@ export function CategoryFilterBar({
             type="button"
             onClick={() => onSelectCategory(cat)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer',
               isActive
                 ? 'bg-[#E0674B] text-white shadow-xs'
                 : 'text-zinc-800 dark:text-zinc-200 hover:text-[#E0674B] dark:hover:text-[#E0674B] hover:bg-zinc-100/80 dark:hover:bg-zinc-900/60'
@@ -84,7 +84,7 @@ export function CategoryFilterBar({
           >
             <Icon
               className={cn(
-                'size-4 shrink-0',
+                'size-3.5 shrink-0',
                 isActive ? 'text-white' : 'text-zinc-600 dark:text-zinc-400'
               )}
             />

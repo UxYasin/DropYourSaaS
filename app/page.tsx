@@ -46,15 +46,15 @@ export default function Home() {
     <MobileLayout>
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Header />
-        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-5">
           <div className="flex justify-center items-start gap-6 lg:gap-8">
             <BentoRails side="left" />
 
             <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0">
               {showVerifiedBanner && (
-                <div className="mb-6 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 text-xs sm:text-sm font-mono flex items-center justify-between shadow-lg animate-in fade-in-50 duration-300">
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="size-5 text-emerald-400 shrink-0" />
+                <div className="mb-4 p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
                     <span>🎉 Your SaaS listing has been verified &amp; published to the public directory!</span>
                   </div>
                   <button
@@ -62,19 +62,19 @@ export default function Home() {
                     onClick={() => setShowVerifiedBanner(false)}
                     className="text-emerald-400 hover:text-white p-1"
                   >
-                    <X className="size-4" />
+                    <X className="size-3.5" />
                   </button>
                 </div>
               )}
 
               <HeroSection key={selectedRank} ref={inputRef} selectedRank={selectedRank} selectedBid={selectedBid} />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                 <TrendingSection />
                 <LatestActivity />
               </div>
 
-              <div id="index-feed" className="mt-4">
+              <div id="index-feed" className="mt-2.5">
                 <Suspense fallback={null}>
                   <LeaderboardList onClaimClick={handleClaimClick} />
                 </Suspense>

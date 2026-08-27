@@ -112,31 +112,31 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const bidText = `$${bid.toLocaleString()}`;
 
   return (
-    <div className="text-center py-6 sm:py-10 max-w-3xl xl:max-w-4xl mx-auto space-y-4 sm:space-y-6">
+    <div className="text-center py-2 sm:py-4 max-w-3xl xl:max-w-4xl mx-auto space-y-2.5 sm:space-y-3.5">
       {/* Dynamic Status Pill */}
       <LiveStatsPill />
 
       {/* Main Hero Headline & Dynamic Outbid Interactive Title */}
-      <div className="space-y-2 sm:space-y-3">
-        <h1 className="font-mono font-black text-3xl sm:text-5xl md:text-6xl lg:text-[68px] tracking-tight text-foreground leading-[1.1]">
+      <div className="space-y-1.5 sm:space-y-2">
+        <h1 className="font-mono font-black text-2xl sm:text-4xl md:text-5xl lg:text-[52px] tracking-tight text-foreground leading-[1.1]">
           Rank higher. Claim #{displayRank} for{' '}
-          <span className="inline-flex items-center gap-1.5 sm:gap-2.5 text-[#FFFC00] align-middle justify-center flex-wrap bg-black px-3 py-0.5 rounded-2xl border border-[#FFFC00]/40 shadow-sm">
+          <span className="inline-flex items-center gap-1 sm:gap-2 text-[#FFFC00] align-middle justify-center flex-wrap bg-black px-2.5 py-0.5 rounded-xl sm:rounded-2xl border border-[#FFFC00]/40 shadow-xs">
             <button
               type="button"
               onClick={handleDecrease}
               aria-label="Decrease bid"
-              className="inline-flex items-center justify-center size-7 sm:size-9 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
             >
-              <Minus className="size-3.5 sm:size-4" />
+              <Minus className="size-3 sm:size-3.5" />
             </button>
 
             <span className="inline-flex items-center font-mono font-black">
-              <span className="text-xl sm:text-3xl md:text-4xl">$</span>
+              <span className="text-lg sm:text-2xl md:text-3xl">$</span>
               <input
                 type="text"
                 value={bid}
                 onChange={handleBidInputChange}
-                className="w-14 sm:w-20 md:w-24 text-center bg-transparent border-b-2 border-[#FFFC00]/60 focus:border-[#FFFC00] outline-none text-xl sm:text-3xl md:text-4xl font-mono font-black text-[#FFFC00] p-0"
+                className="w-12 sm:w-16 md:w-20 text-center bg-transparent border-b-2 border-[#FFFC00]/60 focus:border-[#FFFC00] outline-none text-lg sm:text-2xl md:text-3xl font-mono font-black text-[#FFFC00] p-0"
               />
             </span>
 
@@ -144,60 +144,60 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               type="button"
               onClick={handleIncrease}
               aria-label="Increase bid"
-              className="inline-flex items-center justify-center size-7 sm:size-9 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
             >
-              <Plus className="size-3.5 sm:size-4" />
+              <Plus className="size-3 sm:size-3.5" />
             </button>
           </span>
         </h1>
-        <p className="font-body text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl xl:max-w-3xl mx-auto">
+        <p className="font-body text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl xl:max-w-3xl mx-auto line-clamp-2">
           Outrank competitors in real-time. Every listing gets instant live placement, verified badge, dedicated SEO page &amp; dofollow backlink.
         </p>
       </div>
 
       {/* Quick Outrank Shortcut Badges */}
-      <div className="flex items-center justify-center gap-2 flex-wrap max-w-2xl mx-auto pt-1">
+      <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-2xl mx-auto">
         <button
           type="button"
           onClick={() => handleQuickSelect(1, Math.max(1, bid))}
-          className="px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-[#FFFC00] border border-amber-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+          className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-[#FFFC00] border border-amber-500/30 text-[11px] font-mono font-bold inline-flex items-center gap-1 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
-          <Crown className="size-3.5 fill-current" />
+          <Crown className="size-3 fill-current" />
           <span>👑 Outbid #1</span>
         </button>
         <button
           type="button"
           onClick={() => handleQuickSelect(2, Math.max(1, bid))}
-          className="px-3.5 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+          className="px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-[11px] font-mono font-bold inline-flex items-center gap-1 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
-          <Award className="size-3.5" />
+          <Award className="size-3" />
           <span>🥈 Outbid #2</span>
         </button>
         <button
           type="button"
           onClick={() => handleQuickSelect(3, Math.max(1, bid))}
-          className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+          className="px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[11px] font-mono font-bold inline-flex items-center gap-1 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
-          <Flame className="size-3.5" />
+          <Flame className="size-3" />
           <span>🥉 Outbid #3</span>
         </button>
         <button
           type="button"
           onClick={() => handleQuickSelect(4, 1)}
-          className="px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+          className="px-3 py-1 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-[11px] font-mono font-bold inline-flex items-center gap-1 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
-          <Zap className="size-3.5 fill-current" />
+          <Zap className="size-3 fill-current" />
           <span>🚀 Start from $1</span>
         </button>
       </div>
 
       {/* Unified Instant Outbid Container */}
-      <div className="pt-2 max-w-2xl xl:max-w-3xl mx-auto">
-        <div className="p-3 sm:p-4 rounded-[26px] bg-white dark:bg-[#1a1c20] border border-border/80 text-left shadow-sm space-y-3">
+      <div className="pt-1 max-w-2xl xl:max-w-3xl mx-auto">
+        <div className="p-2.5 sm:p-3 rounded-[22px] bg-white dark:bg-[#1a1c20] border border-border/80 text-left shadow-2xs space-y-2">
           {/* Top Row: URL Input & Instant Yellow Claim Button */}
-          <div className="flex items-center justify-between gap-3 h-12 sm:h-13 pl-2 sm:pl-3 pr-1">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Link2 className="size-5 text-muted-foreground shrink-0 ml-1" />
+          <div className="flex items-center justify-between gap-2.5 h-10 sm:h-11 pl-2 sm:pl-2.5 pr-1">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              <Link2 className="size-4 text-muted-foreground shrink-0 ml-0.5" />
               <input
                 ref={ref}
                 type="text"
@@ -212,21 +212,21 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   if (e.key === 'Enter') handleClaim();
                 }}
                 placeholder="yourproduct.com or @twitter"
-                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
+                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
               />
             </div>
 
             <button
               type="button"
-              className="h-10 sm:h-11 px-6 sm:px-8 rounded-full shrink-0 font-mono font-black text-xs sm:text-sm text-black bg-[#FFFC00] hover:bg-[#e6e300] shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="h-8 sm:h-9 px-5 sm:px-6 rounded-full shrink-0 font-mono font-black text-xs text-black bg-[#FFFC00] hover:bg-[#e6e300] shadow-xs hover:shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               onClick={handleClaim}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="size-4 animate-spin text-black" />
+                <Loader2 className="size-3.5 animate-spin text-black" />
               ) : (
                 <>
-                  <Zap className="size-4 fill-black" />
+                  <Zap className="size-3.5 fill-black" />
                   <span>Claim #{displayRank} for {bidText}</span>
                 </>
               )}
