@@ -2,13 +2,22 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { X, Globe, Sparkles, ExternalLink, ArrowRight, Loader2, Image as ImageIcon, AlertCircle, Check, Zap } from 'lucide-react';
+import {
+  X,
+  Globe,
+  Sparkles,
+  ExternalLink,
+  ArrowRight,
+  Loader2,
+  Zap,
+  Crown,
+  Award,
+  Flame,
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
-import { IS_FREE_MODE } from '@/lib/copy';
 import { CATEGORIES } from '@/lib/categories';
 
 export interface ScrapedData {
@@ -34,15 +43,15 @@ interface SubmissionModalProps {
   onSuccess?: () => void;
 }
 
+type RankTierType = 'top1' | 'podium' | 'bento' | 'fast_track';
+
 export function SubmissionModal({
   isOpen,
   onClose,
   initialData,
-  bid,
   selectedRank = 1,
   onSuccess,
 }: SubmissionModalProps) {
-  const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [url, setUrl] = useState(initialData?.url || '');
@@ -54,9 +63,37 @@ export function SubmissionModal({
   const [twitterHandle, setTwitterHandle] = useState(initialData?.twitterHandle || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
   const [askingPrice, setAskingPrice] = useState(initialData?.askingPrice || '');
-  const [selectedTier, setSelectedTier] = useState<'free' | 'fast_track'>('fast_track');
+
+  // Dynamic Pay-to-Rank Tier State
+  const initialTier: RankTierType =
+    selectedRank === 1
+      ? 'top1'
+      : selectedRank <= 3
+        ? 'podium'
+        : selectedRank <= 10
+          ? 'bento'
+          : 'fast_track';
+
+  const [selectedTier, setSelectedTier] = useState<RankTierType>(initialTier);
+
+  // Determine current active rank & amount
+  let activeRank = selectedRank;
+  let activeAmount = 5;
+
+  if (selectedTier === 'top1') {
+    activeRank = 1;
+    activeAmount = 50;
+  } else if (selectedTier === 'podium') {
+    activeRank = selectedRank === 2 || selectedRank === 3 ? selectedRank : 2;
+    activeAmount = 25;
+  } else if (selectedTier === 'bento') {
+    activeRank = selectedRank >= 4 && selectedRank <= 10 ? selectedRank : 4;
+    activeAmount = 10;
+  } else if (selectedTier === 'fast_track') {
+    activeRank = selectedRank > 10 ? selectedRank : 11;
+    activeAmount = 5;
+  }
 
   // Sync state when new initialData arrives
   const initialUrl = initialData?.url;
@@ -74,7 +111,7 @@ export function SubmissionModal({
     setEmail(initialData?.email || '');
     setTwitterHandle(initialData?.twitterHandle || '');
     setError(null);
-    setRateLimitError(null);
+    setSelectedTier(initialTier);
   }
 
   if (!isOpen || !initialData || typeof document === 'undefined') return null;
@@ -88,102 +125,73 @@ export function SubmissionModal({
 
     setIsSubmitting(true);
     setError(null);
-    setRateLimitError(null);
 
     trackEvent('checkout_started', {
       url,
-      bid,
+      rank: activeRank,
+      amount: activeAmount,
       title,
       tier: selectedTier,
     });
 
     try {
-      // 1. Submit listing record to /api/submit
+      // 1. Submit pending listing record to /api/submit
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url,
+          url: url.trim(),
           title: title.trim() || undefined,
+          name: title.trim() || undefined,
           description: description.trim() || undefined,
+          valueProposition: description.trim() || undefined,
           faviconUrl: favicon || undefined,
           screenshotUrl: screenshotUrl || undefined,
           category: category || 'SaaS',
           forSale: isForSale,
+          isForSale,
           askingPrice: isForSale ? askingPrice.trim() : undefined,
           email: email.trim() || undefined,
           twitterHandle: twitterHandle.trim() || undefined,
-          targetRank: selectedRank,
+          targetRank: activeRank,
+          selectedRank: activeRank,
+          bid: activeAmount,
           tier: selectedTier,
         }),
       });
 
       const data = await res.json();
+      const listingId = data.id || data.listingId || url.trim();
 
-      if (!res.ok || !data.success) {
-        if (data.rateLimited) {
-          setRateLimitError(data.error || 'Submission limit reached for this domain. Please try again later.');
-          setIsSubmitting(false);
-          return;
-        }
-        setError(data.error || 'Failed to submit listing. Please try again.');
-        setIsSubmitting(false);
+      // 2. Initialize Whop SDK Checkout with exact rank, amount, and metadata
+      const checkoutRes = await fetch('/api/checkout/whop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: activeAmount,
+          targetRank: activeRank,
+          tier: selectedTier,
+          listingId,
+          siteUrl: url.trim(),
+          projectName: title.trim() || url.trim(),
+          oneLiner: description.trim() || undefined,
+          logoUrl: favicon || undefined,
+          twitterHandle: twitterHandle.trim() || undefined,
+          category,
+          email: email.trim() || undefined,
+        }),
+      });
+
+      const checkoutData = await checkoutRes.json();
+      const redirectUrl = checkoutData?.url || checkoutData?.checkoutUrl;
+
+      if (checkoutRes.ok && redirectUrl) {
+        onSuccess?.();
+        window.location.href = redirectUrl;
         return;
       }
 
-      const listingId = data.id || data.listingId || url;
-
-      // 2. If Fast-Track ($5), route to Whop checkout immediately
-      if (selectedTier === 'fast_track') {
-        const checkoutRes = await fetch('/api/checkout/whop', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: 5,
-            tier: 'fast_track',
-            listingId,
-            siteUrl: url.trim(),
-            projectName: title.trim() || url.trim(),
-            oneLiner: description.trim() || undefined,
-            logoUrl: favicon || undefined,
-          }),
-        });
-
-        const checkoutData = await checkoutRes.json();
-        const redirectUrl = checkoutData?.url || checkoutData?.checkoutUrl;
-
-        if (checkoutRes.ok && redirectUrl) {
-          onSuccess?.();
-          window.location.href = redirectUrl;
-          return;
-        }
-      }
-
-      // 3. Free tier or fallback
-      onSuccess?.();
-      onClose();
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
-          new CustomEvent('show-congratulations', {
-            detail: {
-              title: title.trim() || url,
-              url,
-              rank: selectedRank,
-            },
-          })
-        );
-        window.dispatchEvent(new CustomEvent('listing-submitted'));
-      }
-
-      const congratsParams = new URLSearchParams({
-        name: title.trim() || url,
-        url: url.trim(),
-        rank: String(selectedRank),
-        verified: 'true',
-      });
-
-      router.push(`/congrats?${congratsParams.toString()}`);
+      setError('Could not initialize checkout. Please try again.');
     } catch (err: unknown) {
       console.error('Submission catch error:', err);
       setError('An unexpected network error occurred. Please try again.');
@@ -197,33 +205,32 @@ export function SubmissionModal({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in-0 duration-200"
+        className="fixed inset-0 bg-black/70 dark:bg-black/85 backdrop-blur-md transition-opacity animate-in fade-in-0 duration-200"
       />
 
-      {/* Modal Card — Wider & Light/Dark Unified */}
-      <div className="relative w-full max-w-2xl lg:max-w-3xl bg-white dark:bg-[#181a1e] text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+      {/* Modal Card */}
+      <div className="relative w-full max-w-2xl lg:max-w-3xl bg-white dark:bg-[#121316] text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
         {/* Modal Top Header */}
-        <div className="p-5 sm:p-6 pb-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-4 shrink-0 bg-zinc-50/50 dark:bg-zinc-900/40">
+        <div className="p-5 sm:p-6 pb-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-4 shrink-0 bg-zinc-50/70 dark:bg-zinc-900/50">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="size-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 shadow-2xs">
+            <div className="size-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-[#FFFC00] shrink-0 shadow-2xs">
               <Sparkles className="size-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-mono font-bold text-base sm:text-lg text-zinc-900 dark:text-white truncate">
-                  Preview &amp; Confirm SaaS
+                <h2 className="font-mono font-black text-base sm:text-lg text-zinc-900 dark:text-white truncate">
+                  Publish &amp; Claim High Rank
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 text-xs font-mono font-bold shrink-0">
-                  Spot #{selectedRank}
+                  Target Rank #{activeRank}
                 </span>
               </div>
               <p className="font-body text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
-                Verified metadata fetched via live scraper. Confirm details to feature on DropYourSaaS.
+                Select your desired rank tier. Instant live placement upon Whop checkout confirmation.
               </p>
             </div>
           </div>
 
-          {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
@@ -236,13 +243,6 @@ export function SubmissionModal({
 
         {/* Scrollable Form Body */}
         <form id="submission-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-left">
-          {rateLimitError && (
-            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 font-mono text-xs flex items-center gap-2.5 animate-in fade-in-50 duration-200">
-              <AlertCircle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span className="font-semibold">{rateLimitError}</span>
-            </div>
-          )}
-
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300 text-xs font-sans">
               {error}
@@ -270,8 +270,8 @@ export function SubmissionModal({
                 <span className="font-mono font-bold text-sm sm:text-base text-zinc-900 dark:text-white truncate">
                   {title || url || 'Your SaaS Product'}
                 </span>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-orange-500/15 text-orange-700 dark:text-orange-400 font-bold border border-orange-500/20">
-                  #{selectedRank} Spot · {IS_FREE_MODE ? 'FREE' : `$${bid}`}
+                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/30">
+                  Target #{activeRank} · ${activeAmount}
                 </span>
               </div>
               <p className="font-body text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 mt-1 leading-relaxed">
@@ -280,8 +280,114 @@ export function SubmissionModal({
             </div>
           </div>
 
+          {/* Pay-to-Rank Tier Selection Grid */}
+          <div className="space-y-2 pt-1 text-left">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 font-mono tracking-wide uppercase">
+                1. Select Desired Ranking Tier
+              </label>
+              <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-sans">
+                Powered by Whop Payments
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Tier 1: Top Spot (#1) */}
+              <div
+                onClick={() => setSelectedTier('top1')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
+                  selectedTier === 'top1'
+                    ? 'bg-amber-500/10 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/40 text-zinc-900 dark:text-white shadow-md'
+                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-amber-600 dark:text-[#FFFC00]">
+                    <Crown className="size-4 fill-current" />
+                    <span>#1 Top Spot</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500 text-black shadow-xs">
+                    $50
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
+                  Crown spotlight at very top of leaderboard, #1 badge, automated viral X tweet.
+                </p>
+              </div>
+
+              {/* Tier 2: Podium (#2–#3) */}
+              <div
+                onClick={() => setSelectedTier('podium')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
+                  selectedTier === 'podium'
+                    ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/40 text-zinc-900 dark:text-white shadow-md'
+                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-blue-600 dark:text-blue-400">
+                    <Award className="size-4" />
+                    <span>#2–#3 Podium</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-600 text-white shadow-xs">
+                    $25
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
+                  High-contrast podium cards with large preview images, verified blue checkmark.
+                </p>
+              </div>
+
+              {/* Tier 3: Bento Featured (#4–#10) */}
+              <div
+                onClick={() => setSelectedTier('bento')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
+                  selectedTier === 'bento'
+                    ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/40 text-zinc-900 dark:text-white shadow-md'
+                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">
+                    <Flame className="size-4" />
+                    <span>#4–#10 Bento</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-600 text-white shadow-xs">
+                    $10
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
+                  Vibrant pastel Bento card styling, guaranteed top 10 discovery, dofollow link.
+                </p>
+              </div>
+
+              {/* Tier 4: Fast-Track (#11+) */}
+              <div
+                onClick={() => setSelectedTier('fast_track')}
+                className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
+                  selectedTier === 'fast_track'
+                    ? 'bg-purple-50/90 dark:bg-purple-950/40 border-purple-500 ring-2 ring-purple-500/40 text-zinc-900 dark:text-white shadow-md'
+                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-purple-600 dark:text-purple-400">
+                    <Zap className="size-4 fill-current" />
+                    <span>#11+ Fast-Track</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-600 text-white shadow-xs">
+                    $5
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
+                  Instant live listing, verified badge, permanent SEO backlink, skip queues.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Grid Row 1: Title & Destination Link */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <div>
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5 font-sans">
                 Product Title
@@ -290,7 +396,7 @@ export function SubmissionModal({
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. MySaaS — The AI Workflow Tool"
+                placeholder="e.g. MySaaS — AI Productivity Tool"
                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans text-xs sm:text-sm h-10.5 rounded-xl focus-visible:ring-primary"
                 required
               />
@@ -380,11 +486,11 @@ export function SubmissionModal({
             </div>
           </div>
 
-          {/* Grid Row 3: Founder Email, X/Twitter Handle & Asking Price (if for sale) */}
+          {/* Grid Row 3: Founder Email & X/Twitter */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
-                Contact / Founder Email {isForSale ? <span className="text-emerald-600 dark:text-emerald-400 font-bold">(Required for Marketplace)</span> : <span className="text-zinc-400 dark:text-zinc-500 font-normal">(Optional)</span>}
+                Contact Email
               </label>
               <Input
                 type="email"
@@ -392,13 +498,7 @@ export function SubmissionModal({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@yourproduct.com"
                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans text-xs sm:text-sm h-10.5 rounded-xl focus-visible:ring-amber-500"
-                required={isForSale}
               />
-              {isForSale && (
-                <p className="text-[11px] font-body text-emerald-600 dark:text-emerald-400/90 leading-snug">
-                  Buyers on /buy-sell will use this email for acquisition inquiries.
-                </p>
-              )}
             </div>
 
             <div className="space-y-1">
@@ -409,7 +509,7 @@ export function SubmissionModal({
                 type="text"
                 value={twitterHandle}
                 onChange={(e) => setTwitterHandle(e.target.value)}
-                placeholder="@x.com/username"
+                placeholder="@username (for auto-shoutout)"
                 className="bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-sans text-xs sm:text-sm h-10.5 rounded-xl focus-visible:ring-amber-500"
               />
             </div>
@@ -430,89 +530,6 @@ export function SubmissionModal({
               </div>
             )}
           </div>
-
-          {/* Screenshot / OG Image preview banner */}
-          {screenshotUrl && (
-            <div className="pt-1">
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-400 mb-1 font-sans flex items-center gap-1">
-                <ImageIcon className="size-3 text-zinc-500 dark:text-zinc-400" />
-                Featured Preview
-              </label>
-              <div className="relative h-28 w-full rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-xs">
-                <Image
-                  src={screenshotUrl}
-                  alt="Website preview"
-                  fill
-                  className="object-cover opacity-90"
-                  unoptimized
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Tier Selection (Free vs $5 Fast-Track) */}
-          <div className="space-y-2 pt-2 text-left">
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-sans">
-              Choose Publishing Tier
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* $5 Fast-Track Tier */}
-              <div
-                onClick={() => setSelectedTier('fast_track')}
-                className={`relative p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left ${
-                  selectedTier === 'fast_track'
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/30 text-zinc-900 dark:text-white shadow-sm'
-                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-zinc-900 dark:text-white">
-                    <span className="text-amber-500 font-mono">⚡</span>
-                    <span>Fast-Track</span>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-blue-600 text-white shadow-xs">
-                    $5 One-Time
-                  </span>
-                </div>
-                <ul className="text-[11px] space-y-1.5 font-sans leading-snug">
-                  <li className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 font-semibold">
-                    <Check className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                    <span>Instant Go-Live (Skip queue)</span>
-                  </li>
-                  <li className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-                    <Check className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                    <span>Permanent Do-Follow Backlink</span>
-                  </li>
-                  <li className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300">
-                    <Check className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                    <span>Verified Blue Badge</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Free Tier */}
-              <div
-                onClick={() => setSelectedTier('free')}
-                className={`relative p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left ${
-                  selectedTier === 'free'
-                    ? 'bg-zinc-100 dark:bg-zinc-800/80 border-zinc-400 dark:border-zinc-500 ring-2 ring-zinc-400/30 text-zinc-900 dark:text-white shadow-xs'
-                    : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-white">Standard Free</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700">
-                    $0 Free
-                  </span>
-                </div>
-                <ul className="text-[11px] text-zinc-500 dark:text-zinc-400 space-y-1.5 font-sans leading-snug">
-                  <li>• Standard review queue</li>
-                  <li>• Nofollow SEO backlink</li>
-                  <li>• No verified checkmark</li>
-                </ul>
-              </div>
-            </div>
-          </div>
         </form>
 
         {/* Fixed Sticky Action Footer */}
@@ -527,27 +544,18 @@ export function SubmissionModal({
           <Button
             type="submit"
             form="submission-form"
-            disabled={isSubmitting || Boolean(rateLimitError)}
-            className={`flex-1 rounded-full text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 ${
-              selectedTier === 'fast_track'
-                ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25'
-                : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/25'
-            }`}
+            disabled={isSubmitting}
+            className="flex-1 rounded-full text-black font-mono font-black text-xs sm:text-sm h-11 shadow-lg bg-[#FFFC00] hover:bg-[#e6e300] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : selectedTier === 'fast_track' ? (
-              <>
-                <Zap className="size-4 text-amber-300 fill-amber-300" />
-                <span>Fast-Track &amp; Verify ($5)</span>
-                <ArrowRight className="size-4" />
+                <Loader2 className="size-4 animate-spin text-black" />
+                <span>Redirecting to Whop...</span>
               </>
             ) : (
               <>
-                <span>Publish Free Listing #{selectedRank}</span>
+                <Zap className="size-4 fill-black" />
+                <span>Pay &amp; Secure Rank #{activeRank} (${activeAmount})</span>
                 <ArrowRight className="size-4" />
               </>
             )}

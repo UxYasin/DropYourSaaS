@@ -88,7 +88,7 @@ export function SponsorCheckoutModal({
             Rent {slotTitle}
           </h2>
           <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
-            Enter your email below to complete checkout via Creem.io and activate your 30-day sponsor placement.
+            Enter your email below to complete checkout via Whop and activate your 30-day sponsor placement.
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export function SponsorCheckoutModal({
 
           <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
             <ShieldCheck className="size-3.5 text-emerald-400 shrink-0" />
-            <span>Secure 256-bit encrypted checkout powered by Creem.io</span>
+            <span>Secure 256-bit encrypted checkout powered by Whop</span>
           </div>
 
           <div className="pt-2">
@@ -128,10 +128,10 @@ export function SponsorCheckoutModal({
               {isLoading ? (
                 <>
                   <Loader2 className="size-4 animate-spin text-white" />
-                  <span>Redirecting to Creem...</span>
+                  <span>Redirecting to Whop...</span>
                 </>
               ) : (
-                <span>Proceed to Checkout</span>
+                <span>Proceed to Whop Checkout</span>
               )}
             </Button>
           </div>
