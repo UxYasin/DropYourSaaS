@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
+import { BentoRails } from '@/components/bento-rails';
 import { Card } from '@/components/ui/card';
 import {
   Globe,
@@ -72,11 +73,15 @@ export default function StatsPage() {
 
   return (
     <MobileLayout>
-      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-[#FFFC00] selection:text-black">
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-[#fe4103] selection:text-white">
         <Header />
 
-        <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8">
-          {/* Top Control Bar */}
+        <main className="flex-1 w-full px-3 sm:px-5 md:px-6 lg:px-6 xl:px-8 2xl:px-10 py-5 sm:py-8">
+          <div className="flex justify-between items-start gap-4 lg:gap-6 xl:gap-8 w-full">
+            <BentoRails side="left" />
+
+            <div className="w-full max-w-3xl xl:max-w-4xl 2xl:max-w-[880px] mx-auto min-w-0 space-y-6 sm:space-y-8">
+              {/* Top Control Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
             <div className="flex items-center gap-2.5 flex-wrap">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-card border border-border/80 shadow-2xs">
@@ -470,7 +475,7 @@ export default function StatsPage() {
           <Card className="p-4 sm:p-6 rounded-3xl border-border bg-card shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border/70">
               <h3 className="text-sm font-mono font-bold text-foreground flex items-center gap-2">
-                <Zap className="size-4 text-[#FFFC00]" />
+                <Zap className="size-4 text-[#fe4103]" />
                 Conversion Goals & Outbound Tracking
               </h3>
               <span className="text-xs text-muted-foreground font-mono">Verified Actions</span>
@@ -488,6 +493,10 @@ export default function StatsPage() {
               ))}
             </div>
           </Card>
+            </div>
+
+            <BentoRails side="right" />
+          </div>
         </main>
 
         <Footer />

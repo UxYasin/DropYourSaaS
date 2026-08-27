@@ -19,6 +19,7 @@ function ExploreDirectoryContent() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'rank' | 'hot' | 'top' | 'recent'>('rank');
@@ -36,6 +37,9 @@ function ExploreDirectoryContent() {
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
           setItems(data.items);
+          if (Array.isArray(data.activeCategories)) {
+            setActiveCategories(data.activeCategories);
+          }
           if (typeof data.totalCount === 'number') setTotalCount(data.totalCount);
           if (typeof data.totalPages === 'number') setTotalPages(data.totalPages);
         }
@@ -62,10 +66,10 @@ function ExploreDirectoryContent() {
   });
 
   return (
-    <div className="w-full max-w-5xl mx-auto min-w-0 space-y-8">
+    <div className="w-full space-y-6 sm:space-y-8">
       {/* Title Header */}
-      <div className="text-center space-y-4 max-w-2xl mx-auto pt-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-[#08F9C9] text-xs font-mono font-bold">
+      <div className="text-center space-y-3 max-w-2xl mx-auto pt-2">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#fe4103]/10 border border-[#fe4103]/20 text-[#fe4103] text-xs font-mono font-bold">
           <Sparkles className="size-3.5" />
           SaaS Directory &amp; Marketplace
         </div>
@@ -77,14 +81,14 @@ function ExploreDirectoryContent() {
         </p>
 
         {/* Search Input Bar */}
-        <div className="relative max-w-md mx-auto pt-2">
+        <div className="relative max-w-md mx-auto pt-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by product name, category, or keyword..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#fe4103]/40 shadow-sm"
           />
         </div>
       </div>
@@ -97,6 +101,7 @@ function ExploreDirectoryContent() {
             setSelectedCategory(cat.queryValue);
             setPage(1);
           }}
+          activeCategories={activeCategories}
         />
       </div>
 
@@ -110,14 +115,14 @@ function ExploreDirectoryContent() {
               setPage(1);
             }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer',
+              'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'hot'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
+                ? 'bg-[#fe4103] text-white shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             )}
           >
-            <Flame className="size-3.5 fill-current" />
-            <span>Hot</span>
+            <Flame className="size-3.5" />
+            Hot
           </button>
           <button
             type="button"
@@ -126,14 +131,14 @@ function ExploreDirectoryContent() {
               setPage(1);
             }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer',
+              'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'top'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
+                ? 'bg-[#fe4103] text-white shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             )}
           >
             <Trophy className="size-3.5" />
-            <span>Top Voted</span>
+            Top
           </button>
           <button
             type="button"
@@ -142,14 +147,14 @@ function ExploreDirectoryContent() {
               setPage(1);
             }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer',
+              'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'recent'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
+                ? 'bg-[#fe4103] text-white shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             )}
           >
             <Clock className="size-3.5" />
-            <span>Recent</span>
+            Recent
           </button>
           <button
             type="button"
@@ -158,31 +163,35 @@ function ExploreDirectoryContent() {
               setPage(1);
             }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer',
+              'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'rank'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
+                ? 'bg-[#fe4103] text-white shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
             )}
           >
             <BarChart2 className="size-3.5" />
-            <span>Rank / Bids</span>
+            Rank / Bid
           </button>
         </div>
 
-        <div className="text-xs font-mono text-muted-foreground">
-          Showing <span className="text-foreground font-bold">{filteredItems.length}</span> SaaS products
+        <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+          Showing <span className="font-bold text-foreground">{filteredItems.length}</span> of{' '}
+          <span className="font-bold text-foreground">{totalCount}</span> products
         </div>
       </div>
 
-      {/* 3-Column Directory Grid Layout */}
-      <DirectoryGrid listings={filteredItems} isLoading={isLoading} />
+      {/* Grid of Directory Cards */}
+      <DirectoryGrid
+        listings={filteredItems}
+        isLoading={isLoading}
+      />
 
-      {/* Pagination Bar */}
+      {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-6 border-t border-border/80">
-          <div className="text-xs font-mono text-muted-foreground">
-            Page <span className="text-foreground font-bold">{page}</span> of{' '}
-            <span className="text-foreground font-bold">{totalPages}</span>
+        <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+            Page <span className="font-bold text-foreground">{page}</span> of{' '}
+            <span className="font-bold text-foreground">{totalPages}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -218,12 +227,14 @@ export default function ExplorePage() {
     <MobileLayout>
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Header />
-        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex justify-center items-start gap-6 lg:gap-8">
+        <main className="flex-1 w-full px-3 sm:px-5 md:px-6 lg:px-6 xl:px-8 2xl:px-10 py-5 sm:py-8">
+          <div className="flex justify-between items-start gap-4 lg:gap-6 xl:gap-8 w-full">
             <BentoRails side="left" />
-            <Suspense fallback={null}>
-              <ExploreDirectoryContent />
-            </Suspense>
+            <div className="w-full max-w-3xl xl:max-w-4xl 2xl:max-w-[880px] mx-auto min-w-0">
+              <Suspense fallback={null}>
+                <ExploreDirectoryContent />
+              </Suspense>
+            </div>
             <BentoRails side="right" />
           </div>
         </main>
