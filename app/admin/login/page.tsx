@@ -6,10 +6,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ShieldCheck, Lock, Mail } from 'lucide-react';
+import { ShieldCheck, Lock, User, Loader2 } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: identifier, username: identifier, password }),
       });
 
       const data = await res.json();
@@ -46,14 +46,14 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background text-foreground">
       <Card className="w-full max-w-md rounded-3xl border border-border shadow-xl bg-card">
         <CardHeader className="text-center space-y-2 pb-4">
-          <div className="size-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto border border-blue-500/20">
+          <div className="size-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-[#FFFC00] flex items-center justify-center mx-auto border border-amber-500/20">
             <ShieldCheck className="size-6" />
           </div>
           <CardTitle className="text-2xl font-mono font-extrabold tracking-tight">
-            Admin Access
+            DropYourSaaS Admin
           </CardTitle>
           <CardDescription className="text-xs text-muted-foreground">
-            Sign in to manage DropYourSaaS ad requests & listings
+            Sign in to access analytics breakdown, traffic control, and listings
           </CardDescription>
         </CardHeader>
 
@@ -66,17 +66,17 @@ export default function AdminLoginPage() {
             )}
 
             <div className="space-y-1.5 text-left">
-              <Label htmlFor="admin-email" className="text-xs font-bold">
-                Admin Email
+              <Label htmlFor="admin-id" className="text-xs font-bold">
+                User ID or Email
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3 size-4 text-muted-foreground" />
+                <User className="absolute left-3.5 top-3 size-4 text-muted-foreground" />
                 <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="admin-id"
+                  type="text"
+                  placeholder="loladmin"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                   className="pl-10 h-10 rounded-xl border-border bg-muted/30 text-xs"
                 />
@@ -104,9 +104,16 @@ export default function AdminLoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 mt-2 rounded-xl font-bold font-mono text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-md cursor-pointer"
+              className="w-full h-11 rounded-xl bg-[#FFFC00] hover:bg-[#FFFC00]/90 text-black font-mono font-bold text-xs shadow-md transition-all mt-2"
             >
-              {isLoading ? 'Authenticating...' : 'Sign In to Dashboard'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin mr-2" />
+                  Verifying...
+                </>
+              ) : (
+                'Sign In to Dashboard'
+              )}
             </Button>
           </form>
         </CardContent>

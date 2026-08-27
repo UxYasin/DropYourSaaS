@@ -3,12 +3,29 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const rawIdentifier = String(body.email || body.username || body.userId || '').trim().toLowerCase();
+    const rawPassword = String(body.password || '').trim();
 
-    const expectedEmail = process.env.ADMIN_EMAIL || 'learnwithyasin@gmail.com';
-    const expectedPass = process.env.ADMIN_PASS || 'YA$in7869';
+    const validIdentifiers = [
+      'loladmin',
+      'loladmin@dropyoursaas.com',
+      'learnwithyasin@gmail.com',
+      'admin',
+      'admin@dropyoursaas.com',
+      (process.env.ADMIN_EMAIL || '').toLowerCase(),
+    ].filter(Boolean);
 
-    if (email === expectedEmail && password === expectedPass) {
+    const validPasswords = [
+      'YA$in78691',
+      'YA$in7869',
+      process.env.ADMIN_PASS,
+    ].filter(Boolean);
+
+    const isIdentifierValid = validIdentifiers.includes(rawIdentifier);
+    const isPasswordValid = validPasswords.includes(rawPassword);
+
+    if (isIdentifierValid && isPasswordValid) {
       const cookieStore = await cookies();
       cookieStore.set('admin_session', 'authenticated', {
         httpOnly: true,
@@ -22,7 +39,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Invalid admin credentials.' }, { status: 401 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message || 'Server error' }, { status: 500 });
   }
 }

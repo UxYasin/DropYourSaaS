@@ -47,30 +47,30 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseServerClient();
   let newCount: number | undefined;
 
-  // 1. Try atomic RPC first
-  const { error: rpcError } = await supabase.rpc('increment_clicks', { entry_url: url });
+  try {
+    const { data: currentEntry } = await supabase
+      .from('leaderboard_entries')
+      .select('clicks, real_clicks')
+      .eq('url', url)
+      .maybeSingle();
 
-  if (rpcError) {
-    // 2. Graceful fallback if RPC function is not yet created in Supabase
-    try {
-      const { data: currentEntry } = await supabase
-        .from('leaderboard_entries')
-        .select('clicks')
-        .eq('url', url)
-        .single();
-
-      newCount = (currentEntry?.clicks || 0) + 1;
+    if (currentEntry) {
+      newCount = (currentEntry.clicks || 0) + 1;
+      const newRealClicks = (currentEntry.real_clicks || 0) + 1;
 
       await supabase
         .from('leaderboard_entries')
-        .update({ clicks: newCount })
+        .update({
+          clicks: newCount,
+          real_clicks: newRealClicks,
+        })
         .eq('url', url);
-    } catch {
-      // Non-blocking
+
+      await invalidateLeaderboardCache();
     }
+  } catch (err) {
+    console.warn('[Click Tracking Notice]:', err);
   }
 
-  await invalidateLeaderboardCache();
-
-  return NextResponse.json({ ok: true, counted: true, newCount });
+  return NextResponse.json({ ok: true, clicks: newCount });
 }

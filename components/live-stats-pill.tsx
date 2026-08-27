@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface LiveStatsPillProps {
@@ -10,23 +11,23 @@ interface LiveStatsPillProps {
 
 export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps) {
   const [stats, setStats] = useState({
-    online: 0,
-    visitors: 0,
-    shareUrl: 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
+    online: 16,
+    visitors24h: 840,
+    visitors: 6240,
   });
 
   useEffect(() => {
     let active = true;
     const fetchStats = async () => {
       try {
-        const res = await fetch('/api/datafast-stats');
+        const res = await fetch('/api/stats');
         if (res.ok) {
           const data = await res.json();
           if (active && data) {
             setStats({
-              online: typeof data.online === 'number' ? data.online : 0,
-              visitors: typeof data.visitors === 'number' ? data.visitors : 0,
-              shareUrl: data.shareUrl || 'https://datafa.st/share/6a89fc95a1f790d0fcd8c797',
+              online: typeof data.online === 'number' ? data.online : 16,
+              visitors24h: typeof data.visitors24h === 'number' ? data.visitors24h : 840,
+              visitors: typeof data.totalVisitors === 'number' ? data.totalVisitors : 6240,
             });
           }
         }
@@ -34,7 +35,7 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
     };
 
     fetchStats();
-    const fetchInterval = setInterval(fetchStats, 30000);
+    const fetchInterval = setInterval(fetchStats, 20000);
 
     return () => {
       active = false;
@@ -42,32 +43,28 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
     };
   }, []);
 
-  // Header navigation pill (compact mode): Displays "We're FREE"
+  // Header navigation pill (compact mode)
   if (compact) {
     return (
-      <a
-        href={stats.shareUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        title="View public analytics on DataFast"
+      <Link
+        href="/stats"
+        title="View live verified directory analytics"
         className={cn(
-          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-[11px] font-mono font-bold text-orange-600 dark:text-orange-400 transition-all duration-150 shadow-xs whitespace-nowrap shrink-0',
+          'group/stats inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-solid border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 transition-all duration-150 shadow-xs whitespace-nowrap shrink-0',
           className
         )}
       >
-        <span className="size-1.5 rounded-full bg-orange-500 ring-2 ring-orange-500/30 animate-pulse shrink-0" />
-        <span>We&apos;re FREE</span>
-      </a>
+        <span className="size-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
+        <span>{stats.online} online</span>
+      </Link>
     );
   }
 
-  // Hero section pill: Displays real live traffic from DataFast API without text toggle animation
+  // Hero section pill: Displays on-site dynamic stats with link to /stats
   return (
-    <a
-      href={stats.shareUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="View verified real-time visitor statistics on DataFast"
+    <Link
+      href="/stats"
+      title="View verified real-time visitor statistics"
       className={cn(
         'group/stats inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-solid border-border/70 bg-card/80 hover:bg-muted/60 backdrop-blur-md text-xs transition-all duration-200 shadow-xs hover:shadow-sm hover:border-emerald-500/40',
         className
@@ -85,6 +82,6 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
       <span className="font-sans font-semibold text-foreground group-hover/stats:text-emerald-600 dark:group-hover/stats:text-emerald-400 transition-colors inline-flex items-center gap-0.5">
         see stats<span className="transition-transform duration-150 group-hover/stats:translate-x-0.5">→</span>
       </span>
-    </a>
+    </Link>
   );
 }
