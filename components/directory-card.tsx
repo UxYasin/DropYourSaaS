@@ -298,7 +298,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="md"
                 />
               </div>
-              {siteCopy.feed.showPrices && (
+              {siteCopy.feed.showPrices && item.bid > 0 && (
                 <div className="font-mono font-black text-xl sm:text-2xl text-sky-500 tracking-tight shrink-0">
                   {formatBid(item.bid)}
                 </div>
@@ -306,7 +306,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               {onClaimClick && (
                 <button
                   type="button"
-                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
                   className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   {siteCopy.feed.podiumButton}
@@ -455,7 +455,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="sm"
                 />
               </div>
-              {siteCopy.feed.showPrices && (
+              {siteCopy.feed.showPrices && item.bid > 0 && (
                 <div className={`font-mono font-black text-lg sm:text-xl tracking-tight shrink-0 ${theme.priceColor}`}>
                   {formatBid(item.bid)}
                 </div>
@@ -463,7 +463,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               {onClaimClick && (
                 <button
                   type="button"
-                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
                   className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   {siteCopy.feed.podiumButton}
@@ -568,7 +568,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="sm"
                 />
               </div>
-              {siteCopy.feed.showPrices && (
+              {siteCopy.feed.showPrices && item.bid > 0 && (
                 <div className={`font-mono font-black text-xs sm:text-sm ${currentStyle.text}`}>
                   {formatBid(item.bid)}
                 </div>
@@ -576,7 +576,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               {onClaimClick && (
                 <button
                   type="button"
-                  onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
                   className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
                 >
                   {siteCopy.feed.podiumButton}
@@ -660,7 +660,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 size="sm"
               />
             </div>
-            {siteCopy.feed.showPrices && (
+            {siteCopy.feed.showPrices && item.bid > 0 && (
               <div className="font-mono font-black text-xs text-sky-500">
                 {formatBid(item.bid)}
               </div>
@@ -668,7 +668,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
             {onClaimClick && (
               <button
                 type="button"
-                onClick={() => onClaimClick(item.rank, item.bid + 1)}
+                onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
                 className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
               >
                 {siteCopy.feed.listingButton}

@@ -33,8 +33,9 @@ export async function GET(request: NextRequest) {
 
     const result = await getPaginatedLeaderboard(page, limit, category, sortBy);
     return NextResponse.json(result);
-  } catch (err: any) {
-    console.error('Leaderboard fetch error:', err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('Leaderboard fetch error:', message);
     return NextResponse.json({ error: 'Failed to fetch leaderboard data' }, { status: 500 });
   }
 }

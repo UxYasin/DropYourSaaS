@@ -63,6 +63,8 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
     }).catch(() => {});
   };
 
+  const nextBid = Math.max(1, item.bid + 1);
+
   return (
     <div
       ref={containerRef}
@@ -114,7 +116,9 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
               </div>
               <div>
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Bid</div>
-                <div className="font-mono text-xs font-semibold text-[#FFFC00]">{formatBid(item.bid)}</div>
+                <div className="font-mono text-xs font-semibold text-[#FFFC00]">
+                  {item.bid > 0 ? formatBid(item.bid) : '—'}
+                </div>
               </div>
               <div>
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Clicks</div>
@@ -130,9 +134,9 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
         <button
           type="button"
           className="w-full flex items-center justify-center bg-[#FFFC00]/15 text-black dark:text-[#FFFC00] text-xs font-mono font-bold cursor-pointer border border-[#FFFC00]/40 border-t-0 rounded-b-xl py-2 hover:bg-[#FFFC00]/25 transition-colors"
-          onClick={() => onClaimClick(item.rank, item.bid + 1)}
+          onClick={() => onClaimClick(item.rank, nextBid)}
         >
-          Outbid #{item.rank} for {formatBid(item.bid + 1)}
+          Outbid #{item.rank} for {formatBid(nextBid)}
         </button>
       </div>
     </div>

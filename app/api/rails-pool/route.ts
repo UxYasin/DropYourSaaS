@@ -144,24 +144,6 @@ export async function GET() {
 
     const pool = Array.from(combinedMap.values());
 
-    // Fallback fill with seed items if pool is small
-    if (pool.length < 10) {
-      seedLeaderboardItems.forEach((seed, idx) => {
-        if (!pool.some((p) => p.url === seed.url)) {
-          pool.push({
-            id: `seed-${idx}`,
-            name: seed.name,
-            url: seed.url,
-            tagline: `Verified ${seed.name} software product`,
-            net_score: 0,
-            hot_score: 0,
-            user_vote: 0,
-            category: 'SaaS',
-          });
-        }
-      });
-    }
-
     return NextResponse.json({
       pool,
       pinnedAds: pinnedAdsMap,

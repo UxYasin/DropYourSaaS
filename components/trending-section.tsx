@@ -65,7 +65,7 @@ export function TrendingSection() {
                   key={item.name + i}
                   href={href}
                   target="_blank"
-                  rel={item.is_dofollow ? "noopener" : "nofollow noopener"}
+                  rel="noopener noreferrer"
                   onClick={() => {
                     trackEvent('outbound_click', { url: item.url, source: 'trending' });
                     fetch('/api/click', {

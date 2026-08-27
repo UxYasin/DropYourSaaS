@@ -1,11 +1,11 @@
 import { redis } from '@/lib/redis';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
-import { leaderboardItems as seedLeaderboardItems, type LeaderboardItem } from '@/lib/leaderboard-data';
+import type { LeaderboardItem } from '@/lib/leaderboard-data';
 import { cookies } from 'next/headers';
 import { getListingSlug } from '@/lib/slug';
 
-const CACHE_KEY = 'leaderboard:v6';
-const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for real-time responsiveness
+const CACHE_KEY = 'leaderboard:v7';
+const CACHE_TTL_SECONDS = 2; // 2s TTL for real-time responsiveness
 
 export async function getLeaderboard(
   category?: string,
@@ -43,6 +43,7 @@ export async function invalidateLeaderboardCache() {
     await redis.del('leaderboard:v4');
     await redis.del('leaderboard:v5');
     await redis.del('leaderboard:v6');
+    await redis.del('leaderboard:v7');
   } catch {}
 }
 
@@ -107,8 +108,8 @@ export async function fetchLeaderboardFromDatabase(
       query = query.ilike('category', `%${category}%`);
     }
 
-    // Apply exact Outbid ranking algorithm:
-    // Ranked primarily by Highest Bid (bid_cents DESC), then claimed_at DESC (recent tie-breaker), then created_at DESC
+    // Dynamic Outbid ranking algorithm:
+    // Ranked strictly by highest active paid bid (bid_cents DESC), then net_score DESC, then claimed_at DESC
     if (sortBy === 'hot') {
       query = query.order('hot_score', { ascending: false, nullsFirst: false }).order('net_score', { ascending: false });
     } else if (sortBy === 'top') {
@@ -116,9 +117,10 @@ export async function fetchLeaderboardFromDatabase(
     } else if (sortBy === 'recent') {
       query = query.order('claimed_at', { ascending: false });
     } else {
-      // Default 'rank': Highest Paid Bid outranks all lower bids
+      // Default 'rank': Highest Paid Bid outranks all lower/free bids, with recent submissions as tie-breaker
       query = query
         .order('bid_cents', { ascending: false, nullsFirst: false })
+        .order('net_score', { ascending: false, nullsFirst: false })
         .order('claimed_at', { ascending: false, nullsFirst: false });
     }
 
@@ -130,8 +132,8 @@ export async function fetchLeaderboardFromDatabase(
     console.warn('Error loading live Supabase listings:', err);
   }
 
-  const realUrlSet = new Set<string>();
-  const dbItems: LeaderboardItem[] = dbEntries.map((row) => {
+  // 100% Database-backed: strictly map real listings from Supabase with NO mock data
+  const realItems: LeaderboardItem[] = dbEntries.map((row, idx) => {
     const urlStr = String(row.url || '');
     let hostname = 'SaaS Product';
     try {
@@ -140,13 +142,9 @@ export async function fetchLeaderboardFromDatabase(
       hostname = urlStr || 'SaaS Product';
     }
 
-    if (urlStr) {
-      realUrlSet.add(urlStr.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
-    }
-
     return {
       id: String(row.id || ''),
-      rank: 0, // Assigned sequentially below
+      rank: idx + 1,
       name: String(row.name || row.title || hostname),
       bid: Number(row.bid_cents || 0) / 100,
       url: urlStr,
@@ -170,33 +168,7 @@ export async function fetchLeaderboardFromDatabase(
     };
   });
 
-  // If we have database items, merge with non-duplicate seed items if needed to fill minimum directory spots
-  const combined: LeaderboardItem[] = [...dbItems];
-
-  if (combined.length < 20) {
-    for (const seed of seedLeaderboardItems) {
-      const seedNorm = seed.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-      if (!realUrlSet.has(seedNorm)) {
-        combined.push({
-          ...seed,
-          is_verified: true,
-          is_dofollow: true,
-          upvotes: 0,
-          downvotes: 0,
-          net_score: 0,
-          hot_score: 0,
-          user_vote: 0,
-        });
-        realUrlSet.add(seedNorm);
-      }
-    }
-  }
-
-  // Assign sequential 1-based ranks based on exact sorted order
-  return combined.map((item, idx) => ({
-    ...item,
-    rank: idx + 1,
-  }));
+  return realItems;
 }
 
 function formatRelativeTime(iso: string) {
