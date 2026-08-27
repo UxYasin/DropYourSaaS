@@ -7,6 +7,7 @@ import { PinAdModal } from '@/components/pin-ad-modal';
 import { Pin, Target, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaviconImage } from '@/components/favicon-image';
+import { leaderboardItems as seedLeaderboardItems } from '@/lib/leaderboard-data';
 
 export interface RailCardItem {
   id: string;
@@ -71,10 +72,33 @@ const BENTO_THEMES = [
   },
 ];
 
-let globalPool: RailCardItem[] = [];
+const fallbackDbCards: RailCardItem[] = seedLeaderboardItems.map((item) => ({
+  id: item.id || item.url,
+  name: item.name,
+  url: item.url,
+  tagline: item.description || `Verified ${item.category || 'SaaS'} tool on DropYourSaaS`,
+  net_score: item.net_score || item.upvotes || 5,
+  user_vote: 0,
+  category: item.category || 'SaaS',
+  is_verified: item.is_verified,
+  bid_cents: (item.bid || 0) * 100,
+}));
+
+let globalPool: RailCardItem[] = fallbackDbCards;
 
 export function BentoRails({ side }: BentoRailsProps) {
-  const [displayedItems, setDisplayedItems] = useState<RailCardItem[]>([]);
+  // Initial 5 slots based on real database listings (0..4 for left, 5..9 for right)
+  const initialOffset = side === 'left' ? 0 : 5;
+  const [displayedItems, setDisplayedItems] = useState<RailCardItem[]>(() => {
+    return [
+      fallbackDbCards[initialOffset] || fallbackDbCards[0],
+      fallbackDbCards[initialOffset + 1] || fallbackDbCards[1],
+      fallbackDbCards[initialOffset + 2] || fallbackDbCards[2],
+      fallbackDbCards[initialOffset + 3] || fallbackDbCards[3],
+      fallbackDbCards[initialOffset + 4] || fallbackDbCards[4],
+    ];
+  });
+
   const [pinnedAds, setPinnedAds] = useState<Record<string, RailCardItem>>({});
   const [isAdSelectionMode, setIsAdSelectionMode] = useState(false);
   const [pinModalState, setPinModalState] = useState<{
@@ -101,7 +125,9 @@ export function BentoRails({ side }: BentoRailsProps) {
               globalPool = data.pool;
               const startIdx = side === 'left' ? 0 : 5;
               const slice = data.pool.slice(startIdx, startIdx + 5);
-              setDisplayedItems(slice);
+              if (slice.length >= 5) {
+                setDisplayedItems(slice);
+              }
             }
           }
         }
@@ -112,7 +138,7 @@ export function BentoRails({ side }: BentoRailsProps) {
 
     fetchPool();
 
-    // 8-Second maximum display rotation for unpinned slots (Slots 3, 4, 5)
+    // 8-Second maximum display rotation strictly across real database pool listings
     const startRotation = () => {
       timerId = setInterval(() => {
         if (!isMounted || globalPool.length < 5) return;
@@ -120,7 +146,7 @@ export function BentoRails({ side }: BentoRailsProps) {
         setDisplayedItems((current) => {
           if (current.length === 0) return current;
 
-          // Only rotate unpinned slots (slots 3, 4, 5)
+          // Only rotate unpinned slots (Slots 3, 4, 5)
           const availableSlotIndices = [2, 3, 4].filter((idx) => {
             const slotPos = `${side}_${idx + 1}`;
             return !pinnedAds[slotPos];
@@ -152,15 +178,7 @@ export function BentoRails({ side }: BentoRailsProps) {
     };
   }, [side, pinnedAds]);
 
-  const fallbackCards: RailCardItem[] = [
-    { id: 'fb-1', name: side === 'left' ? 'redreplier.com' : 'whop.com', url: 'https://redreplier.com', tagline: 'Verified SaaS · AI-powered Reddit lead generation & social listening tool.', net_score: 15, user_vote: 0, category: 'AI Tools' },
-    { id: 'fb-2', name: side === 'left' ? 'trycomp.ai' : 'lathire.com', url: 'https://trycomp.ai', tagline: 'Verified SaaS · Autonomous AI Agents & Intelligent Workflows.', net_score: 9, user_vote: 0, category: 'Developer' },
-    { id: 'fb-3', name: side === 'left' ? 'mytb.ai' : 'fiber.so', url: 'https://mytb.ai', tagline: 'Verified SaaS · Productivity & Workspace Automation Suite.', net_score: 12, user_vote: 0, category: 'Productivity' },
-    { id: 'fb-4', name: side === 'left' ? 'prelint.com' : 'ranked.ai', url: 'https://prelint.com', tagline: 'Verified SaaS · Developer Code Quality & Automated Linting.', net_score: 7, user_vote: 0, category: 'DevOps' },
-    { id: 'fb-5', name: side === 'left' ? 'overskill.com' : 'startglobal.co', url: 'https://overskill.com', tagline: 'Verified SaaS · Global Founder Marketplace & Product Launchpad.', net_score: 18, user_vote: 0, category: 'Marketplace' },
-  ];
-
-  const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackCards;
+  const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackDbCards.slice(0, 5);
 
   const handleOpenPlaceAd = (slotPos: string) => {
     setIsAdSelectionMode(false);
@@ -180,14 +198,14 @@ export function BentoRails({ side }: BentoRailsProps) {
           const isTopTwoSlot = i < 2; // Top 2 slots on each rail
           const pinnedAd = pinnedAds[slotPos];
           const isPinnedAd = Boolean(pinnedAd);
-          const defaultCard = cardsToRender[i] || fallbackCards[i];
+          const defaultCard = cardsToRender[i] || fallbackDbCards[i] || fallbackDbCards[0];
           const card = pinnedAd || defaultCard;
 
           const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
           const theme = BENTO_THEMES[themeIndex];
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
-          // TOP 2 SLOTS: Monochromatic Minimal "Place an Ad" card with hover reveal
+          // TOP 2 SLOTS: Monochromatic Minimal "Place an Ad" card with 15% opacity and hover reveal
           if (isTopTwoSlot && !isPinnedAd) {
             return (
               <div
@@ -221,7 +239,7 @@ export function BentoRails({ side }: BentoRailsProps) {
             );
           }
 
-          // SLOTS 3, 4, 5 (or Top Slots with Active Pinned Ads)
+          // SLOTS 3, 4, 5: STRICTLY Database-Synced Real Listings (Quill, traceback, HorizonX, SaaSpotlight, etc.)
           return (
             <div
               key={slotPos}
@@ -345,7 +363,7 @@ export function BentoRails({ side }: BentoRailsProps) {
         <button
           type="button"
           onClick={() => handleOpenPlaceAd(`${side}_1`)}
-          className="w-full mt-1 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900/40 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 cursor-pointer active:scale-95 shadow-2xs"
+          className="w-full mt-1 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed border-zinc-400/40 dark:border-zinc-700/50 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-white/15 dark:bg-zinc-900/20 hover:bg-white/30 dark:hover:bg-zinc-900/40 cursor-pointer active:scale-95 shadow-2xs"
         >
           <Pin className="size-3 text-zinc-400" />
           <span>Place an Ad ($100 · 30–60d)</span>

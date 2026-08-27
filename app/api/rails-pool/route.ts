@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
-import { leaderboardItems as seedLeaderboardItems } from '@/lib/leaderboard-data';
 
 export interface PinnedAdItem {
   id: string;
@@ -93,24 +92,18 @@ export async function GET() {
       console.warn('Pinned ads fetch warning:', err);
     }
 
-    // 1. Fetch 60% Evergreen Pool (Ordered by hot_score DESC, net_score DESC)
-    const { data: hotData } = await supabase
+    // 1. Fetch real listings directly from Supabase leaderboard_entries
+    const { data: dbData, error: dbError } = await supabase
       .from('leaderboard_entries')
-      .select('id, url, name, category, value_proposition, additional_info, net_score, hot_score, is_verified, bid_cents')
+      .select('id, url, name, category, net_score, hot_score, is_verified, bid_cents, upvotes, clicks, claimed_at')
       .neq('status', 'rejected')
+      .order('bid_cents', { ascending: false, nullsFirst: false })
       .order('hot_score', { ascending: false, nullsFirst: false })
-      .order('net_score', { ascending: false })
-      .limit(30);
+      .order('net_score', { ascending: false });
 
-    // 2. Fetch 40% Recent Fresh Drops (within 48 hours or recent)
-    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-    const { data: recentData } = await supabase
-      .from('leaderboard_entries')
-      .select('id, url, name, category, value_proposition, additional_info, net_score, hot_score, is_verified, bid_cents')
-      .neq('status', 'rejected')
-      .gte('claimed_at', fortyEightHoursAgo)
-      .order('claimed_at', { ascending: false })
-      .limit(20);
+    if (dbError) {
+      console.warn('Database listings fetch warning:', dbError);
+    }
 
     const mapRow = (row: Record<string, unknown>): PoolListingItem => {
       const urlStr = String(row.url || '');
@@ -124,7 +117,7 @@ export async function GET() {
         id: String(row.id || ''),
         name: String(row.name || hostname),
         url: urlStr,
-        tagline: String(row.value_proposition || row.additional_info || `Verified ${row.category || 'SaaS'} tool on DropYourSaaS`),
+        tagline: `Verified ${row.category || 'SaaS'} tool on DropYourSaaS`,
         net_score: Number(row.net_score || 0),
         hot_score: Number(row.hot_score || 0),
         user_vote: userVotesMap.get(String(row.id || '')) || 0,
@@ -134,21 +127,12 @@ export async function GET() {
       };
     };
 
-    const hotList = (hotData || []).map(mapRow);
-    const recentList = (recentData || []).map(mapRow);
-
-    // Combine and deduplicate
-    const combinedMap = new Map<string, PoolListingItem>();
-    hotList.forEach((item) => combinedMap.set(item.id || item.url, item));
-    recentList.forEach((item) => combinedMap.set(item.id || item.url, item));
-
-    const pool = Array.from(combinedMap.values());
+    const pool = (dbData || []).map(mapRow);
 
     return NextResponse.json({
       pool,
       pinnedAds: pinnedAdsMap,
-      hotCount: hotList.length,
-      recentCount: recentList.length,
+      count: pool.length,
     });
   } catch (error: unknown) {
     console.error('Rails pool error:', error);
