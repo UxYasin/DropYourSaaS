@@ -46,11 +46,11 @@ export default function Home() {
     <MobileLayout>
       <div className="min-h-screen flex flex-col bg-background text-foreground">
         <Header />
-        <main className="flex-1 max-w-[1600px] xl:max-w-[1680px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
-          <div className="flex justify-center items-start gap-6 lg:gap-8">
+        <main className="flex-1 w-full px-3 sm:px-5 md:px-6 lg:px-6 xl:px-8 2xl:px-10 py-5 sm:py-8">
+          <div className="flex justify-between items-start gap-4 lg:gap-6 xl:gap-8 w-full">
             <BentoRails side="left" />
 
-            <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0">
+            <div className="w-full max-w-3xl xl:max-w-4xl 2xl:max-w-[880px] mx-auto min-w-0">
               {showVerifiedBanner && (
                 <div className="mb-5 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300">
                   <div className="flex items-center gap-2">

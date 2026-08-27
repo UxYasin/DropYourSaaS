@@ -76,15 +76,15 @@ export function Header() {
               Explore Directory
             </Link>
             <Link
-              href="/advertise"
+              href="/stats"
               className={cn(
                 'text-xs font-medium transition-colors px-3 py-1.5 rounded-full',
-                pathname === '/advertise' || pathname === '/pricing'
+                pathname === '/stats'
                   ? 'text-foreground font-semibold bg-muted/70'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
               )}
             >
-              Advertise
+              Stats
             </Link>
           </nav>
           <LiveStatsPill compact />
