@@ -117,7 +117,7 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
               <div>
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Bid</div>
                 <div className="font-mono text-xs font-semibold text-[#FFFC00]">
-                  {item.bid > 0 ? formatBid(item.bid) : '—'}
+                  {formatBid(item.bid)}
                 </div>
               </div>
               <div>

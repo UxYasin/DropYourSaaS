@@ -298,7 +298,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="md"
                 />
               </div>
-              {siteCopy.feed.showPrices && item.bid > 0 && (
+              {siteCopy.feed.showPrices && (
                 <div className="font-mono font-black text-xl sm:text-2xl text-sky-500 tracking-tight shrink-0">
                   {formatBid(item.bid)}
                 </div>
@@ -455,7 +455,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="sm"
                 />
               </div>
-              {siteCopy.feed.showPrices && item.bid > 0 && (
+              {siteCopy.feed.showPrices && (
                 <div className={`font-mono font-black text-lg sm:text-xl tracking-tight shrink-0 ${theme.priceColor}`}>
                   {formatBid(item.bid)}
                 </div>
@@ -568,7 +568,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   size="sm"
                 />
               </div>
-              {siteCopy.feed.showPrices && item.bid > 0 && (
+              {siteCopy.feed.showPrices && (
                 <div className={`font-mono font-black text-xs sm:text-sm ${currentStyle.text}`}>
                   {formatBid(item.bid)}
                 </div>
@@ -660,7 +660,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 size="sm"
               />
             </div>
-            {siteCopy.feed.showPrices && item.bid > 0 && (
+            {siteCopy.feed.showPrices && (
               <div className="font-mono font-black text-xs text-sky-500">
                 {formatBid(item.bid)}
               </div>
