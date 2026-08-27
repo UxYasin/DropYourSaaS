@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createWhopRankCheckout } from '@/lib/whop';
+import { getSupabaseServerClient } from '@/lib/supabase/server';
 
 export async function POST(req: Request) {
   try {
@@ -23,15 +24,34 @@ export async function POST(req: Request) {
       tier,
       slotPosition,
       twitterHandle,
+      category,
+      isForSale,
+      askingPrice,
       selectedUpsell,
     } = body;
 
-    const resolvedUrl = siteUrl || url || '';
-    const resolvedName = projectName || title || name || resolvedUrl;
+    const rawUrl = siteUrl || url || '';
+    if (!rawUrl.trim()) {
+      return NextResponse.json({ error: 'A valid website URL or @handle is required' }, { status: 400 });
+    }
+
+    const normalizedUrl = /^https?:\/\//i.test(rawUrl.trim())
+      ? rawUrl.trim()
+      : `https://${rawUrl.trim().replace(/^@/, '')}`;
+
+    let hostname = 'SaaS Product';
+    try {
+      hostname = new URL(normalizedUrl).hostname.replace(/^www\./, '');
+    } catch {
+      hostname = normalizedUrl;
+    }
+
+    const resolvedName = projectName || title || name || hostname;
     const resolvedDescription = oneLiner || description || valueProposition || '';
     const resolvedRank = Number(targetRank || requestedRank || selectedRank || rank || 1);
 
-    let resolvedAmount = Number(amount || bid || 5);
+    // Starting bid from $1
+    let resolvedAmount = Math.max(1, Number(amount || bid || 1));
     if (selectedUpsell === 'sponsor_panel') resolvedAmount = 100;
     else if (selectedUpsell === 'ai_boost') resolvedAmount = 25;
     else if (selectedUpsell === 'dofollow') resolvedAmount = 10;
@@ -39,14 +59,36 @@ export async function POST(req: Request) {
     const checkoutResult = await createWhopRankCheckout({
       amount: resolvedAmount,
       targetRank: resolvedRank,
-      siteUrl: resolvedUrl,
+      siteUrl: normalizedUrl,
       projectName: resolvedName,
       oneLiner: resolvedDescription,
-      email,
-      tier: tier || (selectedUpsell ? `upsell_${selectedUpsell}` : 'paid_rank'),
+      email: email ? String(email).trim() : undefined,
+      tier: tier || (selectedUpsell ? `upsell_${selectedUpsell}` : 'outbid'),
       slotPosition,
-      twitterHandle,
+      twitterHandle: twitterHandle ? String(twitterHandle).trim() : undefined,
+      category: category || 'SaaS',
     });
+
+    if (!checkoutResult.success || !checkoutResult.checkoutUrl) {
+      return NextResponse.json(
+        { error: checkoutResult.error || 'Failed to initialize Whop checkout' },
+        { status: 500 }
+      );
+    }
+
+    // Record pending bid in Supabase bids table for telemetry and fulfillment tracking
+    try {
+      const supabase = getSupabaseServerClient();
+      const amountCents = Math.round(resolvedAmount * 100);
+      await supabase.from('bids').insert({
+        entry_url: normalizedUrl,
+        entry_name: resolvedName,
+        amount_cents: amountCents,
+        status: 'pending',
+      });
+    } catch (dbErr) {
+      console.warn('[Checkout API] Notice recording bid:', dbErr);
+    }
 
     return NextResponse.json({
       success: true,
@@ -54,8 +96,9 @@ export async function POST(req: Request) {
       checkoutUrl: checkoutResult.checkoutUrl,
       sessionId: checkoutResult.sessionId,
     });
-  } catch (error: any) {
-    console.error('[Checkout API Route Error]:', error);
-    return NextResponse.json({ error: error?.message || 'Checkout creation failed' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[Checkout API Route Error]:', message);
+    return NextResponse.json({ error: message || 'Checkout creation failed' }, { status: 500 });
   }
 }

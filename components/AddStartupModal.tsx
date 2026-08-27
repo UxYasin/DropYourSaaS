@@ -138,37 +138,32 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
 
     // Standard Submit or Checkout API route
     try {
-      const endpoint = selectedUpsell ? '/api/checkout' : '/api/submit';
-
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          bid: selectedUpsell === 'sponsor_panel' ? 100 : selectedUpsell === 'ai_boost' ? 25 : selectedUpsell === 'dofollow' ? 10 : 1,
+        }),
       });
 
       const data = await res.json();
-      if (res.ok && data?.success) {
+      const redirectUrl = data?.checkoutUrl || data?.url;
+      if (res.ok && redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      } else if (res.ok && data?.success) {
         setSuccess(true);
         if (onSuccess) onSuccess();
         setTimeout(() => {
           onClose();
           setSuccess(false);
         }, 1500);
-      } else if (data?.url) {
-        window.location.href = data.url;
       } else {
-        setSuccess(true);
-        setTimeout(() => {
-          onClose();
-          setSuccess(false);
-        }, 1500);
+        setError(data?.error || 'Failed to initialize checkout.');
       }
     } catch {
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        setSuccess(false);
-      }, 1500);
+      setError('An unexpected error occurred.');
     } finally {
       setIsSubmitting(false);
     }
@@ -726,10 +721,10 @@ export function AddStartupModal({ isOpen, onClose, onSuccess }: AddStartupModalP
                     {selectedUpsell === 'sponsor_panel'
                       ? `Continue to Payment (${activePriceDisplay})`
                       : selectedUpsell === 'dofollow'
-                      ? 'Continue to Payment ($19)'
+                      ? 'Continue to Payment ($10)'
                       : selectedUpsell === 'ai_boost'
-                      ? 'Continue to Payment ($79)'
-                      : 'Add startup (Free)'}
+                      ? 'Continue to Payment ($25)'
+                      : 'Continue to Whop Checkout ($1+)'}
                   </span>
                 )}
               </button>

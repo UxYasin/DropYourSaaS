@@ -59,7 +59,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
   const containerRef = useRef<HTMLDivElement>(null);
 
   const clicks = (item.clicks || 0) + clickedExtra;
-  const relAttribute = item.is_verified || item.is_dofollow ? 'noopener' : 'nofollow noopener';
+  const relAttribute = 'noopener noreferrer';
 
   useEffect(() => {
     let active = true;
@@ -331,7 +331,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
             <a
               href={href}
               target="_blank"
-              rel="sponsored noopener noreferrer"
+              rel={relAttribute}
               onClick={handleClick}
               className="block"
             >

@@ -9,15 +9,15 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const headers = Object.fromEntries(req.headers.entries());
 
-    let event: Record<string, any> = {};
+    let event: Record<string, unknown> = {};
 
     // 1. Verify webhook signature using Whop SDK helpers if secret exists
     if (process.env.WHOP_WEBHOOK_SECRET) {
       try {
-        event = verifyWhopWebhookEvent(rawBody, headers);
-      } catch (verifyErr: any) {
-        console.warn('[Whop Webhook Verification Warning]:', verifyErr?.message);
-        // Fallback to JSON parse if signature check fails (useful in local dev or sandbox tests)
+        event = verifyWhopWebhookEvent(rawBody, headers) as Record<string, unknown>;
+      } catch (verifyErr: unknown) {
+        const msg = verifyErr instanceof Error ? verifyErr.message : String(verifyErr);
+        console.warn('[Whop Webhook Verification Warning]:', msg);
         try {
           event = JSON.parse(rawBody);
         } catch {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       const metadata = (data.metadata || {}) as Record<string, string | number | undefined>;
 
       const rawAmount = Number(data.final_amount ?? data.amount ?? data.total ?? data.initial_price ?? 0);
-      const amountPaid = rawAmount > 0 ? (rawAmount > 1000 ? rawAmount / 100 : rawAmount) : 5;
+      const amountPaid = rawAmount > 0 ? (rawAmount > 1000 ? rawAmount / 100 : rawAmount) : 1;
 
       const listingId = String(metadata.listing_id || metadata.listingId || '');
       const rawTargetRank = metadata.target_rank ?? metadata.requested_rank ?? metadata.rank;
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       const customerEmail = String(data.email || (data.user as Record<string, unknown>)?.email || metadata.email || '');
       const logoUrl = String(metadata.logo_url || metadata.logoUrl || metadata.favicon || metadata.faviconUrl || '');
 
-      // 1. Sidebar Pinned Ad Placement
+      // 1. Sidebar Pinned Ad Placement ($100 / 30 Days)
       if (rawSlot !== undefined && rawSlot !== null && String(rawSlot) !== '') {
         let slotKey = String(rawSlot);
         if (/^\d+$/.test(slotKey)) {
@@ -101,100 +101,64 @@ export async function POST(req: Request) {
         }
       }
 
-      // 2. Pay-to-High-Rank Listing Placement & Displacement
+      // 2. Outbid / Paid Listing Placement
       if (listingId || siteUrl) {
-        const targetIdentifier = listingId || siteUrl;
+        const targetIdentifier = siteUrl || listingId;
         const nowIso = new Date().toISOString();
         const amountCents = Math.round(amountPaid * 100);
 
-        // A. Invoke atomic claim_paid_rank RPC in Postgres (shifts other listings down safely)
-        let rpcSuccessful = false;
+        // Update bids table
         try {
-          const { error: rpcError } = await supabase.rpc('claim_paid_rank', {
-            p_listing_id: targetIdentifier,
-            p_target_rank: targetRank,
-            p_amount: amountPaid,
-            p_name: projectName || undefined,
-            p_url: siteUrl || undefined,
-            p_twitter_handle: twitterHandle || undefined,
-          });
+          await supabase
+            .from('bids')
+            .update({ status: 'paid' })
+            .or(`entry_url.eq.${targetIdentifier},entry_url.eq.${siteUrl}`);
+        } catch {}
 
-          if (!rpcError) {
-            rpcSuccessful = true;
-          } else {
-            console.warn('[Whop Webhook] claim_paid_rank RPC returned error:', rpcError.message);
-          }
-        } catch (rpcErr: any) {
-          console.warn('[Whop Webhook] claim_paid_rank RPC exception:', rpcErr?.message);
+        // Upsert into leaderboard_entries with paid bid_cents, verified status, and dofollow backlink
+        try {
+          await supabase.from('leaderboard_entries').upsert(
+            {
+              url: targetIdentifier,
+              name: projectName || new URL(targetIdentifier).hostname.replace(/^www\./, ''),
+              bid_cents: amountCents,
+              is_verified: true,
+              is_dofollow: true,
+              status: 'published',
+              twitter_handle: twitterHandle || undefined,
+              verified_at: nowIso,
+              claimed_at: nowIso,
+            },
+            { onConflict: 'url' }
+          );
+        } catch (upsertErr) {
+          console.warn('[Whop Webhook] Upsert error:', upsertErr);
         }
 
-        // B. Fallback / direct update if RPC is pending migration
-        if (!rpcSuccessful) {
-          try {
-            // Shift existing listings down
-            await supabase
-              .from('leaderboard_entries')
-              .update({ rank: supabase.rpc('increment_val' as any, {}) as any })
-              .gte('rank', targetRank);
-          } catch {}
-
-          try {
-            await supabase
-              .from('leaderboard_entries')
-              .upsert(
-                {
-                  url: siteUrl || targetIdentifier,
-                  name: projectName || targetIdentifier,
-                  rank: targetRank,
-                  target_rank: targetRank,
-                  bid_cents: amountCents,
-                  is_verified: true,
-                  is_dofollow: true,
-                  status: 'published',
-                  twitter_handle: twitterHandle || undefined,
-                  verified_at: nowIso,
-                  claimed_at: nowIso,
-                },
-                { onConflict: 'url' }
-              );
-          } catch (upsertErr) {
-            console.warn('[Whop Webhook] Fallback upsert notice:', upsertErr);
-          }
-        }
-
-        // C. Invalidate Upstash Redis leaderboard cache for instant real-time live ranking update
+        // Invalidate Upstash Redis leaderboard cache for instant real-time live ranking update
         await invalidateLeaderboardCache();
 
-        // D. Trigger automated promotional Tweet to X (Twitter)
+        // Trigger automated promotional Tweet to X (Twitter)
         try {
-          const listingIdToSearch = listingId || targetIdentifier;
-          const { data: listingData } = await supabase
-            .from('leaderboard_entries')
-            .select('id, name, value_proposition, url, twitter_handle')
-            .or(`id.eq.${listingIdToSearch},url.ilike.%${listingIdToSearch}%`)
-            .maybeSingle();
+          const nameToPost = projectName || new URL(targetIdentifier).hostname.replace(/^www\./, '');
+          const tagline = oneLiner || `Verified Listing ($${amountPaid} bid)`;
+          const listingUrl = `https://www.dropyoursaas.com/s/${encodeURIComponent(nameToPost.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`;
+          const handleToMention = twitterHandle || null;
 
-          const nameToPost = listingData?.name || projectName || 'New SaaS';
-          const tagline = listingData?.value_proposition || oneLiner || `Rank #${targetRank} Verified Listing`;
-          const matchedId = listingData?.id || listingId;
-          const handleToMention = listingData?.twitter_handle || twitterHandle || null;
-          const listingUrl = matchedId
-            ? `https://www.dropyoursaas.com/s/${matchedId}`
-            : siteUrl || 'https://www.dropyoursaas.com';
-
-          console.log(`[Whop Webhook] Triggering auto-post to X for #${targetRank} ${nameToPost}...`);
+          console.log(`[Whop Webhook] Triggering auto-post to X for ${nameToPost}...`);
           await postToX(nameToPost, listingUrl, tagline, true, handleToMention);
         } catch (xErr) {
           console.error('[Whop Webhook] Error triggering X post:', xErr);
         }
       }
 
-      console.log(`[Whop Webhook] Successfully processed paid rank #${targetRank} payment of $${amountPaid}`);
+      console.log(`[Whop Webhook] Successfully processed outbid payment of $${amountPaid} for ${siteUrl || listingId}`);
     }
 
     return NextResponse.json({ received: true, success: true }, { status: 200 });
-  } catch (error: any) {
-    console.error('[Whop Webhook Error]:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[Whop Webhook Error]:', message);
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

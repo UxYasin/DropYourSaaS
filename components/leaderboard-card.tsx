@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
-import { Clock } from 'lucide-react';
+import { Clock, BadgeCheck } from 'lucide-react';
 import type { LeaderboardItem, MetaData } from '@/lib/leaderboard-data';
 import { FaviconImage } from '@/components/favicon-image';
 
@@ -34,16 +34,20 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let active = true;
     const fetchMeta = async () => {
       try {
         const res = await fetch(`/api/fetch-meta?url=${encodeURIComponent(item.url)}`);
         if (res.ok) {
           const data = await res.json();
-          setMeta(data);
+          if (active) setMeta(data);
         }
       } catch {}
     };
     fetchMeta();
+    return () => {
+      active = false;
+    };
   }, [item.url]);
 
   const title = meta?.title || item.name;
@@ -66,7 +70,7 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
       onMouseLeave={() => setIsHovered(false)}
       className="group transition-transform duration-150"
     >
-      <a href={href} target="_blank" rel="sponsored noopener noreferrer" className="block" onClick={handleClick}>
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block" onClick={handleClick}>
         <Card className="p-3.5 sm:p-4 rounded-xl border border-border bg-card shadow-[var(--shadow-1)] hover:border-border/90 hover:shadow-sm transition-all duration-150">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
@@ -87,8 +91,8 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm truncate text-foreground">{title}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-medium tracking-wide">
-                    VERIFIED
+                  <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified Listing">
+                    <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
                   </span>
                 </div>
                 {description && (
@@ -105,12 +109,12 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
 
             <div className="grid grid-cols-3 sm:flex sm:items-center gap-3 sm:gap-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50 text-center sm:text-right shrink-0">
               <div>
-                <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Tier</div>
+                <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Rank</div>
                 <div className="font-mono text-xs font-semibold text-foreground">#{item.rank}</div>
               </div>
               <div>
-                <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Price</div>
-                <div className="font-mono text-xs font-semibold text-primary">{formatBid(item.bid)}</div>
+                <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Bid</div>
+                <div className="font-mono text-xs font-semibold text-[#FFFC00]">{formatBid(item.bid)}</div>
               </div>
               <div>
                 <div className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">Clicks</div>
@@ -125,10 +129,10 @@ export function LeaderboardCard({ item, onClaimClick }: LeaderboardCardProps) {
       >
         <button
           type="button"
-          className="w-full flex items-center justify-center bg-primary/10 text-primary text-xs font-medium cursor-pointer border border-primary/40 border-t-0 rounded-b-xl py-2 hover:bg-primary/15 transition-colors"
+          className="w-full flex items-center justify-center bg-[#FFFC00]/15 text-black dark:text-[#FFFC00] text-xs font-mono font-bold cursor-pointer border border-[#FFFC00]/40 border-t-0 rounded-b-xl py-2 hover:bg-[#FFFC00]/25 transition-colors"
           onClick={() => onClaimClick(item.rank, item.bid + 1)}
         >
-          Upgrade to Tier #{item.rank} for {formatBid(item.bid + 1)}
+          Outbid #{item.rank} for {formatBid(item.bid + 1)}
         </button>
       </div>
     </div>

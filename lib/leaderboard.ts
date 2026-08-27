@@ -4,7 +4,7 @@ import { leaderboardItems as seedLeaderboardItems, type LeaderboardItem } from '
 import { cookies } from 'next/headers';
 import { getListingSlug } from '@/lib/slug';
 
-const CACHE_KEY = 'leaderboard:v5';
+const CACHE_KEY = 'leaderboard:v6';
 const CACHE_TTL_SECONDS = 2; // 2 seconds TTL for real-time responsiveness
 
 export async function getLeaderboard(
@@ -41,6 +41,8 @@ export async function invalidateLeaderboardCache() {
     await redis.del('leaderboard:v2');
     await redis.del('leaderboard:v3');
     await redis.del('leaderboard:v4');
+    await redis.del('leaderboard:v5');
+    await redis.del('leaderboard:v6');
   } catch {}
 }
 
@@ -105,7 +107,8 @@ export async function fetchLeaderboardFromDatabase(
       query = query.ilike('category', `%${category}%`);
     }
 
-    // Apply exact sorting engine
+    // Apply exact Outbid ranking algorithm:
+    // Ranked primarily by Highest Bid (bid_cents DESC), then claimed_at DESC (recent tie-breaker), then created_at DESC
     if (sortBy === 'hot') {
       query = query.order('hot_score', { ascending: false, nullsFirst: false }).order('net_score', { ascending: false });
     } else if (sortBy === 'top') {
@@ -113,8 +116,10 @@ export async function fetchLeaderboardFromDatabase(
     } else if (sortBy === 'recent') {
       query = query.order('claimed_at', { ascending: false });
     } else {
-      // Default 'rank': Order strictly by rank ascending
-      query = query.order('rank', { ascending: true, nullsFirst: false }).order('claimed_at', { ascending: false });
+      // Default 'rank': Highest Paid Bid outranks all lower bids
+      query = query
+        .order('bid_cents', { ascending: false, nullsFirst: false })
+        .order('claimed_at', { ascending: false, nullsFirst: false });
     }
 
     const { data: entryData } = await query;
@@ -125,49 +130,8 @@ export async function fetchLeaderboardFromDatabase(
     console.warn('Error loading live Supabase listings:', err);
   }
 
-  // If DB entries exist and sorting is not default 'rank', return directly ordered by score!
-  if (dbEntries.length > 0 && sortBy !== 'rank') {
-    return dbEntries.map((row, idx) => {
-      const urlStr = String(row.url || '');
-      let hostname = 'SaaS Product';
-      try {
-        hostname = urlStr ? new URL(urlStr).hostname.replace(/^www\./, '') : 'SaaS Product';
-      } catch {
-        hostname = urlStr || 'SaaS Product';
-      }
-      return {
-        id: String(row.id || ''),
-        rank: idx + 1,
-        name: String(row.name || row.title || hostname),
-        bid: Number(row.bid_cents || 0) / 100,
-        url: urlStr,
-        clicks: Number(row.clicks || 0),
-        time: formatRelativeTime(String(row.claimed_at || row.created_at || new Date().toISOString())),
-        upvotes: Number(row.upvotes || 0),
-        downvotes: Number(row.downvotes || 0),
-        net_score: Number(row.net_score || 0),
-        hot_score: Number(row.hot_score || 0),
-        user_vote: userVotesMap.get(String(row.id || '')) || 0,
-        category: String(row.category || 'SaaS'),
-        claimed_at: String(row.claimed_at || row.created_at || ''),
-        favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
-        preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
-        is_verified: Boolean(row.is_verified),
-        is_dofollow: Boolean(row.is_dofollow),
-        verified_at: row.verified_at ? String(row.verified_at) : undefined,
-        is_for_sale: Boolean(row.is_for_sale || row.for_sale),
-        asking_price: Number(row.asking_price || 0),
-        description: row.description ? String(row.description) : (row.value_proposition ? String(row.value_proposition) : undefined),
-      };
-    });
-  }
-
-  // Default 'rank' building with seed item fallback
-  const realItemsMap = new Map<number, LeaderboardItem>();
   const realUrlSet = new Set<string>();
-  const unrankedItems: LeaderboardItem[] = [];
-
-  dbEntries.forEach((row) => {
+  const dbItems: LeaderboardItem[] = dbEntries.map((row) => {
     const urlStr = String(row.url || '');
     let hostname = 'SaaS Product';
     try {
@@ -176,10 +140,13 @@ export async function fetchLeaderboardFromDatabase(
       hostname = urlStr || 'SaaS Product';
     }
 
-    const assignedRank = Number(row.rank || row.target_rank) || 0;
-    const item: LeaderboardItem = {
+    if (urlStr) {
+      realUrlSet.add(urlStr.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
+    }
+
+    return {
       id: String(row.id || ''),
-      rank: assignedRank,
+      rank: 0, // Assigned sequentially below
       name: String(row.name || row.title || hostname),
       bid: Number(row.bid_cents || 0) / 100,
       url: urlStr,
@@ -194,68 +161,39 @@ export async function fetchLeaderboardFromDatabase(
       claimed_at: String(row.claimed_at || row.created_at || ''),
       favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
       preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
-      is_verified: Boolean(row.is_verified),
-      is_dofollow: Boolean(row.is_dofollow),
+      is_verified: true, // Mandatory verified status for all listings
+      is_dofollow: true, // Mandatory clean dofollow SEO backlink
       verified_at: row.verified_at ? String(row.verified_at) : undefined,
       is_for_sale: Boolean(row.is_for_sale || row.for_sale),
       asking_price: Number(row.asking_price || 0),
       description: row.description ? String(row.description) : (row.value_proposition ? String(row.value_proposition) : undefined),
     };
-
-    if (urlStr) {
-      realUrlSet.add(urlStr.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, ''));
-    }
-
-    if (assignedRank > 0 && !realItemsMap.has(assignedRank)) {
-      realItemsMap.set(assignedRank, item);
-    } else {
-      unrankedItems.push(item);
-    }
   });
 
-  // Assemble full sequential array
-  const result: LeaderboardItem[] = [];
-  const maxRank = Math.max(20, ...Array.from(realItemsMap.keys()));
+  // If we have database items, merge with non-duplicate seed items if needed to fill minimum directory spots
+  const combined: LeaderboardItem[] = [...dbItems];
 
-  let seedIdx = 0;
-  let unrankedIdx = 0;
-
-  for (let r = 1; r <= maxRank; r++) {
-    if (realItemsMap.has(r)) {
-      result.push({ ...realItemsMap.get(r)!, rank: r });
-    } else if (unrankedIdx < unrankedItems.length) {
-      result.push({ ...unrankedItems[unrankedIdx], rank: r });
-      unrankedIdx++;
-    } else {
-      // Fill empty slot with seed item
-      while (seedIdx < seedLeaderboardItems.length) {
-        const seed = seedLeaderboardItems[seedIdx];
-        const seedNorm = seed.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-        seedIdx++;
-        if (!realUrlSet.has(seedNorm)) {
-          result.push({
-            ...seed,
-            rank: r,
-            upvotes: 0,
-            downvotes: 0,
-            net_score: 0,
-            hot_score: 0,
-            user_vote: 0,
-          });
-          realUrlSet.add(seedNorm);
-          break;
-        }
+  if (combined.length < 20) {
+    for (const seed of seedLeaderboardItems) {
+      const seedNorm = seed.url.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+      if (!realUrlSet.has(seedNorm)) {
+        combined.push({
+          ...seed,
+          is_verified: true,
+          is_dofollow: true,
+          upvotes: 0,
+          downvotes: 0,
+          net_score: 0,
+          hot_score: 0,
+          user_vote: 0,
+        });
+        realUrlSet.add(seedNorm);
       }
     }
   }
 
-  // Append any remaining unranked items
-  while (unrankedIdx < unrankedItems.length) {
-    result.push({ ...unrankedItems[unrankedIdx], rank: result.length + 1 });
-    unrankedIdx++;
-  }
-
-  return result.map((item, idx) => ({
+  // Assign sequential 1-based ranks based on exact sorted order
+  return combined.map((item, idx) => ({
     ...item,
     rank: idx + 1,
   }));
@@ -307,31 +245,25 @@ export async function getListingBySlug(slug: string): Promise<LeaderboardItem | 
       } catch {
         hostname = urlStr || 'SaaS Product';
       }
-
       return {
         id: String(row.id || ''),
-        rank: Number(row.rank || row.target_rank) || 1,
+        rank: Number(row.rank || 1),
         name: String(row.name || row.title || hostname),
         bid: Number(row.bid_cents || 0) / 100,
         url: urlStr,
         clicks: Number(row.clicks || 0),
         time: formatRelativeTime(String(row.claimed_at || row.created_at || new Date().toISOString())),
-        upvotes: Number(row.upvotes || 0),
-        downvotes: Number(row.downvotes || 0),
-        net_score: Number(row.net_score || 0),
-        hot_score: Number(row.hot_score || 0),
-        user_vote: 0,
         category: String(row.category || 'SaaS'),
-        claimed_at: String(row.claimed_at || row.created_at || ''),
         favicon: row.favicon_url ? String(row.favicon_url) : (row.favicon ? String(row.favicon) : undefined),
-        preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : undefined),
-        is_verified: Boolean(row.is_verified),
-        is_dofollow: Boolean(row.is_dofollow),
-        verified_at: row.verified_at ? String(row.verified_at) : undefined,
+        preview_image_url: row.preview_image_url ? String(row.preview_image_url) : (row.screenshot_url ? String(row.screenshot_url) : (row.og_image ? String(row.og_image) : undefined)),
+        is_verified: true,
+        is_dofollow: true,
+        is_for_sale: Boolean(row.is_for_sale || row.for_sale),
+        asking_price: Number(row.asking_price || 0),
+        description: row.description ? String(row.description) : (row.value_proposition ? String(row.value_proposition) : undefined),
       };
     }
   } catch {}
 
   return null;
 }
-
