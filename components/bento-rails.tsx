@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
 import { PinAdModal } from '@/components/pin-ad-modal';
-import { Pin, Target } from 'lucide-react';
+import { Pin, Target, ArrowRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaviconImage } from '@/components/favicon-image';
 
@@ -94,9 +94,7 @@ export function BentoRails({ side }: BentoRailsProps) {
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
-            let activePinnedMap: Record<string, RailCardItem> = {};
             if (data.pinnedAds) {
-              activePinnedMap = data.pinnedAds;
               setPinnedAds(data.pinnedAds);
             }
             if (Array.isArray(data.pool) && data.pool.length > 0) {
@@ -114,7 +112,7 @@ export function BentoRails({ side }: BentoRailsProps) {
 
     fetchPool();
 
-    // Fast & frequent rotation every 3.5 seconds (skipping active pinned ads)
+    // 8-Second maximum display rotation for unpinned slots (Slots 3, 4, 5)
     const startRotation = () => {
       timerId = setInterval(() => {
         if (!isMounted || globalPool.length < 5) return;
@@ -122,15 +120,15 @@ export function BentoRails({ side }: BentoRailsProps) {
         setDisplayedItems((current) => {
           if (current.length === 0) return current;
 
-          // Exclude slots that are active Pinned Ads
-          const availableSlotIndices = [0, 1, 2, 3, 4].filter((idx) => {
+          // Only rotate unpinned slots (starting from slot 3 down, unless slot 1 or 2 are occupied by an ad)
+          const availableSlotIndices = [2, 3, 4].filter((idx) => {
             const slotPos = `${side}_${idx + 1}`;
             return !pinnedAds[slotPos];
           });
 
           if (availableSlotIndices.length === 0) return current;
 
-          // Pick a random unpinned slot to rotate
+          // Pick a random unpinned slot from slots 3-5
           const slotToReplace = availableSlotIndices[Math.floor(Math.random() * availableSlotIndices.length)];
 
           // Filter pool items not currently displayed
@@ -139,27 +137,13 @@ export function BentoRails({ side }: BentoRailsProps) {
 
           if (candidates.length === 0) return current;
 
-          // 33% Weighted probability selection ($5 Fast-Track / is_verified = 1.33 weight vs 1.0 for free)
-          const weights = candidates.map((item) =>
-            item.is_verified || (item.bid_cents && item.bid_cents >= 500) ? 1.33 : 1.0
-          );
-          const totalWeight = weights.reduce((acc, w) => acc + w, 0);
-
-          let random = Math.random() * totalWeight;
-          let replacement = candidates[candidates.length - 1];
-          for (let i = 0; i < candidates.length; i++) {
-            if (random < weights[i]) {
-              replacement = candidates[i];
-              break;
-            }
-            random -= weights[i];
-          }
+          const replacement = candidates[Math.floor(Math.random() * candidates.length)];
 
           const next = [...current];
           next[slotToReplace] = replacement;
           return next;
         });
-      }, 3500);
+      }, 8000); // Maximum 8 seconds per card rotation
     };
 
     startRotation();
@@ -181,7 +165,7 @@ export function BentoRails({ side }: BentoRailsProps) {
 
   const cardsToRender = displayedItems.length === 5 ? displayedItems : fallbackCards;
 
-  const handleSelectSlot = (slotPos: string) => {
+  const handleOpenPlaceAd = (slotPos: string) => {
     setIsAdSelectionMode(false);
     setPinModalState({
       isOpen: true,
@@ -194,16 +178,70 @@ export function BentoRails({ side }: BentoRailsProps) {
   return (
     <>
       <aside className="hidden lg:flex flex-col gap-3 w-[290px] sm:w-[305px] lg:w-[315px] xl:w-[325px] shrink-0 sticky top-20 h-fit">
-        {cardsToRender.map((defaultCard, i) => {
+        {[0, 1, 2, 3, 4].map((i) => {
           const slotPos = `${side}_${i + 1}`;
-          // Check if active pinned ad exists for this specific slot position
-          const card = pinnedAds[slotPos] || defaultCard;
-          const isPinnedAd = Boolean(pinnedAds[slotPos]);
+          const isTopTwoSlot = i < 2; // Slots 1 and 2 of left/right
+          const pinnedAd = pinnedAds[slotPos];
+          const isPinnedAd = Boolean(pinnedAd);
+          const defaultCard = cardsToRender[i] || fallbackCards[i];
+          const card = pinnedAd || defaultCard;
 
           const themeIndex = (side === 'left' ? i : i + 3) % BENTO_THEMES.length;
           const theme = BENTO_THEMES[themeIndex];
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
+          // TOP 2 SLOTS: Show "Place an Ad" whitish card unless a paid pinned ad exists
+          if (isTopTwoSlot && !isPinnedAd) {
+            return (
+              <div
+                key={slotPos}
+                onClick={() => handleOpenPlaceAd(slotPos)}
+                className="relative h-[124px] sm:h-[128px] w-full group cursor-pointer select-none"
+              >
+                <div className="w-full h-full min-h-[124px] sm:min-h-[128px] p-3.5 sm:p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-[#18191c] shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden relative">
+                  {/* Background Card Content (Blurs smoothly on hover) */}
+                  <div className="space-y-1.5 transition-all duration-200 group-hover:blur-[2px] group-hover:opacity-20 flex-1 flex flex-col justify-between">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="size-7 rounded-lg bg-[#fe4103]/10 text-[#fe4103] flex items-center justify-center font-mono font-bold shadow-2xs">
+                          <Pin className="size-3.5 fill-current" />
+                        </div>
+                        <div>
+                          <h3 className="font-mono font-bold text-xs sm:text-sm text-foreground">
+                            Place an Ad
+                          </h3>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-[#fe4103] bg-[#fe4103]/10 px-2 py-0.5 rounded-full border border-[#fe4103]/20">
+                        $100 / 30d
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground font-sans leading-tight">
+                      Book this ad spot for $100 for 30 days
+                    </p>
+
+                    <div className="pt-0.5">
+                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold text-amber-600 dark:text-[#FFFC00]">
+                        <Sparkles className="size-3 fill-current text-amber-500" />
+                        <span>1st buyer gets 1 month extra (60 days!)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Centered Hover Overlay: Pill Button Direct to Whop */}
+                  <div className="absolute inset-0 z-20 flex items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    <div className="px-4 sm:px-5 py-2 rounded-full bg-[#fe4103] hover:bg-[#e03800] text-white font-mono font-bold text-xs shadow-xl flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform duration-200">
+                      <span>Place an Ad</span>
+                      <ArrowRight className="size-3.5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // SLOTS 3, 4, 5 (or Top Slots with Active Pinned Ads)
           return (
             <div
               key={slotPos}
@@ -211,7 +249,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                 'relative h-[124px] sm:h-[128px] w-full group transition-all duration-200',
                 isAdSelectionMode && 'cursor-pointer'
               )}
-              onClick={isAdSelectionMode ? () => handleSelectSlot(slotPos) : undefined}
+              onClick={isAdSelectionMode ? () => handleOpenPlaceAd(slotPos) : undefined}
             >
               <AnimatePresence mode="wait">
                 <motion.div
@@ -225,7 +263,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                     isAdSelectionMode
                       ? 'border-blue-500/80 bg-blue-500/10 ring-2 ring-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500 hover:scale-[1.02] shadow-lg'
                       : isPinnedAd
-                      ? 'bg-gradient-to-br from-blue-500/10 via-background to-blue-500/5 border-blue-500/40 dark:border-blue-400/50 shadow-md ring-1 ring-blue-500/20 hover:shadow-md'
+                      ? 'bg-gradient-to-br from-[#fe4103]/10 via-background to-[#fe4103]/5 border-[#fe4103]/40 dark:border-[#fe4103]/50 shadow-md ring-1 ring-[#fe4103]/20 hover:shadow-md'
                       : cn(theme.bg, theme.border, 'hover:shadow-md')
                   )}
                 >
@@ -262,7 +300,7 @@ export function BentoRails({ side }: BentoRailsProps) {
                         </h3>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           {isPinnedAd ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-blue-600 text-white border border-blue-400/50 shadow-2xs">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-[#fe4103] text-white border border-[#fe4103]/50 shadow-2xs">
                               <Pin className="size-2.5 fill-current" />
                               <span>Sponsored Pin</span>
                             </span>
@@ -306,10 +344,10 @@ export function BentoRails({ side }: BentoRailsProps) {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleSelectSlot(slotPos);
+                        handleOpenPlaceAd(slotPos);
                       }}
                       title="Place an Ad in this spot"
-                      className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center justify-center gap-1.5 h-8 px-2 rounded-full bg-orange-500/50 hover:bg-orange-500/85 text-white shadow-md border border-orange-400/40 backdrop-blur-md font-mono group/pin overflow-hidden"
+                      className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out cursor-pointer z-10 flex items-center justify-center gap-1.5 h-8 px-2 rounded-full bg-[#fe4103]/70 hover:bg-[#fe4103] text-white shadow-md border border-[#fe4103]/40 backdrop-blur-md font-mono group/pin overflow-hidden"
                     >
                       <span className="text-sm leading-none shrink-0 select-none">📌</span>
                       <span className="max-w-0 group-hover/pin:max-w-[180px] opacity-0 group-hover/pin:opacity-100 transition-all duration-300 ease-in-out whitespace-nowrap text-[11px] font-bold tracking-tight pr-1">
@@ -326,16 +364,11 @@ export function BentoRails({ side }: BentoRailsProps) {
         {/* Interactive "Place an Ad" / "Cancel Selection" Footer Link */}
         <button
           type="button"
-          onClick={() => setIsAdSelectionMode((prev) => !prev)}
-          className={cn(
-            'w-full mt-1.5 py-2.5 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed cursor-pointer active:scale-95 shadow-2xs',
-            isAdSelectionMode
-              ? 'bg-blue-500/15 border-blue-500 text-blue-600 dark:text-[#08F9C9] font-bold shadow-xs animate-pulse'
-              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white border-zinc-300 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-muted/20 hover:bg-muted/40'
-          )}
+          onClick={() => handleOpenPlaceAd(`${side}_1`)}
+          className="w-full mt-1 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-bold rounded-xl border border-dashed border-[#fe4103]/30 hover:border-[#fe4103] text-[#fe4103] bg-[#fe4103]/5 hover:bg-[#fe4103]/10 cursor-pointer active:scale-95 shadow-2xs"
         >
           <span>📌</span>
-          <span>{isAdSelectionMode ? 'Cancel Selection' : 'Place an Ad'}</span>
+          <span>Place an Ad ($100 / 30d · 1st gets 60d)</span>
         </button>
       </aside>
 

@@ -146,7 +146,7 @@ export function PinAdModal({
         }),
       }).catch(() => {});
 
-      // Request Whop Checkout
+      // Request direct Whop Checkout
       const checkoutRes = await fetch('/api/checkout/whop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,7 +169,7 @@ export function PinAdModal({
         return;
       }
 
-      setErrorMsg('Failed to initialize Whop checkout. Please try again.');
+      setErrorMsg(checkoutData?.error || 'Failed to initialize Whop checkout. Please try again.');
       setIsSubmitting(false);
     } catch {
       setErrorMsg('An unexpected network error occurred. Please try again.');
@@ -187,7 +187,7 @@ export function PinAdModal({
       <DialogContent className="sm:max-w-lg rounded-3xl p-6 sm:p-7 bg-card text-foreground border border-border/80 shadow-2xl overflow-hidden">
         <DialogHeader className="space-y-1.5 text-left">
           <div className="flex items-center justify-between gap-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-[#08F9C9] text-xs font-bold font-mono border border-blue-500/20">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fe4103]/10 text-[#fe4103] text-xs font-bold font-mono border border-[#fe4103]/20">
               <Pin className="size-3.5 fill-current" />
               <span>{formatSlotLabel(slotPosition)}</span>
             </div>
@@ -197,10 +197,10 @@ export function PinAdModal({
           </div>
 
           <DialogTitle className="text-2xl sm:text-3xl font-mono font-black tracking-tight pt-1 text-foreground">
-            Advertise on DropYourSaaS
+            Place an Ad on DropYourSaaS
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Instant 30-day side rail placement &amp; high-intent founder visibility.
+            30-day side rail placement &amp; high-intent founder visibility.
           </DialogDescription>
         </DialogHeader>
 
@@ -208,10 +208,10 @@ export function PinAdModal({
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5 p-3 rounded-2xl bg-muted/40 dark:bg-zinc-900/60 border border-border/80 text-center my-1.5">
           <div className="space-y-0.5">
             <div className="font-mono font-black text-xs sm:text-sm text-foreground flex items-center justify-center gap-1">
-              <span>🔥</span> 500+
+              <span>🔥</span> 10 Max
             </div>
             <div className="text-[10px] text-muted-foreground font-sans leading-tight">
-              Active Launches
+              Slots / Month
             </div>
           </div>
 
@@ -225,13 +225,19 @@ export function PinAdModal({
           </div>
 
           <div className="space-y-0.5">
-            <div className="font-mono font-black text-xs sm:text-sm text-blue-600 dark:text-[#08F9C9] flex items-center justify-center gap-1">
-              <span>📌</span> 30 Days
+            <div className="font-mono font-black text-xs sm:text-sm text-[#fe4103] flex items-center justify-center gap-1">
+              <span>📌</span> 30–60d
             </div>
             <div className="text-[10px] text-muted-foreground font-sans leading-tight">
               Guaranteed Pin
             </div>
           </div>
+        </div>
+
+        {/* 1st Buyer Bonus Notice */}
+        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-700 dark:text-[#FFFC00] text-xs font-mono font-bold">
+          <Sparkles className="size-4 fill-current text-amber-500 shrink-0" />
+          <span>Special Offer: 1st buyer gets 1 month extra (total 60 days)!</span>
         </div>
 
         {/* Form */}
@@ -249,7 +255,7 @@ export function PinAdModal({
                 Website URL
               </Label>
               {isScraping && (
-                <span className="text-[11px] font-mono text-blue-600 dark:text-[#08F9C9] flex items-center gap-1.5 animate-pulse">
+                <span className="text-[11px] font-mono text-[#fe4103] flex items-center gap-1.5 animate-pulse">
                   <Loader2 className="size-3 animate-spin" />
                   Auto-scraping metadata...
                 </span>
@@ -270,7 +276,7 @@ export function PinAdModal({
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                 {isScraping ? (
-                  <Loader2 className="size-4 animate-spin text-blue-500" />
+                  <Loader2 className="size-4 animate-spin text-[#fe4103]" />
                 ) : (
                   <Globe className="size-4 opacity-50" />
                 )}
@@ -278,43 +284,41 @@ export function PinAdModal({
             </div>
           </div>
 
-          {/* Product Name & One-Liner Description */}
-          <div className="grid grid-cols-1 gap-3">
-            <div className="space-y-1 text-left">
-              <Label htmlFor="product_name" className="text-xs font-bold text-foreground">
-                Product Name
-              </Label>
-              <Input
-                id="product_name"
-                type="text"
-                placeholder="e.g. Acme AI"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                className="h-10 rounded-xl border-border bg-muted/30 text-xs font-sans"
-              />
-            </div>
-
-            <div className="space-y-1 text-left">
-              <Label htmlFor="one_liner" className="text-xs font-bold text-foreground">
-                One-Liner Description
-              </Label>
-              <Textarea
-                id="one_liner"
-                rows={2}
-                placeholder="e.g. The automated invoice & CRM tool built for freelancers."
-                value={oneLiner}
-                onChange={(e) => setOneLiner(e.target.value)}
-                className="rounded-xl border-border bg-muted/30 text-xs resize-none font-sans"
-              />
-            </div>
+          {/* Product Name */}
+          <div className="space-y-1 text-left">
+            <Label htmlFor="product_name" className="text-xs font-bold text-foreground">
+              Product / SaaS Name
+            </Label>
+            <Input
+              id="product_name"
+              type="text"
+              placeholder="e.g. Acme AI"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              className="h-10 rounded-xl border-border bg-muted/30 text-xs"
+            />
           </div>
 
-          {/* Real-Time Dynamic Mockup Card */}
-          <div className="p-3.5 rounded-xl bg-muted/30 dark:bg-zinc-900/50 border border-border/80 flex items-start gap-3.5 text-left transition-all">
-            <div className="size-11 rounded-xl bg-background p-1 border border-border shrink-0 overflow-hidden flex items-center justify-center">
-              {isScraping ? (
-                <Loader2 className="size-5 animate-spin text-blue-500" />
-              ) : iconUrl || siteUrl ? (
+          {/* Tagline / One-Liner */}
+          <div className="space-y-1 text-left">
+            <Label htmlFor="one_liner" className="text-xs font-bold text-foreground">
+              One-liner / Tagline (Max 70 chars)
+            </Label>
+            <Textarea
+              id="one_liner"
+              placeholder="Brief value proposition shown on the sidebar card..."
+              value={oneLiner}
+              onChange={(e) => setOneLiner(e.target.value)}
+              maxLength={90}
+              rows={2}
+              className="rounded-xl border-border bg-muted/30 text-xs resize-none"
+            />
+          </div>
+
+          {/* Live Preview Card */}
+          <div className="p-3 rounded-2xl bg-muted/30 border border-border/60 flex items-center gap-3 text-left">
+            <div className="size-10 rounded-xl bg-background border border-border/80 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+              {iconUrl || siteUrl ? (
                 <FaviconImage
                   url={siteUrl || 'https://dropyoursaas.com'}
                   name={productName || 'Sponsor'}
@@ -331,7 +335,7 @@ export function PinAdModal({
                 <span className="font-mono font-bold text-xs text-foreground truncate">
                   {productName || (siteUrl.trim() ? siteUrl.trim() : 'Your Product Name')}
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-[#08F9C9] font-bold shrink-0">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#fe4103]/10 text-[#fe4103] font-bold shrink-0">
                   PINNED SPONSOR
                 </span>
               </div>
@@ -342,17 +346,17 @@ export function PinAdModal({
           </div>
 
           {/* Pricing Card Container */}
-          <div className="p-4 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/30 text-left space-y-1.5">
+          <div className="p-4 rounded-2xl bg-[#fe4103]/10 dark:bg-[#fe4103]/15 border border-[#fe4103]/30 text-left space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-blue-900 dark:text-blue-200 block uppercase tracking-wider">
-                30-Day Sidebar Pin ({formatSlotLabel(slotPosition)})
+              <span className="text-xs font-semibold text-foreground block uppercase tracking-wider">
+                Sidebar Ad Spot ({formatSlotLabel(slotPosition)})
               </span>
-              <span className="font-mono font-black text-xl sm:text-2xl text-blue-600 dark:text-[#08F9C9]">
+              <span className="font-mono font-black text-xl sm:text-2xl text-[#fe4103]">
                 $100 <span className="text-xs font-normal text-muted-foreground">one-time</span>
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-snug">
-              Your spot is locked for exactly 30 days starting immediately upon checkout. No recurring subscription or manual review delay.
+              Instant activation upon checkout. 30 days guaranteed placement (60 days for the 1st buyer).
             </p>
           </div>
 
@@ -360,18 +364,18 @@ export function PinAdModal({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 rounded-2xl font-mono font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full h-12 rounded-2xl font-mono font-bold text-xs sm:text-sm text-white bg-[#fe4103] hover:bg-[#e03800] shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin text-white" />
                 <span>Redirecting to Whop Secure Checkout...</span>
               </>
             ) : (
               <>
-                <Sparkles className="size-4 text-amber-300" />
-                <span>Lock Spot for 30 Days ($100)</span>
-                <ArrowRight className="size-4" />
+                <Sparkles className="size-4 text-white" />
+                <span>Lock Spot ($100 · 1-Click Whop Checkout)</span>
+                <ArrowRight className="size-4 text-white" />
               </>
             )}
           </Button>

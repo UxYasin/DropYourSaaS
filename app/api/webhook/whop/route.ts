@@ -71,7 +71,14 @@ export async function POST(req: Request) {
         }
 
         const now = new Date();
-        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        // Check if this is the 1st buyer to grant 60 days (1 month extra bonus)
+        const { count: activeCount } = await supabase
+          .from('pinned_ads')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'active');
+
+        const durationDays = (activeCount === 0 || activeCount === null) ? 60 : 30;
+        const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
         const { error: pinError } = await supabase.from('pinned_ads').upsert(
           {
@@ -81,6 +88,7 @@ export async function POST(req: Request) {
             one_liner: oneLiner || 'Verified sponsor on DropYourSaaS',
             logo_url: logoUrl || undefined,
             paid_amount: amountPaid,
+            duration_days: durationDays,
             status: 'active',
             starts_at: now.toISOString(),
             expires_at: expiresAt.toISOString(),
