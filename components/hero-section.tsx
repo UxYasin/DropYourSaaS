@@ -120,23 +120,23 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
       <div className="space-y-1.5 sm:space-y-2">
         <h1 className="font-mono font-black text-2xl sm:text-4xl md:text-5xl lg:text-[52px] tracking-tight text-foreground leading-[1.1]">
           Rank higher. Claim #{displayRank} for{' '}
-          <span className="inline-flex items-center gap-1 sm:gap-2 text-[#FFFC00] align-middle justify-center flex-wrap bg-black px-2.5 py-0.5 rounded-xl sm:rounded-2xl border border-[#FFFC00]/40 shadow-xs">
+          <span className="inline-flex items-center gap-1 sm:gap-2 text-orange-500 dark:text-orange-400 align-middle justify-center flex-wrap bg-white dark:bg-zinc-900 px-2.5 py-0.5 rounded-xl sm:rounded-2xl border border-orange-500/30 dark:border-orange-500/40 shadow-xs">
             <button
               type="button"
               onClick={handleDecrease}
               aria-label="Decrease bid"
-              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 transition-transform active:scale-90 cursor-pointer shrink-0"
             >
               <Minus className="size-3 sm:size-3.5" />
             </button>
 
             <span className="inline-flex items-center font-mono font-black">
-              <span className="text-lg sm:text-2xl md:text-3xl">$</span>
+              <span className="text-lg sm:text-2xl md:text-3xl text-orange-500 dark:text-orange-400">$</span>
               <input
                 type="text"
                 value={bid}
                 onChange={handleBidInputChange}
-                className="w-12 sm:w-16 md:w-20 text-center bg-transparent border-b-2 border-[#FFFC00]/60 focus:border-[#FFFC00] outline-none text-lg sm:text-2xl md:text-3xl font-mono font-black text-[#FFFC00] p-0"
+                className="w-12 sm:w-16 md:w-20 text-center bg-transparent border-b-2 border-orange-500/50 focus:border-orange-500 outline-none text-lg sm:text-2xl md:text-3xl font-mono font-black text-orange-500 dark:text-orange-400 p-0"
               />
             </span>
 
@@ -144,7 +144,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               type="button"
               onClick={handleIncrease}
               aria-label="Increase bid"
-              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-white/10 hover:bg-white/20 text-[#FFFC00] transition-transform active:scale-90 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center size-6 sm:size-8 rounded-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 transition-transform active:scale-90 cursor-pointer shrink-0"
             >
               <Plus className="size-3 sm:size-3.5" />
             </button>
