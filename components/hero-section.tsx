@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, forwardRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Link2, Zap, Minus, Plus, Loader2, Crown, Award, Flame } from 'lucide-react';
 import { LiveStatsPill } from '@/components/live-stats-pill';
 
@@ -14,21 +13,11 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   { selectedRank, selectedBid },
   ref
 ) {
-  const router = useRouter();
   const [url, setUrl] = useState('');
   const [currentRank, setCurrentRank] = useState<number>(selectedRank || 1);
   const [bid, setBid] = useState<number>(selectedBid !== undefined ? Math.max(1, selectedBid) : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Form Fields
-  const [projectName, setProjectName] = useState('');
-  const [oneLiner, setOneLiner] = useState('');
-  const [twitterHandle, setTwitterHandle] = useState('');
-  const [category, setCategory] = useState('SaaS');
-  const [isForSale, setIsForSale] = useState(false);
-  const [askingPrice, setAskingPrice] = useState('');
 
   useEffect(() => {
     if (selectedRank !== undefined) {
@@ -80,12 +69,6 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
           url: url.trim(),
           amount: Math.max(1, bid),
           targetRank: currentRank,
-          projectName: projectName.trim() || undefined,
-          oneLiner: oneLiner.trim() || undefined,
-          twitterHandle: twitterHandle.trim() || undefined,
-          category,
-          isForSale,
-          askingPrice: isForSale ? askingPrice : undefined,
         }),
       });
 
@@ -187,178 +170,54 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         </button>
       </div>
 
-      {/* Unified Instant Outbid Container */}
+      {/* Super-clean Single-Row Instant Claim Bar */}
       <div className="pt-2 max-w-2xl xl:max-w-3xl mx-auto">
-        <div className="p-3 sm:p-4 rounded-[26px] bg-white dark:bg-[#1a1c20] border border-border/80 text-left shadow-sm space-y-3">
-          {/* Top Row: URL Input & Instant #fe4103 Claim Button */}
-          <div className="flex items-center justify-between gap-3 h-12 sm:h-13 pl-2 sm:pl-3 pr-1">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Link2 className="size-5 text-muted-foreground shrink-0 ml-1" />
-              <input
-                ref={ref}
-                type="text"
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
-                  if (error) setError(null);
-                }}
-                onFocus={() => setIsExpanded(true)}
-                onClick={() => setIsExpanded(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleClaim();
-                }}
-                placeholder="yourproduct.com or @twitter"
-                className="w-full bg-transparent border-none outline-none text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
-              />
-            </div>
-
-            <button
-              type="button"
-              className="h-10 sm:h-11 px-6 sm:px-8 rounded-full shrink-0 font-mono font-black text-xs sm:text-sm text-white bg-[#fe4103] hover:bg-[#e03800] shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-              onClick={handleClaim}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="size-4 animate-spin text-white" />
-              ) : (
-                <>
-                  <Zap className="size-4 fill-white text-white" />
-                  <span>Claim #{displayRank} for {bidText}</span>
-                </>
-              )}
-            </button>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleClaim();
+          }}
+          className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-[#1a1c20] border border-border/90 text-left shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-2"
+        >
+          <div className="flex items-center gap-2.5 flex-1 min-w-0 pl-3.5 sm:pl-4">
+            <Link2 className="size-4 sm:size-5 text-muted-foreground shrink-0" />
+            <input
+              ref={ref}
+              type="text"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (error) setError(null);
+              }}
+              placeholder="yourproduct.com or @twitter"
+              className="w-full bg-transparent border-none outline-none text-xs sm:text-sm md:text-base text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
+            />
           </div>
 
-          {/* Expandable Meta Section */}
-          {isExpanded && (
-            <div className="pt-2 space-y-3 animate-in fade-in-50 duration-200">
-              <div className="border-t border-border/60 my-2" />
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-10 sm:h-11 px-5 sm:px-7 rounded-full shrink-0 font-mono font-black text-xs sm:text-sm text-white bg-[#fe4103] hover:bg-[#e03800] shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <Loader2 className="size-4 animate-spin text-white" />
+            ) : (
+              <>
+                <Zap className="size-4 fill-white text-white" />
+                <span>Claim #{displayRank} for {bidText}</span>
+              </>
+            )}
+          </button>
+        </form>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-mono text-muted-foreground block mb-1">
-                    Product Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                    placeholder="e.g. Acme SaaS"
-                    className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-[#fe4103] font-sans"
-                  />
-                </div>
+        {error && (
+          <div className="mt-2 text-xs font-mono text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 text-center">
+            {error}
+          </div>
+        )}
 
-                <div>
-                  <label className="text-[11px] font-mono text-muted-foreground block mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-[#fe4103] font-sans cursor-pointer"
-                  >
-                    <option value="SaaS">SaaS</option>
-                    <option value="AI">AI Tools</option>
-                    <option value="Developer Tools">Developer Tools</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Productivity">Productivity</option>
-                    <option value="Analytics">Analytics</option>
-                    <option value="Design Tools">Design Tools</option>
-                    <option value="E-commerce">E-commerce</option>
-                    <option value="No-Code">No-Code</option>
-                    <option value="Fintech">Fintech</option>
-                    <option value="Security">Security</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-mono text-muted-foreground block mb-1">
-                  Tagline / One-liner (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={oneLiner}
-                  onChange={(e) => setOneLiner(e.target.value)}
-                  placeholder="e.g. The fastest way to turn audio into structured notes"
-                  className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-[#fe4103] font-sans"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-mono text-muted-foreground block mb-1">
-                  X / Twitter Handle (for auto-shoutout on rank change)
-                </label>
-                <input
-                  type="text"
-                  value={twitterHandle}
-                  onChange={(e) => setTwitterHandle(e.target.value)}
-                  placeholder="@yourcompany"
-                  className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-[#fe4103] font-sans"
-                />
-              </div>
-
-              {/* List for Sale Toggle */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60">
-                <div>
-                  <div className="font-sans font-semibold text-xs text-foreground">
-                    List for Sale in Marketplace?
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    Receive buyout offers directly from prospective SaaS buyers
-                  </div>
-                </div>
-
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isForSale}
-                    onChange={(e) => setIsForSale(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-muted peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#fe4103]"></div>
-                </label>
-              </div>
-
-              {isForSale && (
-                <div className="animate-in fade-in-50 duration-200">
-                  <label className="text-[11px] font-mono text-muted-foreground block mb-1">
-                    Asking Price (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={askingPrice}
-                    onChange={(e) => setAskingPrice(e.target.value)}
-                    placeholder="e.g. $15,000 or Open to Offers"
-                    className="w-full h-9 px-3 rounded-xl border border-border bg-background text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-[#fe4103] font-sans"
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsExpanded(false)}
-                  className="text-xs font-mono text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  ^ Collapse
-                </button>
-                <div className="text-[11px] font-mono text-muted-foreground">
-                  <strong className="text-foreground">1-Click Whop Checkout</strong> · Direct payment &amp; live instant ranking
-                </div>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="text-xs font-mono text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20">
-              {error}
-            </div>
-          )}
-        </div>
-
-        <p className="text-[11px] text-muted-foreground/80 font-mono text-center pt-2">
-          Every paid listing includes: Live Rank by Bid · Dofollow SEO Backlink · Verified Checkmark · Dedicated Profile Page · Automated X Broadcast
+        <p className="text-[11px] text-muted-foreground/80 font-mono text-center pt-2.5">
+          Instant live placement · Dofollow SEO backlink · 1-click Whop checkout
         </p>
       </div>
     </div>
