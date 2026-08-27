@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VotePill } from '@/components/VotePill';
 import { PinAdModal } from '@/components/pin-ad-modal';
-import { Pin, Target, ArrowRight, Sparkles } from 'lucide-react';
+import { Pin, Target, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaviconImage } from '@/components/favicon-image';
 
@@ -120,7 +120,7 @@ export function BentoRails({ side }: BentoRailsProps) {
         setDisplayedItems((current) => {
           if (current.length === 0) return current;
 
-          // Only rotate unpinned slots (starting from slot 3 down, unless slot 1 or 2 are occupied by an ad)
+          // Only rotate unpinned slots (slots 3, 4, 5)
           const availableSlotIndices = [2, 3, 4].filter((idx) => {
             const slotPos = `${side}_${idx + 1}`;
             return !pinnedAds[slotPos];
@@ -128,10 +128,8 @@ export function BentoRails({ side }: BentoRailsProps) {
 
           if (availableSlotIndices.length === 0) return current;
 
-          // Pick a random unpinned slot from slots 3-5
           const slotToReplace = availableSlotIndices[Math.floor(Math.random() * availableSlotIndices.length)];
 
-          // Filter pool items not currently displayed
           const currentUrls = new Set(current.map((c) => c.url));
           const candidates = globalPool.filter((p) => !currentUrls.has(p.url));
 
@@ -143,7 +141,7 @@ export function BentoRails({ side }: BentoRailsProps) {
           next[slotToReplace] = replacement;
           return next;
         });
-      }, 8000); // Maximum 8 seconds per card rotation
+      }, 8000);
     };
 
     startRotation();
@@ -154,7 +152,6 @@ export function BentoRails({ side }: BentoRailsProps) {
     };
   }, [side, pinnedAds]);
 
-  // Fallback items if database hasn't loaded yet
   const fallbackCards: RailCardItem[] = [
     { id: 'fb-1', name: side === 'left' ? 'redreplier.com' : 'whop.com', url: 'https://redreplier.com', tagline: 'Verified SaaS · AI-powered Reddit lead generation & social listening tool.', net_score: 15, user_vote: 0, category: 'AI Tools' },
     { id: 'fb-2', name: side === 'left' ? 'trycomp.ai' : 'lathire.com', url: 'https://trycomp.ai', tagline: 'Verified SaaS · Autonomous AI Agents & Intelligent Workflows.', net_score: 9, user_vote: 0, category: 'Developer' },
@@ -180,7 +177,7 @@ export function BentoRails({ side }: BentoRailsProps) {
       <aside className="hidden lg:flex flex-col gap-3 w-[290px] sm:w-[305px] lg:w-[315px] xl:w-[325px] shrink-0 sticky top-20 h-fit">
         {[0, 1, 2, 3, 4].map((i) => {
           const slotPos = `${side}_${i + 1}`;
-          const isTopTwoSlot = i < 2; // Slots 1 and 2 of left/right
+          const isTopTwoSlot = i < 2; // Top 2 slots on each rail
           const pinnedAd = pinnedAds[slotPos];
           const isPinnedAd = Boolean(pinnedAd);
           const defaultCard = cardsToRender[i] || fallbackCards[i];
@@ -190,7 +187,7 @@ export function BentoRails({ side }: BentoRailsProps) {
           const theme = BENTO_THEMES[themeIndex];
           const href = `${card.url}${card.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=rail&utm_campaign=${side}`;
 
-          // TOP 2 SLOTS: Show "Place an Ad" whitish card unless a paid pinned ad exists
+          // TOP 2 SLOTS: Monochromatic Minimal "Place an Ad" card with hover reveal
           if (isTopTwoSlot && !isPinnedAd) {
             return (
               <div
@@ -198,42 +195,25 @@ export function BentoRails({ side }: BentoRailsProps) {
                 onClick={() => handleOpenPlaceAd(slotPos)}
                 className="relative h-[124px] sm:h-[128px] w-full group cursor-pointer select-none"
               >
-                <div className="w-full h-full min-h-[124px] sm:min-h-[128px] p-3.5 sm:p-4 rounded-2xl border border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-[#18191c] shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden relative">
-                  {/* Background Card Content (Blurs smoothly on hover) */}
-                  <div className="space-y-1.5 transition-all duration-200 group-hover:blur-[2px] group-hover:opacity-20 flex-1 flex flex-col justify-between">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className="size-7 rounded-lg bg-[#fe4103]/10 text-[#fe4103] flex items-center justify-center font-mono font-bold shadow-2xs">
-                          <Pin className="size-3.5 fill-current" />
-                        </div>
-                        <div>
-                          <h3 className="font-mono font-bold text-xs sm:text-sm text-foreground">
-                            Place an Ad
-                          </h3>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold text-[#fe4103] bg-[#fe4103]/10 px-2 py-0.5 rounded-full border border-[#fe4103]/20">
-                        $100 / 30d
-                      </span>
+                <div className="w-full h-full min-h-[124px] sm:min-h-[128px] p-4 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#18191c] hover:border-zinc-400 dark:hover:border-zinc-700 shadow-2xs hover:shadow-sm transition-all duration-200 flex flex-col items-center justify-center relative overflow-hidden text-center">
+                  {/* Default Monochromatic Resting State: Shows only "Place an Ad" */}
+                  <div className="space-y-1 transition-all duration-200 group-hover:blur-[3px] group-hover:opacity-15 flex flex-col items-center justify-center">
+                    <div className="size-8 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 flex items-center justify-center">
+                      <Pin className="size-4 fill-current" />
                     </div>
-
-                    <p className="text-xs text-muted-foreground font-sans leading-tight">
-                      Book this ad spot for $100 for 30 days
-                    </p>
-
-                    <div className="pt-0.5">
-                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold text-amber-600 dark:text-[#FFFC00]">
-                        <Sparkles className="size-3 fill-current text-amber-500" />
-                        <span>1st buyer gets 1 month extra (60 days!)</span>
-                      </span>
-                    </div>
+                    <h3 className="font-mono font-bold text-xs sm:text-sm text-zinc-700 dark:text-zinc-200">
+                      Place an Ad
+                    </h3>
                   </div>
 
-                  {/* Centered Hover Overlay: Pill Button Direct to Whop */}
-                  <div className="absolute inset-0 z-20 flex items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    <div className="px-4 sm:px-5 py-2 rounded-full bg-[#fe4103] hover:bg-[#e03800] text-white font-mono font-bold text-xs shadow-xl flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform duration-200">
+                  {/* Hover Overlay: Monochromatic details + Vibrant Orange Pill Button */}
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-white/90 dark:bg-[#18191c]/90 backdrop-blur-xs space-y-1.5 pointer-events-none">
+                    <p className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-tight">
+                      $100 · 30 days (1st buyer gets 60d!)
+                    </p>
+                    <div className="px-4 py-1.5 rounded-full bg-[#fe4103] hover:bg-[#e03800] text-white font-mono font-bold text-xs shadow-md flex items-center gap-1.5 transform scale-95 group-hover:scale-100 transition-transform duration-150">
                       <span>Place an Ad</span>
-                      <ArrowRight className="size-3.5" />
+                      <ArrowRight className="size-3" />
                     </div>
                   </div>
                 </div>
@@ -361,14 +341,14 @@ export function BentoRails({ side }: BentoRailsProps) {
           );
         })}
 
-        {/* Interactive "Place an Ad" / "Cancel Selection" Footer Link */}
+        {/* Monochromatic "Place an Ad" Footer Button */}
         <button
           type="button"
           onClick={() => handleOpenPlaceAd(`${side}_1`)}
-          className="w-full mt-1 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-bold rounded-xl border border-dashed border-[#fe4103]/30 hover:border-[#fe4103] text-[#fe4103] bg-[#fe4103]/5 hover:bg-[#fe4103]/10 cursor-pointer active:scale-95 shadow-2xs"
+          className="w-full mt-1 py-2 text-xs transition-all flex items-center justify-center gap-1.5 font-mono font-medium rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50 dark:bg-zinc-900/40 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 cursor-pointer active:scale-95 shadow-2xs"
         >
-          <span>📌</span>
-          <span>Place an Ad ($100 / 30d · 1st gets 60d)</span>
+          <Pin className="size-3 text-zinc-400" />
+          <span>Place an Ad ($100 · 30–60d)</span>
         </button>
       </aside>
 
