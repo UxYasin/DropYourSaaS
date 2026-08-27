@@ -42,7 +42,8 @@ export interface CheckoutResult {
 }
 
 /**
- * Creates a dynamic Whop Checkout session for purchasing a high rank, outbidding, or booking a rail ad.
+ * Creates a dynamic direct Whop Checkout session for purchasing a high rank, outbidding, or booking a rail ad.
+ * Directly produces the native Whop checkout screen (Apple Pay, Google Pay, Card, Crypto) for the exact amount.
  */
 export async function createWhopRankCheckout(params: CreateRankCheckoutParams): Promise<CheckoutResult> {
   const {
@@ -65,13 +66,14 @@ export async function createWhopRankCheckout(params: CreateRankCheckoutParams): 
   const defaultRedirect = redirectUrl || `${siteBaseUrl}/congrats?name=${encodeURIComponent(projectName)}&url=${encodeURIComponent(siteUrl)}&rank=${targetRank}&verified=true`;
 
   const client = getWhopClient();
+  const exactAmount = Math.max(1, Number(amount || 1));
 
-  // 1. Primary: Use official Whop SDK to create dynamic Checkout Configuration
+  // 1. Direct Whop SDK dynamic Checkout Configuration
   if (client) {
     try {
       const checkout = await client.checkoutConfigurations.create({
         plan: {
-          initial_price: Math.max(1, Number(amount)),
+          initial_price: exactAmount,
           plan_type: 'one_time',
           currency: 'usd',
         },
@@ -103,35 +105,20 @@ export async function createWhopRankCheckout(params: CreateRankCheckoutParams): 
       }
     } catch (sdkError: unknown) {
       const msg = sdkError instanceof Error ? sdkError.message : String(sdkError);
-      console.warn('[Whop SDK] Error creating checkout configuration via SDK, trying fallback:', msg);
+      console.error('[Whop SDK] Error creating checkout configuration via SDK:', msg);
+      return {
+        success: false,
+        checkoutUrl: '',
+        error: `Whop checkout error: ${msg}`,
+      };
     }
   }
 
-  // 2. Fallback: Parameterized Whop Hosted Checkout Link
-  const isBoost = tier === 'fast_track' || Number(amount) === 5;
-  const baseUrl = isBoost
-    ? (process.env.NEXT_PUBLIC_WHOP_BOOST_CHECKOUT_URL || 'https://whop.com/dropyoursaas/verified-saas-listing')
-    : (process.env.NEXT_PUBLIC_WHOP_CHECKOUT_URL || 'https://whop.com/dropyoursaas/listing-pay');
-
-  try {
-    const fallbackUrl = new URL(baseUrl);
-    if (email) fallbackUrl.searchParams.set('email', String(email).trim());
-    if (amount) fallbackUrl.searchParams.set('amount', String(amount));
-    if (targetRank) fallbackUrl.searchParams.set('rank', String(targetRank));
-    if (listingId) fallbackUrl.searchParams.set('listing_id', String(listingId));
-    if (siteUrl) fallbackUrl.searchParams.set('site_url', String(siteUrl));
-    if (slotPosition) fallbackUrl.searchParams.set('slot', String(slotPosition));
-
-    return {
-      success: true,
-      checkoutUrl: fallbackUrl.toString(),
-    };
-  } catch {
-    return {
-      success: true,
-      checkoutUrl: baseUrl,
-    };
-  }
+  return {
+    success: false,
+    checkoutUrl: '',
+    error: 'Whop API key is not configured on the server.',
+  };
 }
 
 /**
@@ -153,8 +140,5 @@ export function verifyWhopWebhookEvent(rawPayload: string, headers: Record<strin
     }
   }
 
-  return unwrapWebhook(rawPayload, {
-    headers: stringHeaders,
-    key: webhookSecret,
-  });
+  return unwrapWebhook(rawPayload, { headers: stringHeaders, key: webhookSecret });
 }
