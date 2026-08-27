@@ -188,85 +188,17 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const remainingItems = isFirstPage ? items.slice(10) : items;
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="mt-2 space-y-3">
       {/* Category Topics Filter Bar */}
-      <div className="py-1">
+      <div className="py-0.5">
         <CategoryFilterBar
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
         />
       </div>
 
-      {/* Light & Dark Mode Adaptive Sort Control Tabs */}
-      <div className="flex items-center justify-between gap-3 px-1 py-2 flex-wrap border-b border-border/40 pb-3">
-        <div className="flex items-center gap-1 bg-zinc-200/70 dark:bg-zinc-900/80 p-1 rounded-full border border-zinc-300/80 dark:border-zinc-800/80 shadow-xs">
-          <button
-            type="button"
-            onClick={() => { setSortBy('hot'); setPage(1); }}
-            className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
-              sortBy === 'hot'
-                ? 'bg-[#FF4500] text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
-            )}
-          >
-            <Flame className="size-3.5" />
-            <span>Hot</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSortBy('top'); setPage(1); }}
-            className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
-              sortBy === 'top'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
-            )}
-          >
-            <Trophy className="size-3.5" />
-            <span>Top</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSortBy('recent'); setPage(1); }}
-            className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
-              sortBy === 'recent'
-                ? 'bg-emerald-500 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
-            )}
-          >
-            <Clock className="size-3.5" />
-            <span>Recent</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setSortBy('rank'); setPage(1); }}
-            className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none',
-              sortBy === 'rank'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-300/50 dark:hover:bg-zinc-800/50'
-            )}
-          >
-            <BarChart2 className="size-3.5" />
-            <span>Rank / Bids</span>
-          </button>
-        </div>
-
-        <div className="text-xs font-mono text-muted-foreground">
-          Showing <span className="text-foreground font-bold">{items.length}</span> SaaS products
-        </div>
-      </div>
-
       {isFirstPage ? (
         <>
-          {/* SECTION 1: TOP 3 */}
-          <SectionDivider title="Top 3" />
-
           {isLoading ? (
             <div className="space-y-3.5">
               <DirectorySkeleton variant="top1" />
