@@ -18,6 +18,40 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const [bid, setBid] = useState<number>(selectedBid !== undefined ? Math.max(1, selectedBid) : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [topItems, setTopItems] = useState<{ rank: number; bid: number }[]>([]);
+
+  // Fetch live top leaderboard entries to dynamically determine exact outbid costs
+  useEffect(() => {
+    let isMounted = true;
+    async function loadTopBids() {
+      try {
+        const res = await fetch('/api/leaderboard?limit=10&sortBy=rank');
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : data?.items || [];
+          if (isMounted && items.length > 0) {
+            const mapped = items.map((it: { rank?: number; bid?: number }, idx: number) => ({
+              rank: it.rank || idx + 1,
+              bid: Number(it.bid || 0),
+            }));
+            setTopItems(mapped);
+
+            // If user hasn't selected a specific bid yet, default to outbidding #1 (topBid + 1)
+            if (selectedBid === undefined) {
+              const top1Bid = mapped[0]?.bid || 0;
+              const requiredOutbid = Math.max(1, top1Bid + 1);
+              setBid(requiredOutbid);
+              setCurrentRank(1);
+            }
+          }
+        }
+      } catch {}
+    }
+    loadTopBids();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedBid]);
 
   useEffect(() => {
     if (selectedRank !== undefined) {
@@ -28,22 +62,53 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
     }
   }, [selectedRank, selectedBid]);
 
+  // Compute live outbid minimums for top 3 spots
+  const top1Bid = topItems[0]?.bid ?? 0;
+  const top2Bid = topItems[1]?.bid ?? 0;
+  const top3Bid = topItems[2]?.bid ?? 0;
+
+  const outbid1Cost = Math.max(1, top1Bid + 1);
+  const outbid2Cost = Math.max(1, top2Bid + 1);
+  const outbid3Cost = Math.max(1, top3Bid + 1);
+
+  // Helper to re-evaluate rank based on entered bid amount
+  const calculateRankForBid = (bidAmount: number): number => {
+    if (topItems.length === 0) return 1;
+    if (bidAmount > top1Bid) return 1;
+    if (bidAmount > top2Bid) return 2;
+    if (bidAmount > top3Bid) return 3;
+    const foundIdx = topItems.findIndex((it) => bidAmount > it.bid);
+    if (foundIdx !== -1) return foundIdx + 1;
+    return Math.max(1, topItems.length + 1);
+  };
+
   const handleDecrease = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setBid((prev) => Math.max(1, prev - 1));
+    setBid((prev) => {
+      const next = Math.max(1, prev - 1);
+      setCurrentRank(calculateRankForBid(next));
+      return next;
+    });
   };
 
   const handleIncrease = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setBid((prev) => prev + 1);
+    setBid((prev) => {
+      const next = prev + 1;
+      setCurrentRank(calculateRankForBid(next));
+      return next;
+    });
   };
 
   const handleBidInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
     if (!isNaN(val)) {
-      setBid(Math.max(1, val));
+      const positiveVal = Math.max(1, val);
+      setBid(positiveVal);
+      setCurrentRank(calculateRankForBid(positiveVal));
     } else if (e.target.value === '') {
       setBid(1);
+      setCurrentRank(calculateRankForBid(1));
     }
   };
 
@@ -134,35 +199,35 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         </p>
       </div>
 
-      {/* Quick Outrank Shortcut Badges */}
+      {/* Quick Outrank Shortcut Badges with Live Exact Prices */}
       <div className="flex items-center justify-center gap-2 flex-wrap max-w-2xl mx-auto pt-1">
         <button
           type="button"
-          onClick={() => handleQuickSelect(1, Math.max(1, bid))}
+          onClick={() => handleQuickSelect(1, outbid1Cost)}
           className="px-3.5 py-1.5 rounded-full bg-[#fe4103]/10 hover:bg-[#fe4103]/20 text-[#fe4103] border border-[#fe4103]/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
           <Crown className="size-3.5 fill-current" />
-          <span>👑 Outbid #1</span>
+          <span>👑 Outbid #1 (${outbid1Cost})</span>
         </button>
         <button
           type="button"
-          onClick={() => handleQuickSelect(2, Math.max(1, bid))}
+          onClick={() => handleQuickSelect(2, outbid2Cost)}
           className="px-3.5 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
           <Award className="size-3.5" />
-          <span>🥈 Outbid #2</span>
+          <span>🥈 Outbid #2 (${outbid2Cost})</span>
         </button>
         <button
           type="button"
-          onClick={() => handleQuickSelect(3, Math.max(1, bid))}
+          onClick={() => handleQuickSelect(3, outbid3Cost)}
           className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
           <Flame className="size-3.5" />
-          <span>🥉 Outbid #3</span>
+          <span>🥉 Outbid #3 (${outbid3Cost})</span>
         </button>
         <button
           type="button"
-          onClick={() => handleQuickSelect(4, 1)}
+          onClick={() => handleQuickSelect(Math.max(4, (topItems.length || 3) + 1), 1)}
           className="px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
         >
           <Zap className="size-3.5 fill-current" />
