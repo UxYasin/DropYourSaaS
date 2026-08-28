@@ -62,7 +62,10 @@ export async function createWhopRankCheckout(params: CreateRankCheckoutParams): 
     redirectUrl,
   } = params;
 
-  const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dropyoursaas.com';
+  let siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dropyoursaas.com';
+  if (process.env.NODE_ENV === 'production' && siteBaseUrl.includes('localhost')) {
+    siteBaseUrl = 'https://www.dropyoursaas.com';
+  }
   const defaultRedirect = redirectUrl || `${siteBaseUrl}/congrats?name=${encodeURIComponent(projectName)}&url=${encodeURIComponent(siteUrl)}&rank=${targetRank}&verified=true`;
 
   const client = getWhopClient();

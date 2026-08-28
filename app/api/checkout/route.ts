@@ -56,6 +56,10 @@ export async function POST(req: Request) {
     else if (selectedUpsell === 'ai_boost') resolvedAmount = 25;
     else if (selectedUpsell === 'dofollow') resolvedAmount = 10;
 
+    const proto = req.headers.get('x-forwarded-proto') || 'https';
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+    const origin = req.headers.get('origin') || (host ? `${proto}://${host}` : undefined);
+
     const checkoutResult = await createWhopRankCheckout({
       amount: resolvedAmount,
       targetRank: resolvedRank,
@@ -67,6 +71,7 @@ export async function POST(req: Request) {
       slotPosition,
       twitterHandle: twitterHandle ? String(twitterHandle).trim() : undefined,
       category: category || 'SaaS',
+      redirectUrl: origin ? `${origin}/congrats?name=${encodeURIComponent(resolvedName)}&url=${encodeURIComponent(normalizedUrl)}&rank=${resolvedRank}&verified=true` : undefined,
     });
 
     if (!checkoutResult.success || !checkoutResult.checkoutUrl) {
