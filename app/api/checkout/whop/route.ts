@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createWhopRankCheckout } from '@/lib/whop';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { validateListingSubmission } from '@/lib/security';
 
 export async function POST(req: Request) {
   try {
@@ -31,23 +32,22 @@ export async function POST(req: Request) {
     } = body;
 
     const rawUrl = siteUrl || url || '';
-    if (!rawUrl.trim()) {
-      return NextResponse.json({ error: 'A valid website URL or @handle is required' }, { status: 400 });
-    }
-
-    const normalizedUrl = /^https?:\/\//i.test(rawUrl.trim())
-      ? rawUrl.trim()
-      : `https://${rawUrl.trim().replace(/^@/, '')}`;
-
-    let hostname = 'SaaS Product';
-    try {
-      hostname = new URL(normalizedUrl).hostname.replace(/^www\./, '');
-    } catch {
-      hostname = normalizedUrl;
-    }
-
-    const resolvedName = projectName || title || name || hostname;
+    const resolvedName = projectName || title || name || 'SaaS Product';
     const resolvedDescription = oneLiner || description || valueProposition || '';
+
+    // Security & Anti-Phishing Validation
+    const validation = validateListingSubmission({
+      name: resolvedName,
+      url: rawUrl,
+      description: resolvedDescription,
+    });
+
+    if (!validation.valid || !validation.sanitizedUrl) {
+      return NextResponse.json({ error: validation.error || 'Invalid submission URL' }, { status: 400 });
+    }
+
+    const normalizedUrl = validation.sanitizedUrl;
+    const hostname = validation.hostname || 'SaaS Product';
     const resolvedRank = Number(targetRank || requestedRank || selectedRank || rank || 1);
 
     // Starting bid from $1

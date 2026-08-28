@@ -111,21 +111,19 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Your Data Rights (GDPR &amp; CCPA)</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Your Data Rights &amp; Deletion Requests</h2>
             <p>
-              Under global data privacy regulations, you have the right to:
+              In accordance with international privacy regulations (including GDPR and CCPA), you maintain full rights to access, inspect, modify, or request deletion of your submitted product information.
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 marker:text-emerald-500 text-xs sm:text-sm">
-              <li>Request confirmation of any personal information held about you.</li>
-              <li>Request correction or updates to your listing metadata or contact email.</li>
-              <li>Request immediate permanent deletion of your email records or product listings.</li>
-            </ul>
+            <p className="text-xs">
+              To request full data removal or update public listing details, submit a request to <a href="mailto:privacy@dropyoursaas.com" className="text-emerald-600 dark:text-emerald-400 underline font-mono">privacy@dropyoursaas.com</a> or <a href="mailto:support@dropyoursaas.com" className="text-emerald-600 dark:text-emerald-400 underline font-mono">support@dropyoursaas.com</a>. Requests are verified and processed within 48 hours.
+            </p>
           </section>
 
           <section className="space-y-3 pt-6 border-t border-border/80">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">6. Contact Our Privacy Team</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">6. Contact Data Protection</h2>
             <p>
-              To exercise your privacy rights or request data removal, please contact our Data Protection Officer at:
+              If you have any questions, concerns, or requests regarding this Privacy Policy, please contact our Data Protection team at:
             </p>
             <div className="flex items-center gap-2 text-xs font-mono text-emerald-600 dark:text-emerald-400">
               <Mail className="size-4" />

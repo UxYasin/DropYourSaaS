@@ -98,22 +98,36 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Acceptable Content &amp; Prohibited Spam</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">5. Acceptable Content &amp; Anti-Phishing Guardrails</h2>
             <p>
-              You are solely responsible for the links, domain names, trademarks, titles, and descriptions submitted to DropYourSaaS. By submitting a product, you represent and warrant that:
+              You are solely responsible for the destination links, domain names, trademarks, titles, and descriptions submitted to DropYourSaaS. To protect users and preserve ecosystem trust, we enforce strict submission filtering and automated security verification.
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 marker:text-amber-500 text-xs sm:text-sm">
-              <li>You own or are authorized to promote the software product or domain.</li>
-              <li>The destination link does not distribute malware, spyware, phishing schemes, illegal content, or deceptive redirects.</li>
-              <li>The submission does not infringe upon third-party trademarks, copyrights, or privacy rights.</li>
-            </ul>
+            <div className="p-4 rounded-2xl bg-card border border-border/80 space-y-2 text-xs">
+              <div className="font-bold text-foreground flex items-center gap-2">
+                <Shield className="size-4 text-emerald-500" />
+                Strictly Prohibited Submissions:
+              </div>
+              <ul className="list-disc pl-5 space-y-1.5 marker:text-amber-500 text-muted-foreground">
+                <li><strong>Phishing &amp; Brand Impersonation:</strong> Deceptive login portals, unauthorized brand mimicry, fake cryptocurrency wallets, or credential harvesting pages.</li>
+                <li><strong>URL Shorteners &amp; Cloaking:</strong> Links masked via URL shorteners (e.g. bit.ly, tinyurl, is.gd) or cloaked redirectors are automatically rejected.</li>
+                <li><strong>Direct IP &amp; Localhost Addresses:</strong> Direct IP address hostnames (e.g., 192.168.x.x) and unverified subdomains are disallowed.</li>
+                <li><strong>Malware &amp; Exploit Payloads:</strong> Content or software distributing spyware, rootkits, ransom payloads, or unauthorized downloads.</li>
+              </ul>
+            </div>
             <p className="text-xs">
-              We reserve the absolute right to reject, unpublish, or permanently ban any listing or advertising creative that violates these guidelines without notice or refund.
+              We reserve the absolute right to reject, unpublish, or permanently ban any listing, domain, or advertising creative that violates these guidelines without prior notice or refund.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">6. Limitation of Liability</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">6. Abuse Reporting &amp; DMCA Compliance</h2>
+            <p>
+              DropYourSaaS promptly investigates reports of intellectual property infringement, trademark abuse, or security violations. If you believe a listed website infringes upon your rights or violates safety policies, contact us at <a href="mailto:abuse@dropyoursaas.com" className="text-amber-600 dark:text-amber-400 underline">abuse@dropyoursaas.com</a> or <a href="mailto:support@dropyoursaas.com" className="text-amber-600 dark:text-amber-400 underline">support@dropyoursaas.com</a> with the URL and details.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">7. Limitation of Liability</h2>
             <div className="p-4 rounded-2xl bg-muted/40 border border-border/80 text-xs font-mono uppercase tracking-wide leading-relaxed">
               DROPYOURSAAS AND ITS OPERATORS PROVIDE THE SERVICES ON AN &ldquo;AS-IS&rdquo; AND &ldquo;AS-AVAILABLE&rdquo; BASIS. WE DO NOT GUARANTEE SPECIFIC TRAFFIC VOLUMES, CONVERSION RATES, OR FINANCIAL RETURNS FROM ANY LISTING OR ADVERTISEMENT. IN NO EVENT SHALL DROPYOURSAAS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, OR SPECIAL DAMAGES ARISING FROM USE OF THE PLATFORM.
             </div>

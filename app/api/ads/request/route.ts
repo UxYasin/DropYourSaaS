@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { validateListingSubmission } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,12 +14,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const validation = validateListingSubmission({
+      name: String(project_name || ''),
+      url: String(site_url || ''),
+      description: String(one_liner || ''),
+    });
+
+    if (!validation.valid || !validation.sanitizedUrl) {
+      return NextResponse.json({ error: validation.error || 'Invalid website URL format.' }, { status: 400 });
+    }
+
     const supabase = getSupabaseServerClient();
 
     const { data, error } = await supabase
       .from('ad_requests')
       .insert({
-        site_url: site_url.trim(),
+        site_url: validation.sanitizedUrl,
         project_name: project_name.trim(),
         one_liner: one_liner.trim(),
         contact_email: contact_email.trim(),

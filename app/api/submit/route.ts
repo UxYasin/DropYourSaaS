@@ -6,6 +6,7 @@ import { invalidateLeaderboardCache } from '@/lib/leaderboard';
 import { IS_FREE_MODE } from '@/lib/copy';
 import { savePendingToken } from '@/lib/token-store';
 import { postToX } from '@/lib/twitter';
+import { validateListingSubmission } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,28 +47,27 @@ export async function POST(request: NextRequest) {
       twitter_handle,
     } = body || {};
 
+    const rawUrl = url || '';
+    const entryName = title || name || 'SaaS Product';
+    const description = valueProposition || problemSolved || additionalInfo || '';
+
+    // Security & Anti-Phishing Validation
+    const validation = validateListingSubmission({
+      name: entryName,
+      url: rawUrl,
+      description,
+    });
+
+    if (!validation.valid || !validation.sanitizedUrl) {
+      return NextResponse.json({ error: validation.error || 'Invalid website URL format.' }, { status: 400 });
+    }
+
+    const formattedUrl = validation.sanitizedUrl;
+    const parsedDomain = validation.hostname || 'SaaS Product';
+
     const cleanTwitterHandle = twitterHandle || twitter_handle
       ? String(twitterHandle || twitter_handle).trim().replace(/^@/, '')
       : null;
-
-    if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
-    }
-
-    // Format clean URL
-    let formattedUrl = url.trim();
-    if (!/^https?:\/\//i.test(formattedUrl)) {
-      formattedUrl = `https://${formattedUrl}`;
-    }
-
-    let parsedDomain = '';
-    try {
-      parsedDomain = new URL(formattedUrl).hostname.replace(/^www\./, '').toLowerCase();
-    } catch {
-      parsedDomain = formattedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
-    }
-
-    const entryName = title || name || parsedDomain || 'SaaS Product';
     const targetRank = Math.max(1, Number(requestedRank || selectedRank || 1));
     const isMarketplaceListing = Boolean(isForSale || forSale);
     const supabaseAdmin = getSupabaseServerClient();
