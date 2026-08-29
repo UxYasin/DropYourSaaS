@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, forwardRef } from 'react';
-import { Link2, Minus, Plus, Loader2, Zap, Trophy, Flame, Crown, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Minus, Plus, Loader2, Zap } from 'lucide-react';
 import { FaviconImage } from '@/components/favicon-image';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
@@ -24,7 +24,6 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
     const [recentBids, setRecentBids] = useState<LeaderboardItem[]>([]);
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
 
-    // Fetch live leaderboard data for dynamic pricing and recent bids stream
     useEffect(() => {
       let isMounted = true;
       async function loadLiveFeed() {
@@ -79,7 +78,6 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
     }, [selectedRank, selectedBid]);
 
     const top1Bid = topItems[0]?.bid ?? 0;
-    const outbid1Cost = Math.max(1, top1Bid + 1);
 
     const calculateRankForBid = (bidAmount: number): number => {
       if (topItems.length === 0) return 1;
@@ -160,61 +158,55 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
     return (
       <aside
         className={cn(
-          'w-full lg:w-[320px] xl:w-[340px] shrink-0 lg:sticky lg:top-20 h-fit space-y-4 select-none',
+          'w-full lg:w-[280px] xl:w-[295px] 2xl:w-[310px] shrink-0 lg:sticky lg:top-20 h-fit space-y-6 select-none',
           className
         )}
       >
-        {/* 1. Main Pitch Headline */}
-        <div className="space-y-2 text-left">
-          <h1 className="font-mono font-black text-2xl sm:text-3xl lg:text-[34px] tracking-tight text-foreground leading-[1.15]">
-            Every great project deserves its{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              first bid.
-            </span>
+        {/* 1. Main Headline Matching Sample Typography */}
+        <div className="space-y-1 text-left">
+          <h1 className="font-mono font-black text-3xl sm:text-4xl lg:text-[42px] tracking-tight text-foreground leading-[1.08]">
+            Every great <br />
+            <span className="underline decoration-2 underline-offset-4 decoration-foreground">
+              project
+            </span> <br />
+            deserves its <br />
+            first bid.
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground font-body leading-relaxed">
-            The real-time pay-to-rank software leaderboard. Starting from $1, outbid competitors to claim rankings, live placement, and dofollow backlinks.
-          </p>
         </div>
 
-        {/* 2. Interactive Claim / Outbid Widget Card */}
-        <div className="p-4 sm:p-5 rounded-2xl border border-blue-500/20 dark:border-blue-500/30 bg-card shadow-sm space-y-3.5 relative overflow-hidden">
-          {/* Subtle Ambient Glow */}
-          <div className="absolute -top-12 -right-12 size-32 bg-blue-500/10 dark:bg-purple-500/15 rounded-full blur-2xl pointer-events-none" />
-
+        {/* 2. Quick Claim Stepper Widget Box */}
+        <div className="p-4 rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] shadow-xs space-y-3">
           {/* URL Input */}
-          <div className="relative">
-            <input
-              ref={ref}
-              type="text"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                if (error) setError(null);
-              }}
-              placeholder="yourproduct.com or @handle"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-background text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-sans shadow-2xs"
-            />
-          </div>
+          <input
+            ref={ref}
+            type="text"
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="yourproduct.com"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-muted/40 dark:bg-muted/20 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40 font-sans"
+          />
 
           {/* Stepper + Bid Amount Box */}
-          <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-muted/60 border border-border/60">
+          <div className="flex items-center justify-between gap-2 p-1 rounded-xl bg-muted/50 dark:bg-muted/30 border border-border/60">
             <button
               type="button"
               onClick={handleDecrease}
               aria-label="Decrease bid"
-              className="size-9 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer"
+              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer border border-border/60"
             >
-              <Minus className="size-4" />
+              <Minus className="size-3.5" />
             </button>
 
-            <div className="flex items-center justify-center gap-1 font-mono font-black text-xl sm:text-2xl text-foreground">
-              <span className="text-blue-600 dark:text-blue-400">$</span>
+            <div className="flex items-center justify-center gap-1 font-mono font-black text-xl text-foreground">
+              <span className="text-muted-foreground">$</span>
               <input
                 type="text"
                 value={bid}
                 onChange={handleBidChange}
-                className="w-16 text-center bg-transparent border-none outline-none font-mono font-black text-foreground"
+                className="w-14 text-center bg-transparent border-none outline-none font-mono font-black text-foreground"
               />
             </div>
 
@@ -222,26 +214,23 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
               type="button"
               onClick={handleIncrease}
               aria-label="Increase bid"
-              className="size-9 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer"
+              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer border border-border/60"
             >
-              <Plus className="size-4" />
+              <Plus className="size-3.5" />
             </button>
           </div>
 
-          {/* Primary Action Button (Blue-to-Purple Gradient) */}
+          {/* Primary Action Button */}
           <button
             type="button"
             onClick={() => handleClaim()}
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-xl font-mono font-black text-xs sm:text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-md shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-2.5 px-4 rounded-xl font-mono font-black text-xs sm:text-sm text-white bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
-              <Loader2 className="size-4 animate-spin text-white" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <>
-                <Zap className="size-4 fill-white text-white" />
-                <span>Claim #{displayRank} for ${bid}</span>
-              </>
+              <span>Claim #{displayRank} for ${bid}</span>
             )}
           </button>
 
@@ -252,38 +241,31 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
           )}
 
           <p className="text-[10px] text-center text-muted-foreground font-mono">
-            start as min $1 to list · live ranking
+            start as min $1 to list
           </p>
         </div>
 
-        {/* 3. Recent Bids Live Feed Card */}
-        <div className="p-4 rounded-2xl border border-border/80 bg-card shadow-2xs space-y-3">
-          <div className="flex items-center justify-between text-xs font-mono">
-            <span className="flex items-center gap-1.5 font-bold text-foreground">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-blue-500 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-blue-500" />
-              </span>
-              RECENT BIDS
-            </span>
-            <span className="text-[10px] text-muted-foreground">Live Telemetry</span>
+        {/* 3. Live Traffic / Activity Card */}
+        <div className="p-3.5 rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] shadow-xs space-y-2.5">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-foreground px-1">
+            <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse" />
+            <span>LIVE TRAFFIC</span>
           </div>
 
           {isLoadingRecent ? (
             <div className="space-y-2 py-1">
-              <div className="h-8 w-full bg-muted/40 animate-pulse rounded-lg" />
-              <div className="h-8 w-full bg-muted/40 animate-pulse rounded-lg" />
-              <div className="h-8 w-full bg-muted/40 animate-pulse rounded-lg" />
+              <div className="h-7 w-full bg-muted/40 animate-pulse rounded-lg" />
+              <div className="h-7 w-full bg-muted/40 animate-pulse rounded-lg" />
+              <div className="h-7 w-full bg-muted/40 animate-pulse rounded-lg" />
             </div>
           ) : recentBids.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2 font-mono">
-              No recent bids recorded yet.
+              Live click telemetry active.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {recentBids.slice(0, 4).map((item, idx) => {
-                const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=recent_bids&utm_campaign=left_rail`;
-                const amount = item.bid ? `$${item.bid}` : '$1';
+                const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=live_traffic&utm_campaign=left_rail`;
 
                 return (
                   <a
@@ -291,31 +273,25 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => trackEvent('outbound_click', { url: item.url, source: 'left_recent_bids' })}
-                    className="flex items-center justify-between p-1.5 rounded-xl hover:bg-muted/60 transition-colors group text-xs"
+                    onClick={() => trackEvent('outbound_click', { url: item.url, source: 'left_live_traffic' })}
+                    className="flex items-center gap-2.5 p-2 rounded-xl bg-muted/30 dark:bg-muted/15 hover:bg-muted/60 transition-colors group text-xs border border-border/40"
                   >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className="size-6 rounded-lg bg-background border border-border/60 p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
-                        <FaviconImage
-                          url={item.url}
-                          name={item.name}
-                          size={18}
-                          containerClassName="rounded size-full"
-                        />
+                    <div className="size-6 rounded-lg bg-background border border-border/60 p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
+                      <FaviconImage
+                        url={item.url}
+                        name={item.name}
+                        size={18}
+                        containerClassName="rounded size-full"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold truncate text-foreground text-xs leading-tight">
+                        {item.name}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold truncate text-foreground group-hover:text-blue-500 transition-colors">
-                          {item.name}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground font-sans">
-                          {item.time || 'recently'}
-                        </div>
+                      <div className="text-[10px] text-muted-foreground font-sans truncate">
+                        got a click {item.time || 'just now'}
                       </div>
                     </div>
-
-                    <span className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400 shrink-0 ml-2">
-                      {amount}
-                    </span>
                   </a>
                 );
               })}

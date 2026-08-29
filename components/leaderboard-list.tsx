@@ -201,17 +201,17 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const remainingItems = isFirstPage ? displayList.slice(10) : displayList;
 
   return (
-    <div className="space-y-3.5">
-      {/* Top Quick Filter Tabs Bar */}
+    <div className="space-y-4">
+      {/* Top Filter Capsule Bar Matching Sample */}
       <div className="flex items-center justify-between gap-2 flex-wrap pb-1">
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/60 border border-border/70 text-xs font-mono">
+        <div className="flex items-center gap-1 p-1 rounded-full bg-muted/60 dark:bg-[#161822] border border-border/80 text-xs font-mono">
           <button
             type="button"
             onClick={() => setQuickFilter('all')}
             className={cn(
-              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              'px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer',
               quickFilter === 'all'
-                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -221,9 +221,9 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             type="button"
             onClick={() => setQuickFilter('top5')}
             className={cn(
-              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              'px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer',
               quickFilter === 'top5'
-                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -233,93 +233,41 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
             type="button"
             onClick={() => setQuickFilter('under10')}
             className={cn(
-              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              'px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer',
               quickFilter === 'under10'
-                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
             Under $10
           </button>
-          <button
-            type="button"
-            onClick={() => setQuickFilter('for_sale')}
-            className={cn(
-              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
-              quickFilter === 'for_sale'
-                ? 'bg-card text-foreground shadow-2xs border border-border/80'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            For Sale
-          </button>
         </div>
 
-        {/* Sorting Dropdown / Tabs */}
-        <div className="flex items-center gap-1 text-xs font-mono">
-          <button
-            type="button"
-            onClick={() => setSortBy('rank')}
-            className={cn(
-              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
-              sortBy === 'rank'
-                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Rank
-          </button>
-          <button
-            type="button"
-            onClick={() => setSortBy('hot')}
-            className={cn(
-              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
-              sortBy === 'hot'
-                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Hot
-          </button>
-          <button
-            type="button"
-            onClick={() => setSortBy('recent')}
-            className={cn(
-              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
-              sortBy === 'recent'
-                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            Recent
-          </button>
+        {/* Category Topics Filter Bar */}
+        <div className="flex-1 min-w-[200px] max-w-md">
+          <CategoryFilterBar
+            selectedCategory={selectedCategory}
+            onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
+            activeCategories={activeCategories}
+          />
         </div>
-      </div>
-
-      {/* Category Topics Filter Bar */}
-      <div className="py-0.5">
-        <CategoryFilterBar
-          selectedCategory={selectedCategory}
-          onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
-          activeCategories={activeCategories}
-        />
       </div>
 
       {isFirstPage ? (
         <>
+          {/* TOP 1 - 3 LISTINGS */}
           {isLoading ? (
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               <DirectorySkeleton variant="top1" />
               <DirectorySkeleton variant="top2_3" />
               <DirectorySkeleton variant="top2_3" />
             </div>
           ) : (
-            <div className="space-y-3.5">
+            <div className="space-y-3">
               {item1 && (
                 <DirectoryCard
                   key={item1.id || item1.rank}
                   item={item1}
-                  variant="top1"
                   onClaimClick={handleClaimClick}
                 />
               )}
@@ -327,51 +275,28 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
                 <DirectoryCard
                   key={item.id || item.rank}
                   item={item}
-                  variant="top2_3"
                   onClaimClick={handleClaimClick}
                 />
               ))}
             </div>
           )}
 
-          {/* SECTION 2: TOP 4 TO 10 */}
-          <SectionDivider title="Top 4 – 10" />
+          {/* TOP 3 DIVIDER */}
+          <SectionDivider title="TOP 3" />
 
+          {/* REMAINING LISTINGS (#4+) */}
           {isLoading ? (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <DirectorySkeleton key={i} variant="top4_10" />
               ))}
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {items4_10.map((item) => (
+            <div className="space-y-3">
+              {items4_10.concat(remainingItems).map((item) => (
                 <DirectoryCard
                   key={item.id || item.rank}
                   item={item}
-                  variant="top4_10"
-                  onClaimClick={handleClaimClick}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* SECTION 3: ALL OTHER LISTINGS */}
-          <SectionDivider title="Leaderboard Feed" count={`${totalCount} Total`} />
-
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <DirectorySkeleton key={i} variant="top11_20" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {remainingItems.map((item) => (
-                <DirectoryCard
-                  key={item.id || item.rank}
-                  item={item}
-                  variant="top11_20"
                   onClaimClick={handleClaimClick}
                 />
               ))}
@@ -379,19 +304,18 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
           )}
         </>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {Array.from({ length: 10 }).map((_, i) => (
                 <DirectorySkeleton key={i} variant="top11_20" />
               ))}
             </div>
           ) : (
-            items.map((item) => (
+            filteredItems.map((item) => (
               <DirectoryCard
                 key={item.id || item.rank}
                 item={item}
-                variant="top11_20"
                 onClaimClick={handleClaimClick}
               />
             ))

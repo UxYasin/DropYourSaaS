@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Pin, ArrowRight, ExternalLink, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ExternalLink, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaviconImage } from '@/components/favicon-image';
 import { PinAdModal } from '@/components/pin-ad-modal';
@@ -20,38 +20,48 @@ interface PinnedAdItem {
 const DEFAULT_SLOTS = [
   {
     slot: 'right_1',
-    label: 'SPONSORED #1',
+    slotNumber: '#1',
+    label: 'AD SLOT #1',
+    originalPrice: '$150',
     price: '$100/month',
-    badge: '60-DAY BONUS',
-    description: 'Top-pinned spot across all pages with permanent visibility.',
+    badge: 'TOP PINNED',
+    description: 'Shipkit builds fixed-price MVPs for non-technical founders. SaaS, AI apps...',
   },
   {
     slot: 'right_2',
+    slotNumber: '#2',
     label: 'AD SLOT #2',
+    originalPrice: '$50',
     price: '$39/month',
-    badge: 'POPULAR',
-    description: 'High-visibility sidebar banner with direct dofollow backlink.',
+    badge: null,
+    description: 'High-visibility sticky sidebar placement with direct dofollow link.',
   },
   {
     slot: 'right_3',
+    slotNumber: '#3',
     label: 'AD SLOT #3',
+    originalPrice: '$50',
     price: '$39/month',
     badge: 'LIMITED TIME',
-    description: 'Targeted SaaS audience, founders, and dev tools investors.',
+    description: 'Targeted SaaS audience, indie founders, and angel investors.',
   },
   {
     slot: 'right_4',
+    slotNumber: '#4',
     label: 'AD SLOT #4',
-    price: '$29/month',
+    originalPrice: '$10',
+    price: '$5/day',
     badge: null,
-    description: 'Boost qualified referral clicks directly to your landing page.',
+    description: 'Permanent dofollow backlink and 24/7 side placement.',
   },
   {
     slot: 'right_5',
-    label: 'PREMIUM SLOT #5',
-    price: '$19/month',
-    badge: null,
-    description: 'Permanent dofollow SEO link and 24/7 side visibility.',
+    slotNumber: '#5',
+    label: 'AD SLOT #5',
+    originalPrice: null,
+    price: '$15/d',
+    badge: 'PREMIUM',
+    description: 'Premium right-rail slot with priority rank exposure.',
   },
 ];
 
@@ -92,22 +102,11 @@ export function RightAdsSidebar({ className }: { className?: string }) {
     <>
       <aside
         className={cn(
-          'hidden xl:flex flex-col gap-3.5 w-[290px] 2xl:w-[310px] shrink-0 sticky top-20 h-fit select-none',
+          'hidden xl:flex flex-col gap-3 w-[260px] lg:w-[270px] xl:w-[285px] 2xl:w-[300px] shrink-0 sticky top-20 h-fit select-none',
           className
         )}
       >
-        {/* Header Badge */}
-        <div className="flex items-center justify-between px-1 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-bold text-foreground/80">
-            <Sparkles className="size-3 text-blue-500" />
-            Sponsored Slots
-          </span>
-          <span className="text-[10px] text-blue-500/90 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-            Instant Ads
-          </span>
-        </div>
-
-        {/* 5 Dedicated Ad Slots */}
+        {/* 5 Sponsored Ad Slots Matching Sample Layout */}
         {DEFAULT_SLOTS.map((slotConfig, idx) => {
           const slotKey = slotConfig.slot;
           const activeAd = pinnedAds[slotKey] || pinnedAds[`left_${idx + 1}`];
@@ -119,31 +118,28 @@ export function RightAdsSidebar({ className }: { className?: string }) {
             return (
               <div
                 key={slotKey}
-                className="group relative rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/5 via-card to-purple-500/5 p-4 shadow-sm hover:shadow-md hover:border-blue-500/50 transition-all duration-200"
+                className="relative rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] p-3.5 shadow-2xs hover:shadow-xs transition-all duration-150 flex flex-col justify-between gap-2.5"
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="size-9 rounded-xl bg-background border border-border/80 p-1 shrink-0 overflow-hidden flex items-center justify-center shadow-xs">
+                <div className="flex items-start justify-between gap-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="size-8 rounded-xl bg-background border border-border/80 p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
                       <FaviconImage
                         url={activeAd.url}
                         name={activeAd.name}
-                        size={28}
-                        containerClassName="rounded-md size-full"
+                        size={24}
+                        containerClassName="rounded size-full"
                       />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-blue-500 transition-colors">
-                        {activeAd.name}
-                      </h4>
-                      <span className="text-[10px] font-mono font-bold text-blue-500 inline-flex items-center gap-1">
-                        <Pin className="size-2.5 fill-current" />
-                        <span>Sponsored</span>
-                      </span>
-                    </div>
+                    <h4 className="font-bold text-xs text-foreground truncate">
+                      {activeAd.name}
+                    </h4>
                   </div>
+                  <span className="text-[9px] font-mono tracking-wider text-muted-foreground uppercase">
+                    SPONSORED
+                  </span>
                 </div>
 
-                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
+                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
                   {activeAd.tagline || 'Verified sponsor on DropYourSaaS.'}
                 </p>
 
@@ -152,66 +148,74 @@ export function RightAdsSidebar({ className }: { className?: string }) {
                   target="_blank"
                   rel="sponsored noopener noreferrer"
                   onClick={() => trackEvent('outbound_click', { url: activeAd.url, source: 'sponsored_slot' })}
-                  className="w-full py-1.5 px-3 rounded-xl bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-500/30 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all duration-150 shadow-2xs"
+                  className="w-full py-1.5 px-3 rounded-full bg-muted/70 hover:bg-muted text-foreground text-xs font-mono font-bold flex items-center justify-center gap-1 transition-all"
                 >
-                  <span>Visit Product</span>
-                  <ArrowRight className="size-3" />
+                  <span>Visit →</span>
                 </a>
               </div>
             );
           }
 
-          // 2. AVAILABLE / UNCLAIMED AD SLOT
+          // 2. UNCLAIMED / AVAILABLE AD SLOT
+          const isPremium = slotConfig.badge === 'PREMIUM';
+
           return (
             <div
               key={slotKey}
               onClick={() => handleOpenAd(slotKey)}
-              className="group relative rounded-2xl border border-dashed border-border/80 hover:border-blue-500/60 bg-card/60 hover:bg-card/95 p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer text-center flex flex-col items-center justify-between gap-2.5 overflow-hidden"
+              className={cn(
+                'relative rounded-2xl p-3.5 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer flex flex-col items-center justify-between gap-2 text-center',
+                isPremium
+                  ? 'border border-dashed border-border/80 dark:border-white/20 bg-muted/20 hover:bg-muted/40'
+                  : 'border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] hover:bg-muted/30'
+              )}
             >
-              {/* Top Slot Header */}
-              <div className="w-full flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-                <span className="font-bold tracking-wider text-muted-foreground/90 uppercase">
+              {/* Header: Slot Name + Sponsored Label / Badge */}
+              <div className="w-full flex items-center justify-between text-[9px] font-mono text-muted-foreground">
+                <span className="uppercase font-semibold tracking-wide">
                   {slotConfig.label}
                 </span>
-                {slotConfig.badge && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold border border-purple-500/20 text-[9px]">
-                    {slotConfig.badge}
+                <div className="flex items-center gap-1">
+                  {slotConfig.badge && (
+                    <span
+                      className={cn(
+                        'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase',
+                        slotConfig.badge === 'LIMITED TIME'
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                          : slotConfig.badge === 'PREMIUM'
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-black'
+                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                      )}
+                    >
+                      {slotConfig.badge}
+                    </span>
+                  )}
+                  {!isPremium && <span className="uppercase">SPONSORED</span>}
+                </div>
+              </div>
+
+              {/* Price Row */}
+              <div className="flex items-baseline justify-center gap-1.5 font-mono">
+                {slotConfig.originalPrice && (
+                  <span className="text-xs text-muted-foreground/60 line-through">
+                    {slotConfig.originalPrice}
                   </span>
                 )}
-              </div>
-
-              {/* Price & Pitch */}
-              <div className="space-y-1">
-                <div className="font-mono font-black text-base text-foreground group-hover:text-blue-500 transition-colors">
+                <span className="text-base font-black text-foreground">
                   {slotConfig.price}
-                </div>
-                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-tight">
-                  {slotConfig.description}
-                </p>
+                </span>
               </div>
 
-              {/* Take Spot Action Button */}
+              {/* Take Spot Button (Pill shaped) */}
               <button
                 type="button"
-                className="w-full py-1.5 px-3 rounded-xl bg-muted/80 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 text-foreground group-hover:text-white font-mono font-bold text-[11px] border border-border group-hover:border-transparent transition-all duration-150 flex items-center justify-center gap-1 shadow-2xs"
+                className="w-full py-1.5 px-4 rounded-full bg-background hover:bg-muted/80 text-foreground font-mono font-bold text-[10px] tracking-wider uppercase border border-border/80 shadow-2xs transition-all flex items-center justify-center cursor-pointer"
               >
                 <span>TAKE THIS SPOT</span>
-                <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           );
         })}
-
-        {/* Guaranteed Visibility Banner */}
-        <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-card border border-blue-500/20 text-center space-y-1">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-bold text-foreground">
-            <ShieldCheck className="size-3.5 text-blue-500" />
-            <span>Guaranteed Dofollow Link</span>
-          </div>
-          <p className="text-[11px] text-muted-foreground font-body leading-tight">
-            Every ad placement receives live instant activation + dedicated backlink.
-          </p>
-        </div>
       </aside>
 
       <PinAdModal

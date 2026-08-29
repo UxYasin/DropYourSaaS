@@ -22,30 +22,6 @@ function formatAskingPrice(amount?: number) {
   return `$${amount.toLocaleString('en-US')}`;
 }
 
-const PASTEL_THEMES = [
-  {
-    bg: 'bg-[#eff6ff] dark:bg-blue-950/25',
-    border: 'border-[#dbeafe] dark:border-blue-800/40',
-    title: 'text-blue-950 dark:text-blue-100',
-    subtext: 'text-blue-900/75 dark:text-blue-200/75',
-    categoryBg: 'bg-blue-100/80 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border-blue-200/80 dark:border-blue-800',
-  },
-  {
-    bg: 'bg-[#fefce8] dark:bg-yellow-950/25',
-    border: 'border-[#fef08a] dark:border-yellow-800/40',
-    title: 'text-yellow-950 dark:text-yellow-100',
-    subtext: 'text-yellow-900/75 dark:text-yellow-200/75',
-    categoryBg: 'bg-yellow-100/80 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border-yellow-200/80 dark:border-yellow-800',
-  },
-  {
-    bg: 'bg-[#f0fdf4] dark:bg-emerald-950/25',
-    border: 'border-[#bbf7d0] dark:border-emerald-800/40',
-    title: 'text-emerald-950 dark:text-emerald-100',
-    subtext: 'text-emerald-900/75 dark:text-emerald-200/75',
-    categoryBg: 'bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800',
-  },
-];
-
 export interface DirectoryCardProps {
   item: LeaderboardItem;
   index?: number;
@@ -81,7 +57,6 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
   const title = meta?.title || item.name;
   const description = item.description || meta?.description || `Explore ${item.name} — verified software tools & developer services listed on DropYourSaaS.`;
   const previewImageUrl = meta?.image || item.preview_image_url || null;
-
   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=directory&utm_campaign=listings`;
 
   const handleClick = () => {
@@ -103,503 +78,63 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
   const askingPriceFormatted = formatAskingPrice(item.asking_price);
   const forSaleBadgeText = askingPriceFormatted ? `🏷️ FOR SALE: ${askingPriceFormatted}` : '🏷️ FOR SALE';
 
-  /* -------------------------------------------------------------
-     VARIANT 0: GRID CARD (3-Column Directory Grid View)
-     ------------------------------------------------------------- */
+  // VARIANT: GRID (Directory page)
   if (variant === 'grid' || (!variant && typeof index === 'number')) {
-    const themeIndex = (index ?? (item.rank ? item.rank - 1 : 0)) % PASTEL_THEMES.length;
-    const currentTheme = PASTEL_THEMES[Math.max(0, Math.abs(themeIndex))];
-
     return (
       <div ref={containerRef} className="group relative h-full">
-        <div
-          className={cn(
-            'rounded-2xl border p-4 sm:p-5 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between h-full relative overflow-hidden',
-            currentTheme.border,
-            currentTheme.bg
-          )}
-        >
+        <div className="rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] p-4 sm:p-5 shadow-2xs hover:shadow-xs hover:border-border transition-all duration-150 flex flex-col justify-between h-full">
           <div>
-            {/* Top Row: Flex container. Left side: App Logo (rounded-xl) and Title + Category Pill. Right side: Upvote/Downvote pill component */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0 flex-1">
-                <a
-                  href={href}
-                  target="_blank"
-                  rel={relAttribute}
-                  onClick={handleClick}
-                  className="shrink-0"
-                >
-                  <div className="size-12 rounded-xl bg-background/90 p-1 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                    <FaviconImage
-                      url={item.url}
-                      name={item.name}
-                      src={meta?.favicon}
-                      size={40}
-                      containerClassName="rounded-lg size-full"
-                    />
+                <a href={href} target="_blank" rel={relAttribute} onClick={handleClick} className="shrink-0">
+                  <div className="size-12 rounded-xl bg-background border border-border/60 p-1 flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                    <FaviconImage url={item.url} name={item.name} src={meta?.favicon} size={40} containerClassName="rounded-lg size-full" />
                   </div>
                 </a>
-
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel={relAttribute}
-                      onClick={handleClick}
-                      className={cn(
-                        'font-mono font-bold text-base hover:underline transition-colors inline-flex items-center gap-1 min-w-0 max-w-full',
-                        currentTheme.title
-                      )}
-                    >
-                      <span className="truncate">{title}</span>
-                      {item.is_verified && (
-                        <span className="inline-flex items-center text-blue-500 font-bold shrink-0 ml-0.5" title="$5 Verified Listing">
-                          <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
-                        </span>
-                      )}
-                      <ExternalLink className="size-3 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
-                    </a>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                    {item.category && (
-                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0', currentTheme.categoryBg)}>
-                        {item.category}
-                      </span>
-                    )}
-
-                    {item.is_for_sale && (
-                      <span className="inline-flex items-center text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0 tracking-wide">
-                        {forSaleBadgeText}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right side: Upvote/Downvote pill component */}
-              <div className="shrink-0">
-                <VotePill
-                  listingId={item.id || ''}
-                  initialScore={item.net_score || 0}
-                  initialUserVote={item.user_vote || 0}
-                  size="sm"
-                  className="bg-black/5 dark:bg-zinc-800/50"
-                />
-              </div>
-            </div>
-
-            {/* Bottom Row: Truncated description text */}
-            <p className={cn('font-body text-xs mt-3.5 line-clamp-2 leading-relaxed', currentTheme.subtext)}>
-              {description}
-            </p>
-          </div>
-
-          {/* Footer Meta: time & details link */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-black/5 dark:border-white/5 text-[11px] font-sans">
-            <span className={cn('flex items-center gap-1 font-sans', currentTheme.subtext)}>
-              <Clock className="size-3 opacity-70" />
-              {item.time}
-            </span>
-
-            <Link
-              href={`/s/${getListingSlug(item)}`}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline inline-flex items-center gap-1 transition-colors"
-            >
-              Details →
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* -------------------------------------------------------------
-     VARIANT 1: #1 SPOT (Top Rank Card with Glow & VotePill)
-     ------------------------------------------------------------- */
-  if (variant === 'top1') {
-    return (
-      <div ref={containerRef} className="group relative my-1.5">
-        <div className="absolute -inset-[2px] rounded-[24px] animate-rainbow-glow opacity-35 blur-xs group-hover:opacity-60 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
-        <div className="absolute -inset-[1px] rounded-[23px] animate-rainbow-glow opacity-50 pointer-events-none" />
-
-        <Card className="relative rounded-[22px] border-none bg-card p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden text-foreground">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl -z-10 pointer-events-none" />
-
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
-              <span className="font-mono text-xl sm:text-2xl font-black text-foreground shrink-0 mt-1">
-                #{item.rank}
-              </span>
-              <a
-                href={href}
-                target="_blank"
-                rel={relAttribute}
-                onClick={handleClick}
-                className="shrink-0"
-              >
-                <div className="size-14 sm:size-16 rounded-[14px] bg-muted/80 p-1.5 border border-border/80 shadow-sm flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <FaviconImage
-                    url={item.url}
-                    name={item.name}
-                    src={meta?.favicon}
-                    size={52}
-                    containerClassName="rounded-[10px] size-full"
-                  />
-                </div>
-              </a>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel={relAttribute}
-                    onClick={handleClick}
-                    className="font-mono font-black text-base sm:text-lg text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
-                  >
+                  <a href={href} target="_blank" rel={relAttribute} onClick={handleClick} className="font-mono font-bold text-sm sm:text-base text-foreground hover:text-blue-500 transition-colors inline-flex items-center gap-1 min-w-0 max-w-full">
                     <span className="truncate">{title}</span>
                     {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
-                        <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
+                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0 ml-0.5">
+                        <BadgeCheck className="size-4 fill-blue-500 text-white dark:text-black" />
                       </span>
                     )}
-                    <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
-                  <span className="font-sans text-[10px] px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 font-bold tracking-wide border border-amber-500/40 shrink-0">
-                    TOP SPOT #1
-                  </span>
-                  {item.is_for_sale && (
-                    <span className="inline-flex items-center text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
-                      {forSaleBadgeText}
-                    </span>
-                  )}
+                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">{description}</p>
                 </div>
-                <p className="font-body text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-                  {description}
-                </p>
               </div>
-            </div>
-
-            {/* Voting Pill, View Listing, Price & CTA */}
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/s/${getListingSlug(item)}`}
-                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
-                >
-                  View listing →
-                </Link>
-                <VotePill
-                  listingId={item.id || ''}
-                  initialScore={item.net_score || 0}
-                  initialUserVote={item.user_vote || 0}
-                  size="md"
-                />
-              </div>
-              {siteCopy.feed.showPrices && (
-                <div className="font-mono font-black text-xl sm:text-2xl text-sky-500 tracking-tight shrink-0">
-                  {formatBid(item.bid)}
-                </div>
-              )}
-              {onClaimClick && (
-                <button
-                  type="button"
-                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                  className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-500 shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer"
-                >
-                  {siteCopy.feed.podiumButton}
-                </button>
-              )}
             </div>
           </div>
-
-          <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground font-sans">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium text-[11px] font-sans">
-              <Sparkles className="size-3" />
-              {clicks.toLocaleString()} clicks
-            </span>
-            <span className="flex items-center gap-1 text-[11px] font-sans">
-              <Clock className="size-3 text-muted-foreground/70" />
-              {item.time}
-            </span>
-          </div>
-
-          {/* Large Preview Banner for Spot #1 */}
-          <div className="mt-4 pt-3 border-t border-border/60">
-            <a
-              href={href}
-              target="_blank"
-              rel={relAttribute}
-              onClick={handleClick}
-              className="block"
-            >
-              <PreviewImage
-                src={previewImageUrl}
-                url={item.url}
-                name={item.name}
-                title={title}
-              />
-            </a>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  /* -------------------------------------------------------------
-     VARIANT 2: TOP 2 & TOP 3 (Podium Cards with VotePill)
-     ------------------------------------------------------------- */
-  if (variant === 'top2_3') {
-    const isRank2 = item.rank === 2;
-    const theme = isRank2
-      ? {
-          bg: 'bg-[var(--bento-blue)]',
-          border: 'border-blue-300/80 dark:border-blue-700/60',
-          text: 'text-blue-950 dark:text-blue-100',
-          subtext: 'text-blue-900/75 dark:text-blue-200/75',
-          rankColor: 'text-blue-600 dark:text-blue-400',
-          badge: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-400/30',
-          priceColor: 'text-blue-600 dark:text-blue-400',
-        }
-      : {
-          bg: 'bg-[var(--bento-yellow)]',
-          border: 'border-amber-300/80 dark:border-amber-700/60',
-          text: 'text-amber-950 dark:text-amber-100',
-          subtext: 'text-amber-900/75 dark:text-amber-200/75',
-          rankColor: 'text-amber-600 dark:text-amber-400',
-          badge: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-400/30',
-          priceColor: 'text-amber-600 dark:text-amber-400',
-        };
-
-    return (
-      <div ref={containerRef} className="group relative">
-        <div className={`rounded-[20px] border ${theme.border} ${theme.bg} p-4 sm:p-5 shadow-[var(--shadow-1)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden`}>
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="flex items-start gap-3.5 min-w-0 flex-1">
-              <span className={`font-mono text-xl sm:text-2xl font-black shrink-0 mt-0.5 ${theme.rankColor}`}>
-                #{item.rank}
-              </span>
-              <a
-                href={href}
-                target="_blank"
-                rel={relAttribute}
-                onClick={handleClick}
-                className="shrink-0"
-              >
-                <div className="size-12 sm:size-14 rounded-[14px] bg-background/90 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <FaviconImage
-                    url={item.url}
-                    name={item.name}
-                    src={meta?.favicon}
-                    size={44}
-                    containerClassName="rounded-[8px] size-full"
-                  />
-                </div>
-              </a>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel={relAttribute}
-                    onClick={handleClick}
-                    className={`font-mono font-bold text-base sm:text-lg hover:underline transition-colors inline-flex items-center gap-1 min-w-0 max-w-full ${theme.text}`}
-                  >
-                    <span className="truncate">{title}</span>
-                    {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
-                        <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
-                      </span>
-                    )}
-                    <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
-                  </a>
-                  <span className={`font-sans text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide border ${theme.badge}`}>
-                    {isRank2 ? 'PODIUM #2' : 'PODIUM #3'}
-                  </span>
-                  {item.is_for_sale && (
-                    <span className="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
-                      {forSaleBadgeText}
-                    </span>
-                  )}
-                </div>
-                <p className={`font-body text-xs mt-1 line-clamp-2 leading-relaxed ${theme.subtext}`}>
-                  {description}
-                </p>
-                <div className="flex items-center gap-3 mt-3 font-sans">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium text-[11px] font-sans ${theme.badge}`}>
-                    <Sparkles className="size-3" />
-                    {clicks.toLocaleString()} clicks
-                  </span>
-                  <span className={`text-[11px] font-sans flex items-center gap-1 ${theme.subtext}`}>
-                    <Clock className="size-3 opacity-70" />
-                    {item.time}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/s/${getListingSlug(item)}`}
-                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
-                >
-                  View listing →
-                </Link>
-                <VotePill
-                  listingId={item.id || ''}
-                  initialScore={item.net_score || 0}
-                  initialUserVote={item.user_vote || 0}
-                  size="sm"
-                />
-              </div>
-              {siteCopy.feed.showPrices && (
-                <div className={`font-mono font-black text-lg sm:text-xl tracking-tight shrink-0 ${theme.priceColor}`}>
-                  {formatBid(item.bid)}
-                </div>
-              )}
-              {onClaimClick && (
-                <button
-                  type="button"
-                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                  className="px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
-                >
-                  {siteCopy.feed.podiumButton}
-                </button>
-              )}
-            </div>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50 text-[11px] font-sans">
+            <span className="text-muted-foreground flex items-center gap-1">{item.time}</span>
+            <span className="font-mono font-bold text-foreground text-sm">{formatBid(item.bid)}</span>
           </div>
         </div>
       </div>
     );
   }
 
-  /* -------------------------------------------------------------
-     VARIANT 3: TOP 4 TO TOP 10 (Bento Pastel Cards with VotePill)
-     ------------------------------------------------------------- */
-  if (variant === 'top4_10') {
-    const bentoStyles = [
-      { bg: 'bg-[var(--bento-blue)]', border: 'border-blue-200/60 dark:border-blue-800/40', text: 'text-blue-950 dark:text-blue-100', subtext: 'text-blue-900/70 dark:text-blue-200/70', badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300' },
-      { bg: 'bg-[var(--bento-yellow)]', border: 'border-amber-200/60 dark:border-amber-800/40', text: 'text-amber-950 dark:text-amber-100', subtext: 'text-amber-900/70 dark:text-amber-200/70', badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300' },
-      { bg: 'bg-[var(--bento-mint)]', border: 'border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-950 dark:text-emerald-100', subtext: 'text-emerald-900/70 dark:text-emerald-200/70', badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' },
-      { bg: 'bg-[var(--bento-pink)]', border: 'border-pink-200/60 dark:border-pink-800/40', text: 'text-pink-950 dark:text-pink-100', subtext: 'text-pink-900/70 dark:text-pink-200/70', badge: 'bg-pink-500/10 text-pink-700 dark:text-pink-300' },
-      { bg: 'bg-[var(--bento-lavender)]', border: 'border-purple-200/60 dark:border-purple-800/40', text: 'text-purple-950 dark:text-purple-100', subtext: 'text-purple-900/70 dark:text-purple-200/70', badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300' },
-      { bg: 'bg-[var(--bento-gray)]', border: 'border-zinc-300/60 dark:border-zinc-700/40', text: 'text-zinc-950 dark:text-zinc-100', subtext: 'text-zinc-900/70 dark:text-zinc-300/70', badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300' },
-    ];
+  // STANDARD LEADERBOARD LIST CARD (Matching Sample Photo)
+  const isTop1 = item.rank === 1;
 
-    const styleIndex = (item.rank - 4) % bentoStyles.length;
-    const currentStyle = bentoStyles[Math.max(0, styleIndex)];
-
-    return (
-      <div ref={containerRef} className="group relative">
-        <div className={`rounded-[16px] border ${currentStyle.border} ${currentStyle.bg} p-3.5 sm:p-4 shadow-[var(--shadow-1)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-150`}>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span className={`font-mono text-sm sm:text-base font-black shrink-0 w-6 text-center ${currentStyle.text}`}>
-                #{item.rank}
-              </span>
-              <a
-                href={href}
-                target="_blank"
-                rel={relAttribute}
-                onClick={handleClick}
-                className="shrink-0"
-              >
-                <div className="size-10 sm:size-11 rounded-[12px] bg-background/80 p-1.5 border border-border/60 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
-                  <FaviconImage
-                    url={item.url}
-                    name={item.name}
-                    src={meta?.favicon}
-                    size={36}
-                    containerClassName="rounded-[8px] size-full"
-                  />
-                </div>
-              </a>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel={relAttribute}
-                    onClick={handleClick}
-                    className={`font-mono font-bold text-xs sm:text-sm hover:underline transition-colors truncate inline-flex items-center gap-1 ${currentStyle.text}`}
-                  >
-                    <span>{title}</span>
-                    {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
-                        <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
-                      </span>
-                    )}
-                  </a>
-                  {item.is_for_sale && (
-                    <span className="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
-                      {forSaleBadgeText}
-                    </span>
-                  )}
-                </div>
-                <p className={`font-body text-[11px] sm:text-xs line-clamp-1 mt-0.5 ${currentStyle.subtext}`}>
-                  {description}
-                </p>
-                <div className="flex items-center gap-2.5 mt-1.5 text-[10px] font-sans">
-                  <span className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full font-sans ${currentStyle.badge}`}>
-                    <Sparkles className="size-2.5" />
-                    {clicks.toLocaleString()} clicks
-                  </span>
-                  <span className={currentStyle.subtext}>·</span>
-                  <span className={currentStyle.subtext}>{item.time}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/s/${getListingSlug(item)}`}
-                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
-                >
-                  View listing →
-                </Link>
-                <VotePill
-                  listingId={item.id || ''}
-                  initialScore={item.net_score || 0}
-                  initialUserVote={item.user_vote || 0}
-                  size="sm"
-                />
-              </div>
-              {siteCopy.feed.showPrices && (
-                <div className={`font-mono font-black text-xs sm:text-sm ${currentStyle.text}`}>
-                  {formatBid(item.bid)}
-                </div>
-              )}
-              {onClaimClick && (
-                <button
-                  type="button"
-                  onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                  className="px-3 py-1.5 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
-                >
-                  {siteCopy.feed.podiumButton}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* -------------------------------------------------------------
-     VARIANT 4: TOP 11 TO TOP 20 (Sleek Compact Rows with VotePill)
-     ------------------------------------------------------------- */
   return (
     <div ref={containerRef} className="group relative">
-      <Card className="rounded-[12px] border border-border/70 bg-card p-2.5 sm:p-3 shadow-none hover:bg-muted/30 hover:border-border transition-all duration-150 text-foreground">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <span className="font-mono text-xs font-bold text-muted-foreground w-6 shrink-0 text-center">
-              #{item.rank}
-            </span>
+      <div className="rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] p-4 sm:p-5 shadow-2xs hover:shadow-xs hover:border-border/90 transition-all duration-150">
+        <div className="flex items-center justify-between gap-4">
+          {/* Left Block: Rank + Icon + Info */}
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+            {/* Rank Indicator */}
+            {isTop1 ? (
+              <div className="size-7 sm:size-8 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                #1
+              </div>
+            ) : (
+              <div className="w-7 sm:w-8 text-center font-mono font-bold text-xs sm:text-sm text-muted-foreground shrink-0">
+                #{item.rank}
+              </div>
+            )}
+
+            {/* Favicon / Product Logo */}
             <a
               href={href}
               target="_blank"
@@ -607,76 +142,73 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               onClick={handleClick}
               className="shrink-0"
             >
-              <div className="size-7 sm:size-8 rounded-lg bg-muted/60 p-0.5 border border-border/50 flex items-center justify-center overflow-hidden">
+              <div className="size-11 sm:size-12 rounded-xl bg-background border border-border/80 p-1 flex items-center justify-center overflow-hidden hover:scale-105 transition-transform shadow-2xs">
                 <FaviconImage
                   url={item.url}
                   name={item.name}
                   src={meta?.favicon}
-                  size={26}
-                  containerClassName="rounded-[4px] size-full"
+                  size={38}
+                  containerClassName="rounded-lg size-full"
                 />
               </div>
             </a>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
+
+            {/* Text Information */}
+            <div className="min-w-0 flex-1 pr-2">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
                 <a
                   href={href}
                   target="_blank"
                   rel={relAttribute}
                   onClick={handleClick}
-                  className="font-mono font-bold text-xs text-foreground hover:text-primary transition-colors truncate inline-flex items-center gap-1"
+                  className="font-mono font-bold text-sm sm:text-base text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1 min-w-0 max-w-full"
                 >
-                  <span>{title}</span>
+                  <span className="truncate">{title}</span>
                   {item.is_verified && (
-                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
-                      <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
+                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0">
+                      <BadgeCheck className="size-4 fill-blue-500 text-white dark:text-black" />
                     </span>
                   )}
+                  <ExternalLink className="size-3 opacity-0 group-hover:opacity-60 transition-opacity" />
                 </a>
+
                 {item.is_for_sale && (
-                  <span className="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
+                  <span className="inline-flex items-center text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
                     {forSaleBadgeText}
                   </span>
                 )}
               </div>
-              <p className="font-body text-[11px] text-muted-foreground line-clamp-1">
+
+              <p className="font-body text-xs sm:text-[13px] text-muted-foreground line-clamp-2 leading-relaxed mt-0.5">
                 {description}
               </p>
+
+              <div className="flex items-center gap-2 mt-1.5 text-[11px] text-muted-foreground font-sans">
+                <span>{item.time || 'recently'}</span>
+                <span>•</span>
+                <span>{clicks.toLocaleString()} clicks</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 font-sans">
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/s/${getListingSlug(item)}`}
-                className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-xs px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-medium whitespace-nowrap hidden sm:inline-flex items-center"
-              >
-                View listing →
-              </Link>
-              <VotePill
-                listingId={item.id || ''}
-                initialScore={item.net_score || 0}
-                initialUserVote={item.user_vote || 0}
-                size="sm"
-              />
+          {/* Right Block: Price + Outbid Action */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="font-mono font-black text-xl sm:text-2xl text-foreground tracking-tight">
+              {formatBid(item.bid)}
             </div>
-            {siteCopy.feed.showPrices && (
-              <div className="font-mono font-black text-xs text-sky-500">
-                {formatBid(item.bid)}
-              </div>
-            )}
+
             {onClaimClick && (
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                className="px-2.5 py-1 rounded-full font-bold text-[10px] text-white bg-blue-600 hover:bg-blue-500 shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
+                className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 rounded-full font-mono font-bold text-xs text-white bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs hidden sm:inline-flex items-center cursor-pointer"
               >
-                {siteCopy.feed.listingButton}
+                Outbid →
               </button>
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
