@@ -3,14 +3,11 @@
 import { useRef, useState, useEffect, Suspense } from "react"
 import { CheckCircle2, X } from "lucide-react"
 import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { TrendingSection } from "@/components/trending-section"
-import { LatestActivity } from "@/components/latest-activity"
+import { LeftHeroSidebar } from "@/components/left-hero-sidebar"
 import { LeaderboardList } from "@/components/leaderboard-list"
+import { RightAdsSidebar } from "@/components/right-ads-sidebar"
 import { Footer } from "@/components/footer"
 import { MobileLayout } from "@/components/mobile-layout"
-
-import { BentoRails } from "@/components/bento-rails"
 import { CongratulationsModal } from "@/components/congratulations-modal"
 
 export default function Home() {
@@ -44,46 +41,47 @@ export default function Home() {
 
   return (
     <MobileLayout>
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-blue-600 selection:text-white">
         <Header />
-        <main className="flex-1 w-full px-3 sm:px-5 md:px-6 lg:px-6 xl:px-8 2xl:px-10 py-5 sm:py-8">
-          <div className="flex justify-between items-start gap-4 lg:gap-6 xl:gap-8 w-full">
-            <BentoRails side="left" />
 
-            <div className="w-full max-w-3xl xl:max-w-4xl 2xl:max-w-[880px] mx-auto min-w-0">
-              {showVerifiedBanner && (
-                <div className="mb-5 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-emerald-400 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
-                    <span>🎉 Your SaaS listing has been verified &amp; published to the public directory!</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowVerifiedBanner(false)}
-                    className="text-emerald-400 hover:text-white p-1"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
-              )}
-
-              <HeroSection key={selectedRank} ref={inputRef} selectedRank={selectedRank} selectedBid={selectedBid} />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 sm:mt-8">
-                <TrendingSection />
-                <LatestActivity />
+        <main className="flex-1 w-full max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 xl:px-8 py-5 sm:py-7">
+          {showVerifiedBanner && (
+            <div className="mb-6 p-4 rounded-2xl bg-blue-950/60 border border-blue-500/50 text-blue-300 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300 max-w-4xl mx-auto">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-blue-400 shrink-0" />
+                <span>🎉 Your SaaS listing has been verified &amp; published to the public directory!</span>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowVerifiedBanner(false)}
+                className="text-blue-400 hover:text-white p-1 cursor-pointer"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+          )}
 
-              <div id="index-feed" className="mt-6 sm:mt-8">
-                <Suspense fallback={null}>
-                  <LeaderboardList onClaimClick={handleClaimClick} />
-                </Suspense>
-              </div>
+          {/* New 3-Column Asymmetric Redesigned Layout */}
+          <div className="flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-7 xl:gap-8 w-full">
+            {/* 1. Left Sticky Column: Hero Pitch & Instant Claim Widget + Recent Bids */}
+            <LeftHeroSidebar
+              ref={inputRef}
+              selectedRank={selectedRank}
+              selectedBid={selectedBid}
+            />
+
+            {/* 2. Center Column: Main Leaderboard Feed */}
+            <div className="flex-1 w-full min-w-0 max-w-full lg:max-w-2xl xl:max-w-3xl space-y-4">
+              <Suspense fallback={null}>
+                <LeaderboardList onClaimClick={handleClaimClick} />
+              </Suspense>
             </div>
 
-            <BentoRails side="right" />
+            {/* 3. Right Sticky Column: Dedicated Ads Only */}
+            <RightAdsSidebar />
           </div>
         </main>
+
         <Footer />
       </div>
 

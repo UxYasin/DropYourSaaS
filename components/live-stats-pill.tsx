@@ -10,11 +10,11 @@ interface LiveStatsPillProps {
 }
 
 export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps) {
-  const [stats, setStats] = useState({
-    online: 16,
-    visitors24h: 840,
-    visitors: 6240,
-  });
+  const [stats, setStats] = useState<{
+    online: number;
+    visitors24h: number;
+    visitors: number;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -25,9 +25,9 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
           const data = await res.json();
           if (active && data) {
             setStats({
-              online: typeof data.online === 'number' ? data.online : 16,
-              visitors24h: typeof data.visitors24h === 'number' ? data.visitors24h : 840,
-              visitors: typeof data.totalVisitors === 'number' ? data.totalVisitors : 6240,
+              online: Number(data.online || 0),
+              visitors24h: Number(data.visitors24h || 0),
+              visitors: Number(data.totalVisitors || 0),
             });
           }
         }
@@ -43,6 +43,9 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
     };
   }, []);
 
+  const onlineCount = stats?.online ?? 0;
+  const visitorsCount = stats?.visitors ?? 0;
+
   // Header navigation pill (compact mode)
   if (compact) {
     return (
@@ -55,7 +58,7 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
         )}
       >
         <span className="size-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
-        <span>{stats.online} online</span>
+        <span>{onlineCount} online</span>
       </Link>
     );
   }
@@ -72,11 +75,11 @@ export function LiveStatsPill({ className, compact = false }: LiveStatsPillProps
     >
       <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse shrink-0" />
       <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-        {stats.online.toLocaleString()} online
+        {onlineCount.toLocaleString()} online
       </span>
       <span className="text-muted-foreground/40 font-sans">·</span>
       <span className="text-muted-foreground font-body text-xs sm:text-[13px]">
-        {stats.visitors.toLocaleString()} visitors since launch
+        {visitorsCount > 0 ? `${visitorsCount.toLocaleString()} visitors since launch` : 'Live Analytics'}
       </span>
       <span className="text-muted-foreground/40 font-sans">·</span>
       <span className="font-sans font-semibold text-foreground group-hover/stats:text-emerald-600 dark:group-hover/stats:text-emerald-400 transition-colors inline-flex items-center gap-0.5">

@@ -107,34 +107,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Rank displacement logic: Shift existing listings with rank >= targetRank down by +1
-    try {
-      const { data: existingToShift } = await supabaseAdmin
-        .from('leaderboard_entries')
-        .select('id, rank')
-        .gte('rank', targetRank)
-        .neq('url', formattedUrl)
-        .order('rank', { ascending: false });
-
-      if (existingToShift && existingToShift.length > 0) {
-        for (const item of existingToShift) {
-          const newRank = item.rank + 1;
-          await supabaseAdmin
-            .from('leaderboard_entries')
-            .update({ rank: newRank, target_rank: newRank })
-            .eq('id', item.id);
-        }
-      }
-    } catch (shiftErr) {
-      console.warn('Rank shift notice:', shiftErr);
-    }
 
     // CASE A: Standard Directory Listing (isForSale === false)
     if (!isMarketplaceListing) {
-      console.log(`Standard directory listing for ${formattedUrl} claiming position #${targetRank} (tier: ${tier || 'free'}).`);
+      console.log(`Standard directory listing for ${formattedUrl} pending payment for position #${targetRank} (tier: ${tier || 'outbid'}).`);
 
       const submitterEmail = email ? email.trim() : 'guest@dropyoursaas.com';
-      const isFastTrack = tier === 'fast_track';
 
       const corePayload = {
         url: formattedUrl,
@@ -146,7 +124,7 @@ export async function POST(request: NextRequest) {
         rank: targetRank,
         is_verified: false,
         is_dofollow: false,
-        status: isFastTrack ? 'pending' : 'published',
+        status: 'pending',
         is_for_sale: false,
         twitter_handle: cleanTwitterHandle,
         claimed_at: new Date().toISOString(),
@@ -168,7 +146,7 @@ export async function POST(request: NextRequest) {
           target_rank: targetRank,
           is_verified: false,
           is_dofollow: false,
-          status: isFastTrack ? 'pending' : 'published',
+          status: 'pending',
           twitter_handle: cleanTwitterHandle,
           claimed_at: new Date().toISOString(),
         };
@@ -180,39 +158,14 @@ export async function POST(request: NextRequest) {
         newListing = fallbackListing;
       }
 
-      try {
-        revalidatePath('/', 'page');
-        revalidatePath('/[category]', 'page');
-      } catch {}
-
-      await invalidateLeaderboardCache().catch(() => {});
-
-      if (!isFastTrack) {
-        try {
-          const matchedId = newListing?.id;
-          const listingUrl = matchedId
-            ? `https://www.dropyoursaas.com/s/${matchedId}`
-            : formattedUrl;
-
-          console.log('[Submit Route] Free/Published status confirmed, calling postToX with await...');
-          const tagline = valueProposition || entryName;
-          await postToX(entryName, listingUrl, tagline, false, cleanTwitterHandle);
-          console.log('[Submit Route] Finished postToX execution.');
-        } catch (xErr) {
-          console.error('[Submit Route] Error triggering X post:', xErr);
-        }
-      }
-
       return NextResponse.json({
         success: true,
         id: newListing?.id || formattedUrl,
         listingId: newListing?.id || formattedUrl,
-        tier: isFastTrack ? 'fast_track' : 'free',
-        verified: !isFastTrack,
-        immediate: !isFastTrack,
-        message: isFastTrack
-          ? 'Fast-Track record created. Proceed to payment.'
-          : `Listing published at position #${targetRank}!`,
+        tier: tier || 'outbid',
+        verified: false,
+        immediate: false,
+        message: 'Pending record created. Complete payment to publish.',
       });
     }
 
@@ -267,8 +220,8 @@ export async function POST(request: NextRequest) {
       target_rank: targetRank,
       rank: targetRank,
       verification_token: verification_token,
-      status: 'published',
-      is_verified: true,
+      status: 'pending',
+      is_verified: false,
       is_for_sale: true,
       twitter_handle: cleanTwitterHandle,
       claimed_at: new Date().toISOString(),

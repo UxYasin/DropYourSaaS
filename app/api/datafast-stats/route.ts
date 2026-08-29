@@ -15,9 +15,9 @@ export async function GET() {
     const message = err instanceof Error ? err.message : String(err);
     console.error('DataFast stats proxy error:', message);
     return NextResponse.json({
-      online: 14,
-      visitors: 6240,
-      visitors24h: 840,
+      online: 0,
+      visitors: 0,
+      visitors24h: 0,
       shareUrl: '/stats',
     });
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAdminStats, simulateOrganicListingClicks } from '@/lib/stats-engine';
+import { getAdminStats } from '@/lib/stats-engine';
 import { cookies } from 'next/headers';
 
 export async function GET() {
@@ -10,9 +10,6 @@ export async function GET() {
     if (session !== 'authenticated') {
       return NextResponse.json({ error: 'Unauthorized admin access' }, { status: 401 });
     }
-
-    // Run organic click simulation tick on admin query
-    await simulateOrganicListingClicks();
 
     const stats = await getAdminStats();
     return NextResponse.json(stats);
@@ -32,7 +29,6 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized admin access' }, { status: 401 });
     }
 
-    await simulateOrganicListingClicks();
     const stats = await getAdminStats();
     return NextResponse.json({ success: true, stats });
   } catch (err: unknown) {

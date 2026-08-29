@@ -21,13 +21,13 @@ interface DirectoryListProps {
 
 function SectionDivider({ title, count }: { title: string; count?: string }) {
   return (
-    <div className="relative my-3 sm:my-4 flex items-center justify-center">
+    <div className="relative my-4 flex items-center justify-center">
       <div className="absolute inset-0 flex items-center">
         <div className="w-full border-t border-border/70" />
       </div>
-      <div className="relative flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white font-bold text-[11px] shadow-2xs tracking-wide">
+      <div className="relative flex items-center gap-1.5 px-3.5 py-0.5 rounded-full bg-card border border-border/80 text-muted-foreground font-mono font-bold text-[10px] tracking-wider uppercase shadow-2xs">
         <span>{title}</span>
-        {count && <span className="opacity-80 font-normal text-[10px]">({count})</span>}
+        {count && <span className="opacity-70 font-normal">({count})</span>}
       </div>
     </div>
   );
@@ -184,15 +184,118 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     setPage(1);
   };
 
-  // Show tiered card layout (#1 big hero, #2-3 podium, #4-10 bento, #11+ feed) across ALL tabs
-  const isFirstPage = page === 1 && selectedCategory === 'All';
-  const item1 = isFirstPage ? items[0] : null;
-  const items2_3 = isFirstPage ? items.slice(1, 3) : [];
-  const items4_10 = isFirstPage ? items.slice(3, 10) : [];
-  const remainingItems = isFirstPage ? items.slice(10) : items;
+  const [quickFilter, setQuickFilter] = useState<'all' | 'top5' | 'under10' | 'for_sale'>('all');
+
+  const filteredItems = items.filter((item) => {
+    if (quickFilter === 'top5') return item.rank <= 5;
+    if (quickFilter === 'under10') return (item.bid || 0) <= 10;
+    if (quickFilter === 'for_sale') return Boolean(item.is_for_sale);
+    return true;
+  });
+
+  const displayList = filteredItems;
+  const isFirstPage = page === 1 && selectedCategory === 'All' && quickFilter === 'all';
+  const item1 = isFirstPage ? displayList[0] : null;
+  const items2_3 = isFirstPage ? displayList.slice(1, 3) : [];
+  const items4_10 = isFirstPage ? displayList.slice(3, 10) : [];
+  const remainingItems = isFirstPage ? displayList.slice(10) : displayList;
 
   return (
-    <div className="mt-2 space-y-3">
+    <div className="space-y-3.5">
+      {/* Top Quick Filter Tabs Bar */}
+      <div className="flex items-center justify-between gap-2 flex-wrap pb-1">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-muted/60 border border-border/70 text-xs font-mono">
+          <button
+            type="button"
+            onClick={() => setQuickFilter('all')}
+            className={cn(
+              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              quickFilter === 'all'
+                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickFilter('top5')}
+            className={cn(
+              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              quickFilter === 'top5'
+                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Top 5
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickFilter('under10')}
+            className={cn(
+              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              quickFilter === 'under10'
+                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Under $10
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuickFilter('for_sale')}
+            className={cn(
+              'px-3 py-1 rounded-xl font-bold transition-all cursor-pointer',
+              quickFilter === 'for_sale'
+                ? 'bg-card text-foreground shadow-2xs border border-border/80'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            For Sale
+          </button>
+        </div>
+
+        {/* Sorting Dropdown / Tabs */}
+        <div className="flex items-center gap-1 text-xs font-mono">
+          <button
+            type="button"
+            onClick={() => setSortBy('rank')}
+            className={cn(
+              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
+              sortBy === 'rank'
+                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Rank
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortBy('hot')}
+            className={cn(
+              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
+              sortBy === 'hot'
+                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Hot
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortBy('recent')}
+            className={cn(
+              'px-2.5 py-1 rounded-lg transition-colors cursor-pointer',
+              sortBy === 'recent'
+                ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-500/10'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Recent
+          </button>
+        </div>
+      </div>
+
       {/* Category Topics Filter Bar */}
       <div className="py-0.5">
         <CategoryFilterBar

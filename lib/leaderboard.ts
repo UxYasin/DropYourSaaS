@@ -112,7 +112,7 @@ export async function fetchLeaderboardFromDatabase(
     let query = supabase
       .from('leaderboard_entries')
       .select('*')
-      .neq('status', 'rejected');
+      .eq('status', 'published');
 
     if (category && category !== 'All') {
       query = query.ilike('category', `%${category}%`);

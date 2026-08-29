@@ -132,14 +132,14 @@ export function CategoryFilterBar({
               className={cn(
                 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer select-none',
                 isActive
-                  ? 'bg-[#fe4103] text-white shadow-xs'
-                  : 'text-zinc-800 dark:text-zinc-200 hover:text-[#fe4103] dark:hover:text-[#fe4103] hover:bg-zinc-100/80 dark:hover:bg-zinc-900/60'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs font-bold'
+                  : 'text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-muted/70'
               )}
             >
               <Icon
                 className={cn(
                   'size-3.5 shrink-0',
-                  isActive ? 'text-white' : 'text-zinc-600 dark:text-zinc-400'
+                  isActive ? 'text-white' : 'text-muted-foreground'
                 )}
               />
               <span>{cat.label}</span>
