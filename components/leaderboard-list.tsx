@@ -6,126 +6,48 @@ import { DirectoryCard } from '@/components/directory-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Tag, Flame, Trophy, Clock, BarChart2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Tag, Flame, Trophy, Clock, BarChart2, Sparkles, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CATEGORIES } from '@/lib/categories';
-import { CategoryFilterBar } from '@/components/category-filter-bar';
 import {
   leaderboardItems as seedLeaderboardItems,
   type LeaderboardItem,
 } from '@/lib/leaderboard-data';
 
 interface DirectoryListProps {
+  selectedCategory?: string;
+  onSelectCategory?: (category: string) => void;
   onClaimClick?: (rank: number, bid: number) => void;
 }
 
-function SectionDivider({ title, count }: { title: string; count?: string }) {
+function DirectoryRowSkeleton() {
   return (
-    <div className="relative my-4 flex items-center justify-center">
-      <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-border/70" />
-      </div>
-      <div className="relative flex items-center gap-1.5 px-3.5 py-0.5 rounded-full bg-card border border-border/80 text-muted-foreground font-mono font-bold text-[10px] tracking-wider uppercase shadow-2xs">
-        <span>{title}</span>
-        {count && <span className="opacity-70 font-normal">({count})</span>}
+    <div className="rounded-2xl border border-border/80 bg-card p-3 sm:p-3.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Skeleton className="size-6 rounded-md shrink-0" />
+          <Skeleton className="size-10 rounded-xl shrink-0" />
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-12 rounded-full" />
+          <Skeleton className="h-7 w-16 rounded-full" />
+        </div>
       </div>
     </div>
   );
 }
 
-function DirectorySkeleton({ variant }: { variant: 'top1' | 'top2_3' | 'top4_10' | 'top11_20' }) {
-  if (variant === 'top1') {
-    return (
-      <Card className="rounded-[22px] border border-border bg-card p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4 flex-1">
-            <Skeleton className="size-8 rounded-lg" />
-            <Skeleton className="size-16 rounded-[14px]" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
-          <div className="space-y-2 items-end flex flex-col">
-            <Skeleton className="h-8 w-20" />
-            <Skeleton className="h-9 w-28 rounded-full" />
-          </div>
-        </div>
-        <div className="mt-4 pt-3 border-t border-border">
-          <Skeleton className="w-full h-48 sm:h-56 md:h-64 rounded-xl" />
-        </div>
-      </Card>
-    );
-  }
-
-  if (variant === 'top2_3') {
-    return (
-      <Card className="rounded-[18px] border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3.5 flex-1">
-            <Skeleton className="size-7 rounded-lg" />
-            <Skeleton className="size-14 rounded-[12px]" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-5 w-36" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </div>
-          <div className="space-y-2 items-end flex flex-col">
-            <Skeleton className="h-7 w-16" />
-            <Skeleton className="h-8 w-24 rounded-full" />
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (variant === 'top4_10') {
-    return (
-      <Card className="rounded-[16px] border border-border bg-card p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <Skeleton className="size-6 rounded-md" />
-            <Skeleton className="size-11 rounded-[12px]" />
-            <div className="space-y-1.5 flex-1">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-3/4" />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-6 w-14" />
-            <Skeleton className="h-7 w-20 rounded-full" />
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="rounded-[12px] border border-border bg-card p-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 flex-1">
-          <Skeleton className="size-5 rounded-md" />
-          <Skeleton className="size-8 rounded-lg" />
-          <div className="space-y-1 flex-1">
-            <Skeleton className="h-3.5 w-28" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-5 w-12" />
-          <Skeleton className="h-6 w-16 rounded-full" />
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
+export function LeaderboardList({
+  selectedCategory: propCategory,
+  onSelectCategory,
+  onClaimClick,
+}: DirectoryListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<LeaderboardItem[]>(seedLeaderboardItems);
-  const [activeCategories, setActiveCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [internalCategory, setInternalCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'rank' | 'hot' | 'top' | 'recent'>('rank');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(seedLeaderboardItems.length);
@@ -133,6 +55,30 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const searchParams = useSearchParams();
   const isVerified = searchParams?.get('verified') === 'true';
+
+  const selectedCategory = propCategory !== undefined ? propCategory : internalCategory;
+
+  // Live Launch Countdown Timer (LaunchIt style)
+  const [countdown, setCountdown] = useState({ hours: 1, minutes: 14, seconds: 38 });
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        }
+        if (prev.minutes > 0) {
+          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        }
+        if (prev.hours > 0) {
+          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        }
+        return { hours: 2, minutes: 0, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const countdownString = `${String(countdown.hours).padStart(2, '0')}h ${String(countdown.minutes).padStart(2, '0')}m ${String(countdown.seconds).padStart(2, '0')}s`;
 
   useEffect(() => {
     const handleListingSubmitted = () => {
@@ -154,9 +100,6 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
       .then((data) => {
         if (!cancelled && Array.isArray(data.items)) {
           setItems(data.items);
-          if (Array.isArray(data.activeCategories)) {
-            setActiveCategories(data.activeCategories);
-          }
           if (typeof data.totalCount === 'number') setTotalCount(data.totalCount);
           if (typeof data.totalPages === 'number') setTotalPages(data.totalPages);
         }
@@ -179,11 +122,6 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     }
   };
 
-  const handleCategorySelect = (cat: string) => {
-    setSelectedCategory(cat);
-    setPage(1);
-  };
-
   const [quickFilter, setQuickFilter] = useState<'all' | 'top5' | 'under10' | 'for_sale'>('all');
 
   const filteredItems = items.filter((item) => {
@@ -196,13 +134,29 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
   const displayList = filteredItems;
   const isFirstPage = page === 1 && selectedCategory === 'All' && quickFilter === 'all';
   const item1 = isFirstPage ? displayList[0] : null;
-  const items2_3 = isFirstPage ? displayList.slice(1, 3) : [];
-  const items4_10 = isFirstPage ? displayList.slice(3, 10) : [];
-  const remainingItems = isFirstPage ? displayList.slice(10) : displayList;
+  const remainingItems = isFirstPage ? displayList.slice(1) : displayList;
 
   return (
-    <div className="space-y-4">
-      {/* Top Filter Capsule Bar Matching Sample */}
+    <div id="directory" className="space-y-4">
+      {/* 1. LaunchIt Live Directory Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/70">
+        <div>
+          <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground">
+            LIVE DIRECTORY
+          </span>
+          <h2 className="font-mono font-black text-xl sm:text-2xl text-foreground">
+            {selectedCategory === 'All' ? 'Just launched' : selectedCategory}
+          </h2>
+        </div>
+
+        {/* Live Countdown Pill */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold self-start sm:self-auto shadow-2xs">
+          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Next launch in {countdownString}</span>
+        </div>
+      </div>
+
+      {/* 2. Quick Filter Pills */}
       <div className="flex items-center justify-between gap-2 flex-wrap pb-1">
         <div className="flex items-center gap-1 p-1 rounded-full bg-muted/60 dark:bg-[#161822] border border-border/80 text-xs font-mono">
           <button
@@ -215,7 +169,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            All
+            All Launches
           </button>
           <button
             type="button"
@@ -241,92 +195,69 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
           >
             Under $10
           </button>
+          <button
+            type="button"
+            onClick={() => setQuickFilter('for_sale')}
+            className={cn(
+              'px-3.5 py-1 rounded-full font-bold transition-all cursor-pointer',
+              quickFilter === 'for_sale'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            For Sale
+          </button>
         </div>
 
-        {/* Category Topics Filter Bar */}
-        <div className="flex-1 min-w-[200px] max-w-md">
-          <CategoryFilterBar
-            selectedCategory={selectedCategory}
-            onSelectCategory={(cat) => handleCategorySelect(cat.queryValue)}
-            activeCategories={activeCategories}
-          />
-        </div>
+        <span className="text-xs font-mono text-muted-foreground">
+          Showing {filteredItems.length} products
+        </span>
       </div>
 
-      {isFirstPage ? (
-        <>
-          {/* TOP 1 - 3 LISTINGS */}
-          {isLoading ? (
-            <div className="space-y-3">
-              <DirectorySkeleton variant="top1" />
-              <DirectorySkeleton variant="top2_3" />
-              <DirectorySkeleton variant="top2_3" />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {item1 && (
-                <DirectoryCard
-                  key={item1.id || item1.rank}
-                  item={item1}
-                  variant="top1"
-                  onClaimClick={handleClaimClick}
-                />
-              )}
-              {items2_3.map((item) => (
-                <DirectoryCard
-                  key={item.id || item.rank}
-                  item={item}
-                  variant="top2_3"
-                  onClaimClick={handleClaimClick}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* TOP 3 DIVIDER */}
-          <SectionDivider title="TOP 3" />
-
-          {/* REMAINING LISTINGS (#4+) */}
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <DirectorySkeleton key={i} variant="top4_10" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {items4_10.concat(remainingItems).map((item) => (
-                <DirectoryCard
-                  key={item.id || item.rank}
-                  item={item}
-                  variant="top4_10"
-                  onClaimClick={handleClaimClick}
-                />
-              ))}
-            </div>
-          )}
-        </>
+      {/* 3. Main Directory Feed */}
+      {isLoading ? (
+        <div className="space-y-2.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <DirectoryRowSkeleton key={i} />
+          ))}
+        </div>
+      ) : displayList.length === 0 ? (
+        <div className="p-8 text-center rounded-2xl border border-dashed border-border bg-card space-y-3">
+          <p className="font-mono text-sm text-muted-foreground">
+            No products found in this category yet.
+          </p>
+          <a
+            href="#claim"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-mono text-xs font-bold"
+          >
+            <Zap className="size-3.5" />
+            <span>Be the first to list here</span>
+          </a>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <DirectorySkeleton key={i} variant="top11_20" />
-              ))}
-            </div>
-          ) : (
-            filteredItems.map((item) => (
-              <DirectoryCard
-                key={item.id || item.rank}
-                item={item}
-                onClaimClick={handleClaimClick}
-              />
-            ))
+        <div className="space-y-2.5">
+          {/* Top 1 Spotlight */}
+          {item1 && (
+            <DirectoryCard
+              key={item1.id || item1.rank}
+              item={item1}
+              variant="top1"
+              onClaimClick={handleClaimClick}
+            />
           )}
+
+          {/* Remaining High-Density Listing Rows */}
+          {remainingItems.map((item) => (
+            <DirectoryCard
+              key={item.id || item.rank}
+              item={item}
+              onClaimClick={handleClaimClick}
+            />
+          ))}
         </div>
       )}
 
-      {/* Pagination Bar */}
+      {/* 4. Pagination Bar */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-6 border-t border-border/80">
           <div className="text-xs font-mono text-muted-foreground">
@@ -340,7 +271,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1 || isLoading}
-              className="h-8 gap-1 text-xs cursor-pointer"
+              className="h-8 gap-1 text-xs cursor-pointer rounded-full"
             >
               <ChevronLeft className="size-3.5" />
               Previous
@@ -350,7 +281,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages || isLoading}
-              className="h-8 gap-1 text-xs cursor-pointer"
+              className="h-8 gap-1 text-xs cursor-pointer rounded-full"
             >
               Next
               <ChevronRight className="size-3.5" />
@@ -361,3 +292,4 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
     </div>
   );
 }
+

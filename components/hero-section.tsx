@@ -1,16 +1,35 @@
 'use client';
 
 import React, { useState, useEffect, forwardRef } from 'react';
-import { Link2, Zap, Minus, Plus, Loader2, Crown, Award, Flame } from 'lucide-react';
-import { LiveStatsPill } from '@/components/live-stats-pill';
+import Link from 'next/link';
+import {
+  Link2,
+  Zap,
+  Minus,
+  Plus,
+  Loader2,
+  Crown,
+  Award,
+  Flame,
+  Rocket,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  TrendingUp,
+  Sparkles,
+} from 'lucide-react';
+import { FaviconImage } from '@/components/favicon-image';
+import { cn } from '@/lib/utils';
+import type { LeaderboardItem } from '@/lib/leaderboard-data';
 
 interface HeroSectionProps {
   selectedRank?: number;
   selectedBid?: number;
+  onClaimClick?: (rank: number, bid: number) => void;
 }
 
 export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(function HeroSection(
-  { selectedRank, selectedBid },
+  { selectedRank, selectedBid, onClaimClick },
   ref
 ) {
   const [url, setUrl] = useState('');
@@ -18,34 +37,35 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const [bid, setBid] = useState<number>(selectedBid !== undefined ? Math.max(1, selectedBid) : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [topItems, setTopItems] = useState<{ rank: number; bid: number }[]>([]);
+  const [topItems, setTopItems] = useState<LeaderboardItem[]>([]);
+  const [isLoadingTop, setIsLoadingTop] = useState(true);
 
-  // Fetch live top leaderboard entries to dynamically determine exact outbid costs
+  // Current month & year string (e.g. "August 2026")
+  const currentMonthYear = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date());
+
+  // Fetch live top leaderboard entries
   useEffect(() => {
     let isMounted = true;
     async function loadTopBids() {
       try {
-        const res = await fetch('/api/leaderboard?limit=10&sortBy=rank');
+        const res = await fetch('/api/leaderboard?limit=5&sortBy=rank');
         if (res.ok) {
           const data = await res.json();
-          const items = Array.isArray(data) ? data : data?.items || [];
+          const items: LeaderboardItem[] = Array.isArray(data) ? data : data?.items || [];
           if (isMounted && items.length > 0) {
-            const mapped = items.map((it: { rank?: number; bid?: number }, idx: number) => ({
-              rank: it.rank || idx + 1,
-              bid: Number(it.bid || 0),
-            }));
-            setTopItems(mapped);
+            setTopItems(items);
 
-            // If user hasn't selected a specific bid yet, default to outbidding #1 (topBid + 1)
             if (selectedBid === undefined) {
-              const top1Bid = mapped[0]?.bid || 0;
+              const top1Bid = Number(items[0]?.bid || 0);
               const requiredOutbid = Math.max(1, top1Bid + 1);
               setBid(requiredOutbid);
               setCurrentRank(1);
             }
           }
         }
-      } catch {}
+      } catch {} finally {
+        if (isMounted) setIsLoadingTop(false);
+      }
     }
     loadTopBids();
     return () => {
@@ -62,22 +82,20 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
     }
   }, [selectedRank, selectedBid]);
 
-  // Compute live outbid minimums for top 3 spots
-  const top1Bid = topItems[0]?.bid ?? 0;
-  const top2Bid = topItems[1]?.bid ?? 0;
-  const top3Bid = topItems[2]?.bid ?? 0;
+  const top1Bid = Number(topItems[0]?.bid || 0);
+  const top2Bid = Number(topItems[1]?.bid || 0);
+  const top3Bid = Number(topItems[2]?.bid || 0);
 
   const outbid1Cost = Math.max(1, top1Bid + 1);
   const outbid2Cost = Math.max(1, top2Bid + 1);
   const outbid3Cost = Math.max(1, top3Bid + 1);
 
-  // Helper to re-evaluate rank based on entered bid amount
   const calculateRankForBid = (bidAmount: number): number => {
     if (topItems.length === 0) return 1;
     if (bidAmount > top1Bid) return 1;
     if (bidAmount > top2Bid) return 2;
     if (bidAmount > top3Bid) return 3;
-    const foundIdx = topItems.findIndex((it) => bidAmount > it.bid);
+    const foundIdx = topItems.findIndex((it) => bidAmount > Number(it.bid || 0));
     if (foundIdx !== -1) return foundIdx + 1;
     return Math.max(1, topItems.length + 1);
   };
@@ -156,135 +174,273 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
   const bidText = `$${bid.toLocaleString()}`;
 
   return (
-    <div className="text-center py-4 sm:py-6 max-w-3xl xl:max-w-4xl mx-auto space-y-4 sm:space-y-5">
-      {/* Dynamic Status Pill */}
-      <LiveStatsPill />
+    <section id="claim" className="py-6 sm:py-9 max-w-[1440px] mx-auto w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center">
+        {/* ================= LEFT COLUMN: HERO PITCH & CLAIM FORM ================= */}
+        <div className="lg:col-span-7 space-y-5 text-left">
+          {/* Trust Eyebrow Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+              <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+              <span>ahrefs DR 35+</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-mono font-bold shadow-2xs">
+              <Sparkles className="size-3 fill-current" />
+              <span>DISCOVER THE BEST STARTUPS</span>
+            </div>
+          </div>
 
-      {/* Main Hero Headline & Dynamic Outbid Interactive Title */}
-      <div className="space-y-2 sm:space-y-3">
-        <h1 className="font-mono font-black text-3xl sm:text-5xl md:text-6xl lg:text-[58px] tracking-tight text-foreground leading-[1.15]">
-          Rank higher. Claim #{displayRank} for{' '}
-          <span className="inline-flex items-center gap-2 sm:gap-3 text-[#fe4103] align-middle justify-center flex-wrap bg-white dark:bg-zinc-900 px-4 sm:px-6 py-1.5 sm:py-2 rounded-2xl sm:rounded-3xl border-2 border-[#fe4103]/30 dark:border-[#fe4103]/40 shadow-xs hover:border-[#fe4103]/60 transition-colors">
+          {/* Main Hero Headline */}
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-sans tracking-tight text-foreground leading-[1.08]">
+              Launch today. <br />
+              <span className="text-foreground">Get discovered.</span>
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground font-body leading-relaxed max-w-xl">
+              Guaranteed homepage placement, a permanent dofollow listing page, and founders discovering your product long after launch day.
+            </p>
+          </div>
+
+          {/* Quick Outbid Shortcut Pills */}
+          <div className="flex items-center gap-2 flex-wrap pt-1">
             <button
               type="button"
-              onClick={handleDecrease}
-              aria-label="Decrease bid"
-              className="inline-flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#fe4103]/10 hover:bg-[#fe4103]/20 text-[#fe4103] transition-transform active:scale-90 cursor-pointer shrink-0"
+              onClick={() => handleQuickSelect(1, outbid1Cost)}
+              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
             >
-              <Minus className="size-4 sm:size-4.5" />
+              <Crown className="size-3 fill-current" />
+              <span>👑 Spot #1 (${outbid1Cost})</span>
             </button>
-
-            <span className="inline-flex items-center font-mono font-black">
-              <span className="text-2xl sm:text-3xl md:text-4xl text-[#fe4103] mr-0.5">$</span>
-              <input
-                type="text"
-                value={bid}
-                onChange={handleBidInputChange}
-                className="w-14 sm:w-20 md:w-24 text-center bg-transparent border-b-3 border-[#fe4103] focus:border-[#fe4103] outline-none text-2xl sm:text-3xl md:text-4xl font-mono font-black text-[#fe4103] p-0"
-              />
-            </span>
-
             <button
               type="button"
-              onClick={handleIncrease}
-              aria-label="Increase bid"
-              className="inline-flex items-center justify-center size-8 sm:size-9 rounded-full bg-[#fe4103]/10 hover:bg-[#fe4103]/20 text-[#fe4103] transition-transform active:scale-90 cursor-pointer shrink-0"
+              onClick={() => handleQuickSelect(2, outbid2Cost)}
+              className="px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
             >
-              <Plus className="size-4 sm:size-4.5" />
+              <Award className="size-3" />
+              <span>🥈 Spot #2 (${outbid2Cost})</span>
             </button>
-          </span>
-        </h1>
-        <p className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl xl:max-w-3xl mx-auto">
-          Outrank competitors in real-time. Every listing gets instant live placement, verified badge, dedicated SEO page &amp; dofollow backlink.
-        </p>
-      </div>
+            <button
+              type="button"
+              onClick={() => handleQuickSelect(3, outbid3Cost)}
+              className="px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <Flame className="size-3" />
+              <span>🥉 Spot #3 (${outbid3Cost})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickSelect(Math.max(4, (topItems.length || 3) + 1), 1)}
+              className="px-3 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-foreground border border-border/80 text-xs font-mono font-medium inline-flex items-center gap-1 transition-all cursor-pointer hover:bg-muted"
+            >
+              <Zap className="size-3 text-amber-500 fill-amber-500" />
+              <span>Free / $1 to Rank</span>
+            </button>
+          </div>
 
-      {/* Quick Outrank Shortcut Badges with Live Exact Prices */}
-      <div className="flex items-center justify-center gap-2 flex-wrap max-w-2xl mx-auto pt-1">
-        <button
-          type="button"
-          onClick={() => handleQuickSelect(1, outbid1Cost)}
-          className="px-3.5 py-1.5 rounded-full bg-[#fe4103]/10 hover:bg-[#fe4103]/20 text-[#fe4103] border border-[#fe4103]/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-        >
-          <Crown className="size-3.5 fill-current" />
-          <span>👑 Outbid #1 (${outbid1Cost})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => handleQuickSelect(2, outbid2Cost)}
-          className="px-3.5 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-        >
-          <Award className="size-3.5" />
-          <span>🥈 Outbid #2 (${outbid2Cost})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => handleQuickSelect(3, outbid3Cost)}
-          className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-        >
-          <Flame className="size-3.5" />
-          <span>🥉 Outbid #3 (${outbid3Cost})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => handleQuickSelect(Math.max(4, (topItems.length || 3) + 1), 1)}
-          className="px-3.5 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-        >
-          <Zap className="size-3.5 fill-current" />
-          <span>🚀 Start from $1</span>
-        </button>
-      </div>
-
-      {/* Super-clean Single-Row Instant Claim Bar */}
-      <div className="pt-2 max-w-2xl xl:max-w-3xl mx-auto">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleClaim();
-          }}
-          className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-[#1a1c20] border border-border/90 text-left shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-2"
-        >
-          <div className="flex items-center gap-2.5 flex-1 min-w-0 pl-3.5 sm:pl-4">
-            <Link2 className="size-4 sm:size-5 text-muted-foreground shrink-0" />
-            <input
-              ref={ref}
-              type="text"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                if (error) setError(null);
+          {/* Interactive Claim / Bid Input Bar */}
+          <div className="space-y-2 pt-1 max-w-xl">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleClaim();
               }}
-              placeholder="yourproduct.com or @twitter"
-              className="w-full bg-transparent border-none outline-none text-xs sm:text-sm md:text-base text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
-            />
-          </div>
+              className="p-1.5 sm:p-2 rounded-2xl sm:rounded-full bg-card border border-border/90 text-left shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2"
+            >
+              <div className="flex items-center gap-2.5 flex-1 min-w-0 pl-3 sm:pl-4">
+                <Link2 className="size-4 text-muted-foreground shrink-0" />
+                <input
+                  ref={ref}
+                  type="text"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="yourproduct.com or @handle"
+                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
+                />
+              </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-10 sm:h-11 px-5 sm:px-7 rounded-full shrink-0 font-mono font-black text-xs sm:text-sm text-white bg-[#fe4103] hover:bg-[#e03800] shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader2 className="size-4 animate-spin text-white" />
-            ) : (
-              <>
-                <Zap className="size-4 fill-white text-white" />
-                <span>Claim #{displayRank} for {bidText}</span>
-              </>
+              {/* Stepper Inside Form */}
+              <div className="flex items-center gap-1.5 self-end sm:self-center px-2 py-1 bg-muted/50 rounded-full border border-border/60">
+                <button
+                  type="button"
+                  onClick={handleDecrease}
+                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-2xs text-xs font-bold"
+                >
+                  <Minus className="size-3" />
+                </button>
+                <div className="flex items-center font-mono font-bold text-xs text-foreground">
+                  <span className="text-amber-500 mr-0.5">$</span>
+                  <input
+                    type="text"
+                    value={bid}
+                    onChange={handleBidInputChange}
+                    className="w-8 text-center bg-transparent border-none outline-none font-mono font-bold text-foreground p-0 text-xs"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleIncrease}
+                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-2xs text-xs font-bold"
+                >
+                  <Plus className="size-3" />
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-10 sm:h-10 px-5 sm:px-6 rounded-full shrink-0 font-mono font-bold text-xs sm:text-sm text-white bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="size-4 animate-spin text-white dark:text-zinc-950" />
+                ) : (
+                  <>
+                    <span>Claim #{displayRank} for {bidText}</span>
+                    <ArrowRight className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {error && (
+              <div className="text-xs font-mono text-rose-500 bg-rose-500/10 p-2 rounded-xl border border-rose-500/20 text-center">
+                {error}
+              </div>
             )}
-          </button>
-        </form>
-
-        {error && (
-          <div className="mt-2 text-xs font-mono text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 text-center">
-            {error}
           </div>
-        )}
 
-        <p className="text-[11px] text-muted-foreground/80 font-mono text-center pt-2.5">
-          Instant live placement · Dofollow SEO backlink · 1-click Whop checkout
-        </p>
+          {/* Social Proof & Metrics */}
+          <div className="flex items-center gap-6 pt-2 text-xs font-mono text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2 overflow-hidden">
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-blue-500 text-white font-bold text-[9px] flex items-center justify-center">YA</div>
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-emerald-500 text-white font-bold text-[9px] flex items-center justify-center">SB</div>
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-purple-500 text-white font-bold text-[9px] flex items-center justify-center">RC</div>
+              </div>
+              <span className="font-bold text-foreground">750+</span> founders launched
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Rocket className="size-3.5 text-zinc-500 dark:text-zinc-400" />
+              <span><strong className="text-foreground">1,200+</strong> products listed</span>
+            </div>
+
+            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+              <CheckCircle2 className="size-3.5" />
+              <span>100% Dofollow</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ================= RIGHT COLUMN: LAUNCHING NOW LIVE CARD (LaunchIt Style) ================= */}
+        <div className="lg:col-span-5 relative">
+          {/* Subtle Ambient Background Grid & Glow */}
+          <div className="absolute -inset-2 bg-gradient-to-tr from-blue-500/10 via-transparent to-amber-500/10 rounded-3xl blur-xl -z-10" />
+
+          <div className="rounded-3xl border border-border/90 bg-card p-5 sm:p-6 shadow-md relative overflow-hidden space-y-4">
+            {/* Top Bar of Floating Card */}
+            <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="relative flex size-2.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+                </span>
+                <span className="font-mono font-black text-xs tracking-wider uppercase text-foreground">
+                  LAUNCHING NOW
+                </span>
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  {currentMonthYear}
+                </span>
+              </div>
+
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-[10px] font-mono font-bold">
+                <CheckCircle2 className="size-3 fill-current" />
+                <span>Permanent listing</span>
+              </div>
+            </div>
+
+            {/* List of Top 3 Real-time Ranked Items */}
+            <div className="space-y-2.5">
+              {isLoadingTop ? (
+                <div className="space-y-2 py-2">
+                  <div className="h-12 w-full bg-muted/40 animate-pulse rounded-xl" />
+                  <div className="h-12 w-full bg-muted/40 animate-pulse rounded-xl" />
+                  <div className="h-12 w-full bg-muted/40 animate-pulse rounded-xl" />
+                </div>
+              ) : topItems.length === 0 ? (
+                <p className="text-xs text-muted-foreground font-mono text-center py-4">
+                  Leaderboard telemetry initializing...
+                </p>
+              ) : (
+                topItems.slice(0, 3).map((item, idx) => {
+                  const rank = idx + 1;
+                  const rankBadge = rank === 1 ? '1 🥇' : rank === 2 ? '2 🥈' : '3 🥉';
+                  const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=hero_launchpad&utm_campaign=hero_preview`;
+
+                  return (
+                    <a
+                      key={item.id || item.url + idx}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all border border-border/50 group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="font-mono font-black text-xs text-muted-foreground w-6 shrink-0 text-center">
+                          {rank}
+                        </span>
+
+                        <div className="size-9 rounded-xl bg-background border border-border/80 p-1 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
+                          <FaviconImage
+                            url={item.url}
+                            name={item.name}
+                            src={item.favicon}
+                            size={28}
+                            containerClassName="rounded-md size-full"
+                          />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-blue-500 transition-colors">
+                            {item.name}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground truncate font-sans">
+                            {item.description || 'Verified product listing on DropYourSaaS.'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                          {item.bid ? `$${item.bid}` : `${item.net_score || item.upvotes || 0} votes`}
+                        </span>
+                      </div>
+                    </a>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Floating Card Footer */}
+            <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs font-mono">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <Sparkles className="size-3 text-amber-500" />
+                <span>Fresh launches daily</span>
+              </span>
+              <a
+                href="#directory"
+                className="font-bold text-foreground hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center gap-1 transition-colors"
+              >
+                <span>Browse all</span>
+                <ArrowRight className="size-3" />
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 });
+

@@ -135,27 +135,41 @@ export function RightAdsSidebar({ className }: { className?: string }) {
     <>
       <aside
         className={cn(
-          'hidden xl:flex flex-col gap-3 w-[260px] lg:w-[270px] xl:w-[285px] 2xl:w-[300px] shrink-0 sticky top-20 h-fit select-none',
+          'w-full lg:w-[260px] xl:w-[280px] 2xl:w-[290px] shrink-0 space-y-4 select-none lg:sticky lg:top-20 h-fit',
           className
         )}
       >
+        {/* LaunchIt Style Hand-Picked Header */}
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground">
+            HAND-PICKED
+          </span>
+          <h3 className="font-mono font-bold text-sm text-foreground">
+            Featured
+          </h3>
+        </div>
+
         {/* SLOTS 1 TO 4 (STATIC SPONSORED / AVAILABLE PAID AD SLOTS) */}
-        {STATIC_SLOTS.map((slotConfig, idx) => {
-          const slotKey = slotConfig.slot;
-          const activeAd = pinnedAds[slotKey] || pinnedAds[`left_${idx + 1}`];
+        <div className="space-y-2.5">
+          {STATIC_SLOTS.map((slotConfig, idx) => {
+            const slotKey = slotConfig.slot;
+            const activeAd = pinnedAds[slotKey] || pinnedAds[`left_${idx + 1}`];
 
-          // 1. ACTIVE SPONSOR CARD
-          if (activeAd) {
-            const href = `${activeAd.url}${activeAd.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=sponsored_slot&utm_campaign=${slotKey}`;
+            // 1. ACTIVE SPONSOR CARD
+            if (activeAd) {
+              const href = `${activeAd.url}${activeAd.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=sponsored_slot&utm_campaign=${slotKey}`;
 
-            return (
-              <div
-                key={slotKey}
-                className="relative rounded-2xl border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] p-3.5 shadow-2xs hover:shadow-xs transition-all duration-150 flex flex-col justify-between gap-2.5"
-              >
-                <div className="flex items-start justify-between gap-1">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="size-8 rounded-xl bg-background border border-border/80 p-0.5 shrink-0 overflow-hidden flex items-center justify-center">
+              return (
+                <a
+                  key={slotKey}
+                  href={href}
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                  onClick={() => trackEvent('outbound_click', { url: activeAd.url, source: 'sponsored_slot' })}
+                  className="group relative rounded-2xl border border-border/80 bg-card p-3 shadow-2xs hover:border-border hover:shadow-xs transition-all duration-150 flex items-center justify-between gap-2.5 block"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="size-8 rounded-xl bg-muted/60 border border-border/60 p-0.5 shrink-0 overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
                       <FaviconImage
                         url={activeAd.url}
                         name={activeAd.name}
@@ -163,227 +177,72 @@ export function RightAdsSidebar({ className }: { className?: string }) {
                         containerClassName="rounded size-full"
                       />
                     </div>
-                    <h4 className="font-bold text-xs text-foreground truncate">
-                      {activeAd.name}
-                    </h4>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1">
+                        <h4 className="font-bold text-xs text-foreground truncate group-hover:text-blue-500 transition-colors">
+                          {activeAd.name}
+                        </h4>
+                        <span className="text-blue-500 font-bold text-[10px]">✔</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate leading-relaxed">
+                        {activeAd.tagline || 'Verified sponsor tool'}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider text-muted-foreground uppercase">
-                    SPONSORED
-                  </span>
+
+                  <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
+                </a>
+              );
+            }
+
+            // 2. UNCLAIMED / AVAILABLE AD SLOT (LaunchIt Style)
+            return (
+              <div
+                key={slotKey}
+                onClick={() => handleOpenAd(slotKey)}
+                className="relative rounded-2xl p-3 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer flex items-center justify-between gap-2 border border-dashed border-border/80 hover:border-border bg-muted/20 hover:bg-muted/40 group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="size-8 rounded-xl bg-muted/80 border border-dashed border-border flex items-center justify-center text-muted-foreground font-mono font-bold text-xs shrink-0">
+                    {slotConfig.slotNumber}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-mono font-bold text-foreground">
+                        {slotConfig.label}
+                      </span>
+                      {slotConfig.badge && (
+                        <span className="px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                          {slotConfig.badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground">
+                      {slotConfig.price} · Pinned 24/7
+                    </div>
+                  </div>
                 </div>
 
-                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                  {activeAd.tagline || 'Verified sponsor on DropYourSaaS.'}
-                </p>
-
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="sponsored noopener noreferrer"
-                  onClick={() => trackEvent('outbound_click', { url: activeAd.url, source: 'sponsored_slot' })}
-                  className="w-full py-1.5 px-3 rounded-full bg-muted/70 hover:bg-muted text-foreground text-xs font-mono font-bold flex items-center justify-center gap-1 transition-all"
+                <button
+                  type="button"
+                  className="px-2.5 py-1 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 text-[10px] font-mono font-bold shrink-0 group-hover:scale-105 transition-transform"
                 >
-                  <span>Visit →</span>
-                </a>
+                  Pin
+                </button>
               </div>
             );
-          }
-
-          // 2. UNCLAIMED / AVAILABLE AD SLOT
-          return (
-            <div
-              key={slotKey}
-              onClick={() => handleOpenAd(slotKey)}
-              className="relative rounded-2xl p-3.5 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer flex flex-col items-center justify-between gap-2 text-center border border-border/80 dark:border-white/10 bg-card/90 dark:bg-[#161822] hover:bg-muted/30"
-            >
-              {/* Header: Slot Name + Sponsored Label / Badge */}
-              <div className="w-full flex items-center justify-between text-[9px] font-mono text-muted-foreground">
-                <span className="uppercase font-semibold tracking-wide">
-                  {slotConfig.label}
-                </span>
-                <div className="flex items-center gap-1">
-                  {slotConfig.badge && (
-                    <span
-                      className={cn(
-                        'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase',
-                        slotConfig.badge === 'LIMITED TIME'
-                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
-                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      )}
-                    >
-                      {slotConfig.badge}
-                    </span>
-                  )}
-                  <span className="uppercase">SPONSORED</span>
-                </div>
-              </div>
-
-              {/* Price Row */}
-              <div className="flex items-baseline justify-center gap-1.5 font-mono">
-                {slotConfig.originalPrice && (
-                  <span className="text-xs text-muted-foreground/60 line-through">
-                    {slotConfig.originalPrice}
-                  </span>
-                )}
-                <span className="text-base font-black text-foreground">
-                  {slotConfig.price}
-                </span>
-              </div>
-
-              {/* Take Spot Button (Pill shaped) */}
-              <button
-                type="button"
-                className="w-full py-1.5 px-4 rounded-full bg-background hover:bg-muted/80 text-foreground font-mono font-bold text-[10px] tracking-wider uppercase border border-border/80 shadow-2xs transition-all flex items-center justify-center cursor-pointer"
-              >
-                <span>TAKE THIS SPOT</span>
-              </button>
-            </div>
-          );
-        })}
-
-        {/* BOTTOM 2 SLOTS: ANIMATED SLOW-UP ROTATING SHOWCASE SLOTS (SLOT #5 & SLOT #6) */}
-        
-        {/* SLOT #5: ANIMATED SLOW-UP SHOWCASE */}
-        <div className="relative rounded-2xl border border-blue-500/30 dark:border-blue-500/20 bg-gradient-to-br from-blue-500/5 via-card to-card p-3.5 shadow-2xs overflow-hidden">
-          {/* Header */}
-          <div className="w-full flex items-center justify-between text-[9px] font-mono text-muted-foreground mb-2">
-            <span className="font-bold tracking-wider text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
-              <Sparkles className="size-2.5" />
-              AD SLOT #5
-            </span>
-            <span className="px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold uppercase text-[8px]">
-              ROTATING 5S
-            </span>
-          </div>
-
-          {/* Animated Listing Content (Slow-Up Slide & Fade Animation) */}
-          {itemSlot5 ? (
-            <div
-              key={`slot5-${animKey5}-${itemSlot5.name}`}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-700 space-y-2"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="size-8 rounded-xl bg-background border border-border/80 p-0.5 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
-                  <FaviconImage
-                    url={itemSlot5.url}
-                    name={itemSlot5.name}
-                    size={24}
-                    containerClassName="rounded size-full"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-bold text-xs text-foreground truncate">
-                    {itemSlot5.name}
-                  </h4>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Rank #{itemSlot5.rank || 1} · {itemSlot5.clicks || 0} clicks
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                {itemSlot5.description || 'Verified product active on DropYourSaaS.'}
-              </p>
-
-              <div className="flex items-center gap-2 pt-1">
-                <a
-                  href={`${itemSlot5.url}${itemSlot5.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=slot5_spotlight`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackEvent('outbound_click', { url: itemSlot5.url, source: 'ad_slot_5' })}
-                  className="flex-1 py-1 px-3 rounded-full bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-500/20 text-xs font-mono font-bold flex items-center justify-center gap-1 transition-all"
-                >
-                  <span>Visit</span>
-                  <ArrowRight className="size-3" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => handleOpenAd('right_5')}
-                  className="py-1 px-2.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground text-[10px] font-mono font-semibold transition-all cursor-pointer"
-                  title="Claim Slot #5 permanently"
-                >
-                  Promote ($15)
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="py-4 text-center text-xs text-muted-foreground font-mono">
-              Loading spotlight...
-            </div>
-          )}
+          })}
         </div>
 
-        {/* SLOT #6: ANIMATED SLOW-UP SHOWCASE */}
-        <div className="relative rounded-2xl border border-purple-500/30 dark:border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-card to-card p-3.5 shadow-2xs overflow-hidden">
-          {/* Header */}
-          <div className="w-full flex items-center justify-between text-[9px] font-mono text-muted-foreground mb-2">
-            <span className="font-bold tracking-wider text-purple-600 dark:text-purple-400 uppercase flex items-center gap-1">
-              <TrendingUp className="size-2.5" />
-              AD SLOT #6
-            </span>
-            <span className="px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold uppercase text-[8px]">
-              LIVE DISCOVERY
-            </span>
-          </div>
-
-          {/* Animated Listing Content (Slow-Up Slide & Fade Animation) */}
-          {itemSlot6 ? (
-            <div
-              key={`slot6-${animKey6}-${itemSlot6.name}`}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-700 space-y-2"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="size-8 rounded-xl bg-background border border-border/80 p-0.5 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs">
-                  <FaviconImage
-                    url={itemSlot6.url}
-                    name={itemSlot6.name}
-                    size={24}
-                    containerClassName="rounded size-full"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-bold text-xs text-foreground truncate">
-                    {itemSlot6.name}
-                  </h4>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Rank #{itemSlot6.rank || 2} · {itemSlot6.clicks || 0} clicks
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                {itemSlot6.description || 'Verified product active on DropYourSaaS.'}
-              </p>
-
-              <div className="flex items-center gap-2 pt-1">
-                <a
-                  href={`${itemSlot6.url}${itemSlot6.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=slot6_discovery`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackEvent('outbound_click', { url: itemSlot6.url, source: 'ad_slot_6' })}
-                  className="flex-1 py-1 px-3 rounded-full bg-purple-600/10 hover:bg-purple-600 text-purple-600 hover:text-white border border-purple-500/20 text-xs font-mono font-bold flex items-center justify-center gap-1 transition-all"
-                >
-                  <span>Visit</span>
-                  <ArrowRight className="size-3" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => handleOpenAd('right_6')}
-                  className="py-1 px-2.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground text-[10px] font-mono font-semibold transition-all cursor-pointer"
-                  title="Claim Slot #6 permanently"
-                >
-                  Promote ($15)
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="py-4 text-center text-xs text-muted-foreground font-mono">
-              Loading discovery...
-            </div>
-          )}
-        </div>
+        {/* Global Action: + Advertise Here */}
+        <button
+          type="button"
+          onClick={() => handleOpenAd('right_1')}
+          className="w-full py-2 px-3 rounded-2xl border border-border/80 hover:border-foreground/40 bg-card hover:bg-muted/50 text-xs font-mono font-bold text-muted-foreground hover:text-foreground transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+        >
+          <span>+ Advertise here</span>
+          <ArrowRight className="size-3" />
+        </button>
       </aside>
 
       <PinAdModal
