@@ -268,6 +268,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
                 <DirectoryCard
                   key={item1.id || item1.rank}
                   item={item1}
+                  variant="top1"
                   onClaimClick={handleClaimClick}
                 />
               )}
@@ -275,6 +276,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
                 <DirectoryCard
                   key={item.id || item.rank}
                   item={item}
+                  variant="top2_3"
                   onClaimClick={handleClaimClick}
                 />
               ))}
@@ -297,6 +299,7 @@ export function LeaderboardList({ onClaimClick }: DirectoryListProps) {
                 <DirectoryCard
                   key={item.id || item.rank}
                   item={item}
+                  variant="top4_10"
                   onClaimClick={handleClaimClick}
                 />
               ))}

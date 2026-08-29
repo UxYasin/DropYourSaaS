@@ -50,13 +50,13 @@
 }
 
 :root {
-  /* Base surfaces */
-  --background: #ececec;
-  --foreground: oklch(0.145 0 0);
+  /* Base surfaces: Clean white background with low contrast cards */
+  --background: #ffffff;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: #111827;
 
   /* Text hierarchy */
   --muted: oklch(0.97 0 0);
