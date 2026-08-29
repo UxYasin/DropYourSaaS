@@ -51,7 +51,7 @@ export function Header() {
   } catch {}
 
   return (
-    <header className="sticky top-3 z-40 px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 w-full mx-auto flex items-center justify-between gap-3">
+    <header className="sticky top-3 z-40 px-4 sm:px-6 lg:px-8 xl:px-10 w-full max-w-[1440px] mx-auto flex items-center justify-between gap-3">
       {/* 1. SEPARATE LEFT PILL: Brand Logo */}
       <div className="flex items-center gap-2">
         {isMobile && (

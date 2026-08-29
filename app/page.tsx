@@ -44,7 +44,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-blue-600 selection:text-white">
         <Header />
 
-        <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-5 sm:py-7">
+        <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-7">
           {showVerifiedBanner && (
             <div className="mb-6 p-4 rounded-2xl bg-blue-950/60 border border-blue-500/50 text-blue-300 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300 w-full mx-auto">
               <div className="flex items-center gap-2">
@@ -61,8 +61,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* New 3-Column Full-Width Asymmetric App Layout */}
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-7 xl:gap-8 w-full">
+          {/* 3-Column Layout with Balanced Breathing Room */}
+          <div className="flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-7 xl:gap-8 w-full">
             {/* 1. Left Sticky Column: Hero Pitch & Instant Claim Widget + Recent Bids */}
             <LeftHeroSidebar
               ref={inputRef}
@@ -70,8 +70,8 @@ export default function Home() {
               selectedBid={selectedBid}
             />
 
-            {/* 2. Center Column: Fluid Wide Leaderboard Feed */}
-            <div className="flex-1 w-full min-w-0 space-y-4">
+            {/* 2. Center Column: Well-Proportioned Clean Leaderboard Feed */}
+            <div className="flex-1 w-full min-w-0 max-w-[720px] xl:max-w-[760px] 2xl:max-w-[800px] space-y-4">
               <Suspense fallback={null}>
                 <LeaderboardList onClaimClick={handleClaimClick} />
               </Suspense>

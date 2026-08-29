@@ -174,21 +174,21 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
     );
   }
 
-  // VARIANT 1: SPOT #1 (BIGGER IN HEIGHT WITH RAINBOW GLOW & PREVIEW BANNER)
+  // VARIANT 1: SPOT #1 (DETAILS + PREVIEW IMAGE ON THE SAME ROW AS REQUESTED)
   if (variant === 'top1' || item.rank === 1) {
     return (
       <div ref={containerRef} className="group relative my-2">
         {/* Ambient Glow Aura */}
-        <div className="absolute -inset-[2px] rounded-[26px] animate-rainbow-glow opacity-40 blur-xs group-hover:opacity-65 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
-        <div className="absolute -inset-[1px] rounded-[25px] animate-rainbow-glow opacity-55 pointer-events-none" />
+        <div className="absolute -inset-[2px] rounded-[26px] animate-rainbow-glow opacity-35 blur-xs group-hover:opacity-60 group-hover:blur-sm transition-all duration-300 pointer-events-none" />
+        <div className="absolute -inset-[1px] rounded-[25px] animate-rainbow-glow opacity-50 pointer-events-none" />
 
-        <Card className="relative rounded-[24px] border-none bg-card p-5 sm:p-7 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden text-foreground">
+        <Card className="relative rounded-[24px] border-none bg-card p-5 sm:p-6 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden text-foreground">
           {/* Subtle Ambient Top Corner Glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 dark:bg-purple-500/15 rounded-full blur-3xl -z-10 pointer-events-none" />
 
-          {/* Top Row: Rank, Logo, Info, Price, and CTAs */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="flex items-start gap-4 min-w-0 flex-1">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-5">
+            {/* Left Column: Rank + Favicon + Details + Outbound Link */}
+            <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
               <div className="size-8 sm:size-9 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-mono font-black text-sm flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                 #1
               </div>
@@ -200,30 +200,30 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 onClick={handleClick}
                 className="shrink-0"
               >
-                <div className="size-14 sm:size-16 rounded-[14px] bg-muted/80 p-1.5 border border-border/80 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                <div className="size-12 sm:size-14 rounded-xl bg-background border border-border/80 p-1 shadow-2xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
                   <FaviconImage
                     url={item.url}
                     name={item.name}
                     src={meta?.favicon}
-                    size={52}
-                    containerClassName="rounded-[10px] size-full"
+                    size={44}
+                    containerClassName="rounded-lg size-full"
                   />
                 </div>
               </a>
 
-              <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
                   <a
                     href={href}
                     target="_blank"
                     rel={relAttribute}
                     onClick={handleClick}
-                    className="font-mono font-black text-base sm:text-lg text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
+                    className="font-mono font-black text-sm sm:text-base text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
                   >
                     <span className="truncate">{title}</span>
                     {item.is_verified && (
                       <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="$5 Verified Listing">
-                        <BadgeCheck className="size-4.5 fill-blue-500 text-white dark:text-black" />
+                        <BadgeCheck className="size-4 fill-blue-500 text-white dark:text-black" />
                       </span>
                     )}
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -240,11 +240,11 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   )}
                 </div>
 
-                <p className="font-body text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
+                <p className="font-body text-xs sm:text-[13px] text-muted-foreground mt-1 line-clamp-3 leading-relaxed">
                   {description}
                 </p>
 
-                <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground font-sans">
+                <div className="flex items-center gap-3 mt-2.5 text-xs text-muted-foreground font-sans">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium text-[11px]">
                     <Sparkles className="size-3" />
                     {clicks.toLocaleString()} clicks
@@ -257,8 +257,26 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               </div>
             </div>
 
-            {/* Voting Pill, View Listing, Price & Outbid CTA */}
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+            {/* Middle/Right: Preview Image on the SAME ROW (Side-by-Side with Details) */}
+            <div className="w-full lg:w-48 xl:w-52 2xl:w-56 shrink-0">
+              <a
+                href={href}
+                target="_blank"
+                rel={relAttribute}
+                onClick={handleClick}
+                className="block rounded-xl overflow-hidden border border-border/70 hover:border-blue-500/50 shadow-2xs transition-all h-28 sm:h-32 w-full relative bg-muted/40"
+              >
+                <PreviewImage
+                  src={previewImageUrl}
+                  url={item.url}
+                  name={item.name}
+                  title={title}
+                />
+              </a>
+            </div>
+
+            {/* Far Right: Voting Pill, Price & Action CTA */}
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-border/50">
               <div className="flex items-center gap-2">
                 <Link
                   href={`/s/${getListingSlug(item)}`}
@@ -284,30 +302,12 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 <button
                   type="button"
                   onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                  className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="px-4 py-1.5 rounded-full font-bold text-xs text-white bg-blue-600 hover:bg-blue-500 shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   {siteCopy.feed.podiumButton}
                 </button>
               )}
             </div>
-          </div>
-
-          {/* LARGE PREVIEW BANNER (GIVES SPOT #1 ITS PROMINENT TALLER HEIGHT) */}
-          <div className="mt-4 pt-3 border-t border-border/60">
-            <a
-              href={href}
-              target="_blank"
-              rel={relAttribute}
-              onClick={handleClick}
-              className="block rounded-xl overflow-hidden group/img relative"
-            >
-              <PreviewImage
-                src={previewImageUrl}
-                url={item.url}
-                name={item.name}
-                title={title}
-              />
-            </a>
           </div>
         </Card>
       </div>
@@ -337,12 +337,12 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 onClick={handleClick}
                 className="shrink-0"
               >
-                <div className="size-12 sm:size-13 rounded-xl bg-background/90 p-1 border border-border/60 shadow-2xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                <div className="size-11 sm:size-12 rounded-xl bg-background/90 p-1 border border-border/60 shadow-2xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
                   <FaviconImage
                     url={item.url}
                     name={item.name}
                     src={meta?.favicon}
-                    size={42}
+                    size={40}
                     containerClassName="rounded-lg size-full"
                   />
                 </div>
