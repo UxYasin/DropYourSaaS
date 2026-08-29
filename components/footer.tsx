@@ -21,7 +21,7 @@ export function Footer() {
 
   return (
     <footer className="mt-auto border-t border-border/80 bg-background dark:bg-black text-foreground transition-colors">
-      <div className="max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-12 sm:py-16">
         {/* Main 4-Column Grid Structure */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-border/60">
           {/* Column 1: Newsletter / Updates Block (Spans 5 Columns on Desktop) */}

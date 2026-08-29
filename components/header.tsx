@@ -23,7 +23,7 @@ export function Header() {
   } catch {}
 
   return (
-    <header className="sticky top-3 z-40 px-3 sm:px-5 lg:px-6 xl:px-8 w-full max-w-[1440px] mx-auto flex justify-center">
+    <header className="sticky top-3 z-40 px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 w-full mx-auto flex justify-center">
       <div className="w-full px-4 sm:px-6 py-2.5 rounded-2xl flex items-center justify-between gap-3 sm:gap-4 bg-card/85 dark:bg-[#13151f]/85 border border-border/80 dark:border-white/10 backdrop-blur-xl shadow-xs transition-colors">
         {/* Left Brand Wordmark */}
         <div className="flex items-center gap-3">

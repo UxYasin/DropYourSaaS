@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { MobileLayout } from '@/components/mobile-layout';
-import { BentoRails } from '@/components/bento-rails';
+import { RightAdsSidebar } from '@/components/right-ads-sidebar';
 import { Card } from '@/components/ui/card';
 import {
   Globe,
@@ -76,11 +76,9 @@ export default function StatsPage() {
       <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-[#fe4103] selection:text-white">
         <Header />
 
-        <main className="flex-1 w-full px-3 sm:px-5 md:px-6 lg:px-6 xl:px-8 2xl:px-10 py-5 sm:py-8">
-          <div className="flex justify-between items-start gap-4 lg:gap-6 xl:gap-8 w-full">
-            <BentoRails side="left" />
-
-            <div className="w-full max-w-3xl xl:max-w-4xl 2xl:max-w-[880px] mx-auto min-w-0 space-y-6 sm:space-y-8">
+        <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-5 sm:py-8">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-7 xl:gap-8 w-full">
+            <div className="flex-1 w-full min-w-0 space-y-6 sm:space-y-8">
               {/* Top Control Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -495,7 +493,7 @@ export default function StatsPage() {
           </Card>
             </div>
 
-            <BentoRails side="right" />
+            <RightAdsSidebar />
           </div>
         </main>
 

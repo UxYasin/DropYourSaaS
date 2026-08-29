@@ -227,10 +227,10 @@ export default function ExplorePage() {
     <MobileLayout>
       <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-blue-600 selection:text-white">
         <Header />
-        <main className="flex-1 w-full max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 xl:px-8 py-5 sm:py-7">
-          <div className="flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-7 xl:gap-8 w-full">
+        <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 py-5 sm:py-7">
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-7 xl:gap-8 w-full">
             {/* Center / Main Content */}
-            <div className="flex-1 w-full min-w-0 max-w-full lg:max-w-4xl xl:max-w-5xl space-y-4">
+            <div className="flex-1 w-full min-w-0 space-y-4">
               <Suspense fallback={null}>
                 <ExploreDirectoryContent />
               </Suspense>
