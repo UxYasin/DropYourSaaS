@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
                   <p style="color: #52525b; font-size: 14px; line-height: 22px; margin: 0 0 24px 0; text-align: center;">
                     Your SaaS product <strong>${entryName}</strong> has been published to position <strong>#${targetRank}</strong> on the DropYourSaaS directory.
                   </p>
-                  <a href="${verifyUrl}" style="display: block; background-color: #2563eb; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
+                  <a href="${verifyUrl}" style="display: block; background-color: #1a4bed; color: #ffffff; text-align: center; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 0 auto 24px auto;">
                     Confirm &amp; Manage Listing
                   </a>
                 </div>

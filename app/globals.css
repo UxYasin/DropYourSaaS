@@ -50,87 +50,115 @@
 }
 
 :root {
-  /* Base surfaces: Clean white background with low contrast cards */
+  /* Ruboz Design System Foundations */
+  /* Base Surfaces */
   --background: #ffffff;
+  --surface-base: #f0f1f2;
   --foreground: #111827;
   --card: #ffffff;
   --card-foreground: #111827;
   --popover: #ffffff;
   --popover-foreground: #111827;
 
-  /* Text hierarchy */
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);        /* secondary text */
-  --tertiary-foreground: oklab(0.556 0 0 / 0.6); /* timestamps, meta */
+  /* Text Hierarchy */
+  --text-primary: #6a6a6a;
+  --text-headline: #111827;
+  --text-tertiary: #ffffff;
+  --text-inverse: #6c757d;
+  --muted: #f0f1f2;
+  --muted-foreground: #6a6a6a;
+  --tertiary-foreground: rgba(106, 106, 106, 0.6);
 
-  /* Brand / links: Electric Blue with Purple styling */
-  --primary: #2563eb;                           /* vibrant blue */
+  /* Brand / Interactive - Ruboz Cobalt Blue */
+  --primary: #1a4bed;
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.145 0 0);
-  --accent: #7c3aed;                            /* royal purple */
+  --secondary: #f0f1f2;
+  --secondary-foreground: #111827;
+  --accent: #1a4bed;
   --accent-foreground: #ffffff;
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #dc2626;
 
-  /* Borders / structure */
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: #3b82f6;
+  /* Borders / Structure */
+  --border: #dcddde;
+  --border-strong: #dcddde;
+  --border-muted: #2a2a2a;
+  --input: #dcddde;
+  --ring: #1a4bed;
 
-  /* Radius (pill-shaped buttons/badges) */
-  --radius: 12px;
-  --radius-sm: 8px;
+  /* Radius Scale */
+  --radius-xs: 5px;
+  --radius-sm: 16px;
+  --radius-md: 28px;
+  --radius-lg: 32px;
+  --radius-xl: 800px;
+  --radius: 16px;
   --radius-full: 9999px;
 
-  /* Shadow — clean modern elevation */
-  --shadow-1: 0 1px 3px 0 rgba(0,0,0,0.06);
+  /* Elevation / Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px 0 rgba(26, 75, 237, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 12px 32px -4px rgba(26, 75, 237, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 24px 0 rgba(26, 75, 237, 0.35);
 
   /* Motion */
-  --duration-instant: 150ms;
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Bento accent surfaces (sidebar promo cards) — pastel, low-saturation */
-  --bento-blue: #e6f1ff;
-  --bento-yellow: #fff8e0;
-  --bento-pink: #ffe6f2;
-  --bento-mint: #e6fff0;
-  --bento-lavender: #f0e6ff;
-  --bento-gray: #f4f4f5;
+  /* Bento accent surfaces */
+  --bento-blue: #ebf1ff;
+  --bento-yellow: #fff9e6;
+  --bento-pink: #ffeef6;
+  --bento-mint: #eafaf1;
+  --bento-lavender: #f3efff;
+  --bento-gray: #f0f1f2;
 
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #2563eb;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #1a4bed;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f5f3ff;
-  --sidebar-accent-foreground: #6d28d9;
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: #3b82f6;
+  --sidebar-accent: #ebf1ff;
+  --sidebar-accent-foreground: #1a4bed;
+  --sidebar-border: #dcddde;
+  --sidebar-ring: #1a4bed;
 }
 
 .dark {
-  --background: #0f1117;
-  --foreground: oklch(0.985 0 0);
-  --card: #161822;
-  --card-foreground: oklch(0.985 0 0);
-  --popover: #161822;
-  --popover-foreground: oklch(0.985 0 0);
+  --background: #0d0f14;
+  --surface-base: #151821;
+  --foreground: #f8fafc;
+  --card: #151821;
+  --card-foreground: #f8fafc;
+  --popover: #151821;
+  --popover-foreground: #f8fafc;
 
-  --muted: #1e2230;
+  --text-primary: #94a3b8;
+  --text-headline: #f8fafc;
+  --text-tertiary: #ffffff;
+  --text-inverse: #64748b;
+  --muted: #1e2330;
   --muted-foreground: #94a3b8;
   --tertiary-foreground: rgba(148, 163, 184, 0.6);
 
-  --primary: #3b82f6;                           /* electric blue */
+  --primary: #1a4bed;
   --primary-foreground: #ffffff;
-  --secondary: #1e2230;
-  --secondary-foreground: oklch(0.985 0 0);
-  --accent: #8b5cf6;                            /* vibrant purple */
+  --secondary: #1e2330;
+  --secondary-foreground: #f8fafc;
+  --accent: #3b82f6;
   --accent-foreground: #ffffff;
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: #ef4444;
 
-  --border: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-muted: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: #60a5fa;
+  --ring: #1a4bed;
 
-  --shadow-1: 0 2px 4px 0 rgba(0,0,0,0.5);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 24px 0 rgba(26, 75, 237, 0.45);
 
   /* Bento accents */
   --bento-blue: #131c2e;
@@ -140,14 +168,14 @@
   --bento-lavender: #1e1530;
   --bento-gray: #1a1d27;
 
-  --sidebar: #13151f;
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #3b82f6;
+  --sidebar: #10131a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #1a4bed;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #231d38;
-  --sidebar-accent-foreground: #c4b5fd;
+  --sidebar-accent: #1e2330;
+  --sidebar-accent-foreground: #60a5fa;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #60a5fa;
+  --sidebar-ring: #1a4bed;
 }
 
 @layer base {
