@@ -190,15 +190,54 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             </div>
           </div>
 
-          {/* Main Hero Headline */}
-          <div className="space-y-2">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-heading tracking-tight text-foreground leading-[1.08]">
-              Launch today. <br />
-              <span className="text-primary">Get discovered.</span>
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground font-sans leading-relaxed max-w-xl">
-              Guaranteed homepage placement, a permanent dofollow listing page, and founders discovering your product long after launch day.
-            </p>
+          {/* Main Hero Headline + Big Stepper Widget */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2 max-w-xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-heading tracking-tight text-foreground leading-[1.08]">
+                Launch today. <br />
+                <span className="text-primary">Get discovered.</span>
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground font-sans leading-relaxed">
+                Guaranteed homepage placement, a permanent dofollow listing page, and founders discovering your product long after launch day.
+              </p>
+            </div>
+
+            {/* Big Interactive Bid Stepper Card */}
+            <div className="flex sm:flex-col items-center justify-center p-3.5 sm:p-4.5 rounded-3xl bg-card border-2 border-primary/30 shadow-md hover:border-primary/60 hover:shadow-lg transition-all gap-2 shrink-0 sm:min-w-[170px] self-start sm:self-center">
+              <span className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-wider">
+                Set Your Bid
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDecrease}
+                  className="size-9 rounded-2xl bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs border border-border"
+                  aria-label="Decrease bid"
+                >
+                  <Minus className="size-4 text-primary" />
+                </button>
+                <div className="flex items-center font-heading font-bold text-3xl sm:text-4xl text-foreground">
+                  <span className="text-primary mr-1 text-2xl sm:text-3xl">$</span>
+                  <input
+                    type="text"
+                    value={bid}
+                    onChange={handleBidInputChange}
+                    className="w-14 text-center bg-transparent border-none outline-none font-heading font-bold text-foreground p-0"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleIncrease}
+                  className="size-9 rounded-2xl bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs border border-border"
+                  aria-label="Increase bid"
+                >
+                  <Plus className="size-4 text-primary" />
+                </button>
+              </div>
+              <span className="text-[11px] font-sans font-bold text-primary">
+                Targets Spot #{displayRank}
+              </span>
+            </div>
           </div>
 
           {/* Quick Outbid Shortcut Pills */}
@@ -257,41 +296,14 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                     if (error) setError(null);
                   }}
                   placeholder="yourproduct.com or @handle"
-                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans"
+                  className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:ring-0 font-sans h-10"
                 />
-              </div>
-
-              {/* Stepper Inside Form */}
-              <div className="flex items-center gap-1.5 self-end sm:self-center px-2 py-1 bg-muted/60 rounded-full border border-border/80">
-                <button
-                  type="button"
-                  onClick={handleDecrease}
-                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs text-xs font-bold"
-                >
-                  <Minus className="size-3" />
-                </button>
-                <div className="flex items-center font-bold text-xs text-foreground font-sans">
-                  <span className="text-primary mr-0.5 font-bold">$</span>
-                  <input
-                    type="text"
-                    value={bid}
-                    onChange={handleBidInputChange}
-                    className="w-8 text-center bg-transparent border-none outline-none font-bold text-foreground p-0 text-xs font-sans"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleIncrease}
-                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs text-xs font-bold"
-                >
-                  <Plus className="size-3" />
-                </button>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-10 sm:h-10 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-sm hover:shadow-[0_0_0_0.25em_rgba(140,80,185,0.25)] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="h-10 sm:h-11 px-6 sm:px-7 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-sm hover:shadow-[0_0_0_0.25em_rgba(140,80,185,0.25)] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <Loader2 className="size-4 animate-spin text-white" />
