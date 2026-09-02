@@ -2,14 +2,65 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@font-face {
+  font-family: 'Plush';
+  src: url('/fonts/Plush-Bold.woff2') format('woff2'),
+       url('/fonts/Plush-Bold.woff') format('woff');
+  font-weight: 700 800 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plush';
+  src: url('/fonts/Plush-Medium.woff2') format('woff2'),
+       url('/fonts/Plush-Medium.woff') format('woff');
+  font-weight: 500 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plush';
+  src: url('/fonts/Plush-Regular.woff2') format('woff2'),
+       url('/fonts/Plush-Regular.woff') format('woff');
+  font-weight: 300 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Averta';
+  src: url('/fonts/Averta-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Averta';
+  src: url('/fonts/Averta-Semibold.woff') format('woff');
+  font-weight: 500 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Averta';
+  src: url('/fonts/Averta-Bold.woff') format('woff');
+  font-weight: 700 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-heading);
-    --font-sans: var(--font-sans);
-    --font-body: var(--font-sans);
-    --font-hand: var(--font-hand);
-    --font-mono: var(--font-mono);
+    --font-heading: 'Plush', var(--font-heading), 'Fraunces', serif;
+    --font-sans: 'Averta', var(--font-sans), 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Averta', var(--font-sans), 'Plus Jakarta Sans', sans-serif;
+    --font-hand: var(--font-hand), 'Caveat', cursive;
+    --font-mono: var(--font-mono), 'Roboto Mono', monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,7 +103,7 @@
 
 :root {
   /* Biings Design System (biings-ds) Foundations */
-  /* Base Surfaces: Warm Cream & Crisp White */
+  /* Base Surfaces: Warm Cream (#faf7f5) & Pure White (#ffffff) */
   --background: #faf7f5;
   --surface-base: #faf7f5;
   --foreground: #46285d;

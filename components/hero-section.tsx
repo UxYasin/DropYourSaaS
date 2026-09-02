@@ -355,7 +355,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 </span>
               </div>
 
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-[10px] font-mono font-bold">
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#46285d] text-white text-[10px] font-sans font-bold shadow-xs">
                 <CheckCircle2 className="size-3 fill-current" />
                 <span>Permanent listing</span>
               </div>
@@ -370,13 +370,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                   <div className="h-12 w-full bg-muted/40 animate-pulse rounded-xl" />
                 </div>
               ) : topItems.length === 0 ? (
-                <p className="text-xs text-muted-foreground font-mono text-center py-4">
+                <p className="text-xs text-muted-foreground font-sans text-center py-4">
                   Leaderboard telemetry initializing...
                 </p>
               ) : (
                 topItems.slice(0, 3).map((item, idx) => {
                   const rank = idx + 1;
-                  const rankBadge = rank === 1 ? '1 🥇' : rank === 2 ? '2 🥈' : '3 🥉';
                   const href = `${item.url}${item.url.includes('?') ? '&' : '?'}utm_source=dropyoursaas&utm_medium=hero_launchpad&utm_campaign=hero_preview`;
 
                   return (
@@ -388,11 +387,11 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                       className="flex items-center justify-between p-2.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all border border-border/50 group"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="font-mono font-black text-xs text-muted-foreground w-6 shrink-0 text-center">
+                        <span className="font-heading font-bold text-xs text-muted-foreground w-6 shrink-0 text-center">
                           {rank}
                         </span>
 
-                        <div className="size-9 rounded-xl bg-background border border-border/80 p-1 shrink-0 overflow-hidden flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
+                        <div className="size-9 rounded-xl bg-background border border-border p-1 shrink-0 overflow-hidden flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                           <FaviconImage
                             url={item.url}
                             name={item.name}
@@ -403,7 +402,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <div className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-blue-500 transition-colors">
+                          <div className="font-heading font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
                             {item.name}
                           </div>
                           <div className="text-[11px] text-muted-foreground truncate font-sans">
@@ -412,9 +411,12 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                        <span className="text-[11px] font-mono font-bold text-muted-foreground">
-                          {item.bid ? `$${item.bid}` : `${item.net_score || item.upvotes || 0} votes`}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-sans font-bold text-xs sm:text-sm text-foreground">
+                          ${item.bid || 1}
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                          Live
                         </span>
                       </div>
                     </a>
@@ -423,17 +425,16 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               )}
             </div>
 
-            {/* Floating Card Footer */}
-            <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs font-mono">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Sparkles className="size-3 text-amber-500" />
-                <span>Fresh launches daily</span>
+            {/* Bottom Callout in Floating Card */}
+            <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs font-sans">
+              <span className="text-muted-foreground">
+                Want to be #1 today?
               </span>
               <a
-                href="#directory"
-                className="font-bold text-foreground hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center gap-1 transition-colors"
+                href="#claim"
+                className="font-bold text-foreground hover:text-primary inline-flex items-center gap-1 transition-colors"
               >
-                <span>Browse all</span>
+                <span>Outbid now</span>
                 <ArrowRight className="size-3" />
               </a>
             </div>
@@ -443,4 +444,3 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
     </section>
   );
 });
-
