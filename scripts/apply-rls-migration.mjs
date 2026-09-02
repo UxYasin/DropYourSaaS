@@ -3,6 +3,18 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+if (fs.existsSync('.env.local')) {
+  const content = fs.readFileSync('.env.local', 'utf-8');
+  content.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const val = valueParts.join('=').trim();
+      process.env[key.trim()] = val;
+    }
+  });
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const conn = process.env.DATABASE_URL;

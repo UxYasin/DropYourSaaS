@@ -1,4 +1,17 @@
 import pg from 'pg';
+import fs from 'fs';
+
+if (fs.existsSync('.env.local')) {
+  const content = fs.readFileSync('.env.local', 'utf-8');
+  content.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const val = valueParts.join('=').trim();
+      process.env[key.trim()] = val;
+    }
+  });
+}
 
 const conn = process.env.DATABASE_URL;
 
