@@ -1,6 +1,6 @@
 import pg from 'pg';
 
-const conn = 'postgresql://postgres.naflsoqdvllbnffghkdv:jhLON3g6mAQxpvx5@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres';
+const conn = process.env.DATABASE_URL;
 
 async function run() {
   const client = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false } });

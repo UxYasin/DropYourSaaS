@@ -46,9 +46,8 @@ CREATE INDEX IF NOT EXISTS idx_leaderboard_entries_verification_token ON leaderb
 `;
 
 const connectionStrings = [
-  'postgresql://postgres.naflsoqdvllbnffghkdv:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmxzb3FkdmxsYm5mZmdoa2R2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzM5NDI1MSwiZXhwIjoyMTAyOTcwMjUxfQ.aiN-DIx_lMXHQQhSlyP2MS4Doz1XdqBLfrFnIppnAro@aws-0-us-east-1.pooler.supabase.com:6543/postgres',
-  'postgresql://postgres:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmxzb3FkdmxsYm5mZmdoa2R2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzM5NDI1MSwiZXhwIjoyMTAyOTcwMjUxfQ.aiN-DIx_lMXHQQhSlyP2MS4Doz1XdqBLfrFnIppnAro@db.naflsoqdvllbnffghkdv.supabase.co:5432/postgres',
-];
+  process.env.DATABASE_URL,
+].filter(Boolean);
 
 async function syncSchema() {
   console.log('⚡ Starting schema sync against live Supabase database...');

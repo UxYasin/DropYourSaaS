@@ -43,9 +43,8 @@ create index if not exists idx_listings_verification_token on listings(verificat
 `;
 
 const connectionStrings = [
-  'postgresql://postgres.naflsoqdvllbnffghkdv:jhLON3g6mAQxpvx5@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres',
-  'postgresql://postgres.naflsoqdvllbnffghkdv:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hZmxzb3FkdmxsYm5mZmdoa2R2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzM5NDI1MSwiZXhwIjoyMTAyOTcwMjUxfQ.aiN-DIx_lMXHQQhSlyP2MS4Doz1XdqBLfrFnIppnAro@aws-0-us-east-1.pooler.supabase.com:6543/postgres',
-];
+  process.env.DATABASE_URL,
+].filter(Boolean);
 
 async function main() {
   for (const conn of connectionStrings) {

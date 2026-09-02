@@ -9,8 +9,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 const { Client } = pg;
 const connectionString =
   process.env.DATABASE_URL ||
-  process.env.SUPABASE_DATABASE_URL ||
-  'postgresql://postgres.naflsoqdvllbnffghkdv:jhLON3g6mAQxpvx5@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres';
+  process.env.SUPABASE_DATABASE_URL;
 const client = new Client({
   connectionString,
   ssl: { rejectUnauthorized: false },
