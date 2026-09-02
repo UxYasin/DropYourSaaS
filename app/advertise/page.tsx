@@ -67,38 +67,38 @@ export default function AdvertisePage() {
 
         {/* Audience & Traffic Breakdown Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          <div className="p-6 rounded-3xl bg-card border border-border/80 text-center space-y-2 shadow-xs">
-            <div className="size-10 mx-auto rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <div className="p-6 rounded-3xl bg-card border border-border text-center space-y-2 shadow-xs">
+            <div className="size-10 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
               <Users className="size-5" />
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight text-foreground">
+            <div className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight text-foreground">
               50,000+
             </div>
-            <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+            <div className="text-xs font-sans text-muted-foreground uppercase tracking-wider font-semibold">
               Monthly Active Devs &amp; Founders
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl bg-card border border-border/80 text-center space-y-2 shadow-xs">
-            <div className="size-10 mx-auto rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <div className="p-6 rounded-3xl bg-card border border-border text-center space-y-2 shadow-xs">
+            <div className="size-10 mx-auto rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
               <Eye className="size-5" />
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight text-foreground">
+            <div className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight text-foreground">
               250,000+
             </div>
-            <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+            <div className="text-xs font-sans text-muted-foreground uppercase tracking-wider font-semibold">
               Monthly Ad &amp; Listing Impressions
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl bg-card border border-border/80 text-center space-y-2 shadow-xs">
-            <div className="size-10 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div className="p-6 rounded-3xl bg-card border border-border text-center space-y-2 shadow-xs">
+            <div className="size-10 mx-auto rounded-2xl bg-[#53ab73]/10 text-[#53ab73] flex items-center justify-center">
               <Globe className="size-5" />
             </div>
-            <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight text-foreground">
+            <div className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight text-foreground">
               120+
             </div>
-            <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+            <div className="text-xs font-sans text-muted-foreground uppercase tracking-wider font-semibold">
               Global Founder Reach (US, EU, APAC)
             </div>
           </div>
@@ -107,36 +107,36 @@ export default function AdvertisePage() {
         {/* 3 Advertising Tiers Bento Grid */}
         <div className="space-y-6">
           <div className="text-center space-y-2 max-w-xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-heading">
               Choose Your Growth Tier
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground font-sans">
               Transparent, immediate execution. Every ad placement delivers real-time visibility.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Tier 1: Pay-to-Rank Leaderboard Boost */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 flex flex-col justify-between space-y-6 hover:border-border transition-all shadow-xs">
+            <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border flex flex-col justify-between space-y-6 hover:border-primary/40 transition-all shadow-xs">
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
-                  <div className="size-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <div className="size-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                     <TrendingUp className="size-6" />
                   </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <span className="text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                     Self-Serve
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground font-heading">
                     Leaderboard Boost
                   </h3>
                   <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-extrabold font-mono text-foreground">
+                    <span className="text-2xl sm:text-3xl font-extrabold font-sans text-foreground">
                       $5 - $50
                     </span>
-                    <span className="text-xs text-muted-foreground">/ dynamic</span>
+                    <span className="text-xs text-muted-foreground font-sans">/ dynamic</span>
                   </div>
                   <p className="text-muted-foreground text-xs leading-relaxed mt-2">
                     Pay-what-you-want dynamic placement. Instant indexation and community upvote visibility.

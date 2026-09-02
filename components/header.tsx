@@ -52,20 +52,20 @@ export function Header() {
   return (
     <div className="w-full flex flex-col items-center">
       {/* 1. TOP ANNOUNCEMENT BANNER */}
-      <div className="w-full bg-zinc-950 dark:bg-black text-white text-[11px] sm:text-xs py-1.5 px-4 font-mono flex items-center justify-center gap-2 text-center border-b border-zinc-800/80">
-        <span className="flex items-center gap-1.5 text-amber-400 font-bold">
-          <Sparkles className="size-3.5 fill-amber-400" />
+      <div className="w-full bg-[#46285d] dark:bg-[#130a1a] text-white text-[11px] sm:text-xs py-2 px-4 font-sans flex items-center justify-center gap-2 text-center border-b border-[#5b2d7d]/40 shadow-xs">
+        <span className="flex items-center gap-1.5 text-[#ffc748] font-bold">
+          <Sparkles className="size-3.5 fill-[#ffc748]" />
           <span>Launch Your SaaS:</span>
         </span>
-        <span className="text-zinc-300 hidden sm:inline">
+        <span className="text-white/90 hidden sm:inline font-medium">
           Guaranteed homepage placement, instant Google indexation &amp; permanent dofollow backlinks.
         </span>
-        <span className="text-zinc-300 sm:hidden">
+        <span className="text-white/90 sm:hidden font-medium">
           Dofollow backlinks &amp; instant indexation.
         </span>
         <a
           href="#claim"
-          className="inline-flex items-center gap-1 text-white hover:text-amber-300 font-bold underline underline-offset-2 ml-1 cursor-pointer transition-colors"
+          className="inline-flex items-center gap-1 text-[#cb9569] hover:text-[#ffc748] font-bold underline underline-offset-2 ml-1 cursor-pointer transition-colors"
         >
           <span>Claim Rank from $1</span>
           <ArrowRight className="size-3" />
@@ -81,7 +81,7 @@ export function Header() {
               variant="ghost"
               size="icon-sm"
               onClick={toggleSidebar}
-              className="rounded-full bg-card border border-border/80 shadow-2xs"
+              className="rounded-full bg-card border border-border shadow-xs hover:border-primary/50"
             >
               <Menu className="size-4" />
               <span className="sr-only">Toggle Sidebar</span>
@@ -89,37 +89,37 @@ export function Header() {
           )}
           <Link
             href="/"
-            className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card/90 dark:bg-[#161822]/90 border border-border/80 dark:border-white/10 shadow-xs backdrop-blur-md hover:border-blue-500/40 transition-all group"
+            className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-card/95 dark:bg-[#241b27]/95 border border-border dark:border-white/10 shadow-sm backdrop-blur-md hover:border-primary/50 transition-all group"
           >
-            <div className="size-6 rounded-full bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="size-6 rounded-full bg-[#8c50b9] text-white flex items-center justify-center shrink-0 shadow-xs">
               <Rocket className="size-3.5 fill-current" />
             </div>
-            <span className="font-mono font-black text-sm sm:text-base tracking-tight text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <span className="font-heading font-bold text-sm sm:text-base tracking-tight text-foreground group-hover:text-primary transition-colors">
               DropYourSaaS<span className="text-[10px] text-muted-foreground ml-0.5 font-sans font-normal">™</span>
             </span>
           </Link>
         </div>
 
         {/* CENTER: Clean Navigation Links */}
-        <nav className={cn('hidden md:flex items-center gap-1 p-1 rounded-full bg-card/90 dark:bg-[#161822]/90 border border-border/80 dark:border-white/10 shadow-xs backdrop-blur-md')}>
+        <nav className={cn('hidden md:flex items-center gap-1 p-1 rounded-full bg-card/95 dark:bg-[#241b27]/95 border border-border dark:border-white/10 shadow-sm backdrop-blur-md')}>
           <Link
             href="/#billboard"
             className={cn(
-              'text-xs font-bold transition-all px-3.5 py-1.5 rounded-full font-mono flex items-center gap-1.5',
+              'text-xs font-semibold transition-all px-3.5 py-1.5 rounded-full flex items-center gap-1.5',
               pathname === '/'
-                ? 'text-foreground hover:bg-muted/60'
+                ? 'text-primary bg-primary/10 font-bold'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
             )}
           >
-            <Zap className="size-3 text-amber-500 fill-amber-500" />
+            <Zap className="size-3 text-[#cb9569] fill-[#cb9569]" />
             <span>Billboard</span>
           </Link>
           <Link
             href="/explore"
             className={cn(
-              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full font-mono',
+              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full',
               pathname.startsWith('/explore') || pathname.startsWith('/buy-sell')
-                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs font-bold'
+                ? 'bg-primary text-white shadow-xs font-bold'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
             )}
           >
@@ -128,9 +128,9 @@ export function Header() {
           <Link
             href="/stats"
             className={cn(
-              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full font-mono',
+              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full',
               pathname === '/stats'
-                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs font-bold'
+                ? 'bg-primary text-white shadow-xs font-bold'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
             )}
           >
@@ -139,9 +139,9 @@ export function Header() {
           <Link
             href="/rules"
             className={cn(
-              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full font-mono',
+              'text-xs font-medium transition-all px-3.5 py-1.5 rounded-full',
               pathname === '/rules'
-                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-2xs font-bold'
+                ? 'bg-primary text-white shadow-xs font-bold'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
             )}
           >
@@ -155,19 +155,19 @@ export function Header() {
           <Link
             href="/stats"
             title="Live verified directory analytics"
-            className="hidden xl:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/90 dark:bg-[#161822]/90 border border-border/80 dark:border-white/10 shadow-xs backdrop-blur-md hover:border-emerald-500/40 transition-all text-xs font-mono select-none"
+            className="hidden xl:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/95 dark:bg-[#241b27]/95 border border-border dark:border-white/10 shadow-sm backdrop-blur-md hover:border-emerald-500/40 transition-all text-xs select-none"
           >
             <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
               <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30 animate-pulse" />
               {stats.online} online
             </span>
-            <span className="text-border/80">|</span>
+            <span className="text-border">|</span>
             <span className="text-muted-foreground font-medium">
               {stats.views.toLocaleString()}+ views
             </span>
           </Link>
 
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-card/90 dark:bg-[#161822]/90 border border-border/80 dark:border-white/10 shadow-xs backdrop-blur-md">
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-card/95 dark:bg-[#241b27]/95 border border-border dark:border-white/10 shadow-sm backdrop-blur-md">
             <ThemeToggle />
             <ProfileMenu />
           </div>
@@ -175,7 +175,7 @@ export function Header() {
           {/* High-Converting Launch / Submit CTA Button */}
           <a
             href="#claim"
-            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 font-mono font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#8c50b9] hover:bg-[#76439c] active:bg-[#5b2d7d] text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-[0_0_0_0.25em_rgba(140,80,185,0.25)] active:scale-95 transition-all cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Submit SaaS</span>

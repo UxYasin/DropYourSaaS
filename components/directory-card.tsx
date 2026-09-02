@@ -81,14 +81,14 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
   if (variant === 'top1' || item.rank === 1) {
     return (
       <div ref={containerRef} className="group relative my-1.5">
-        <Card className="relative rounded-2xl border border-amber-500/40 bg-card p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden text-foreground">
+        <Card className="relative rounded-2xl border border-amber-500/40 bg-card p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden text-foreground">
           {/* Subtle Accent Glow */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
 
           <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
             {/* Left Column: Rank + Favicon + Details + Outbound Link */}
             <div className="flex items-start gap-3 min-w-0 flex-1">
-              <div className="size-8 rounded-full bg-amber-500 text-zinc-950 font-mono font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+              <div className="size-8 rounded-full bg-amber-500 text-zinc-950 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                 1 🥇
               </div>
 
@@ -99,7 +99,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 onClick={handleClick}
                 className="shrink-0"
               >
-                <div className="size-11 sm:size-12 rounded-xl bg-background border border-border/80 p-1 shadow-2xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
+                <div className="size-11 sm:size-12 rounded-xl bg-background border border-border p-1 shadow-xs flex items-center justify-center overflow-hidden hover:scale-105 transition-transform">
                   <FaviconImage
                     url={item.url}
                     name={item.name}
@@ -117,33 +117,33 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                     target="_blank"
                     rel={relAttribute}
                     onClick={handleClick}
-                    className="font-mono font-bold text-sm sm:text-base text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
+                    className="font-heading font-bold text-sm sm:text-base text-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5 min-w-0 max-w-full"
                   >
                     <span className="truncate">{title}</span>
                     {item.is_verified && (
-                      <span className="inline-flex items-center text-blue-500 font-bold shrink-0" title="Verified SaaS Listing">
-                        <BadgeCheck className="size-4 fill-blue-500 text-white dark:text-black" />
+                      <span className="inline-flex items-center text-primary font-bold shrink-0" title="Verified SaaS Listing">
+                        <BadgeCheck className="size-4 fill-primary text-white dark:text-black" />
                       </span>
                     )}
                     <ExternalLink className="size-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                   </a>
 
-                  <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30 shrink-0">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30 shrink-0">
                     👑 RANK #1
                   </span>
 
                   {item.is_for_sale && (
-                    <span className="inline-flex items-center text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
                       {forSaleBadgeText}
                     </span>
                   )}
                 </div>
 
-                <p className="font-body text-xs sm:text-[13px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                <p className="font-sans text-xs sm:text-[13px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                   {description}
                 </p>
 
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground font-mono flex-wrap">
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground font-sans flex-wrap">
                   <span className="inline-flex items-center gap-1 text-[11px]">
                     <Eye className="size-3 opacity-70" />
                     {clicks.toLocaleString()} views
@@ -164,13 +164,13 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
             <div className="flex items-center justify-between lg:justify-end gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-border/50 w-full lg:w-auto">
               <Link
                 href={`/s/${getListingSlug(item)}`}
-                className="text-xs px-3 py-1 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-mono font-medium transition-colors"
+                className="text-xs px-3 py-1 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-sans font-medium transition-colors"
               >
                 Page ➔
               </Link>
 
               {siteCopy.feed.showPrices && (
-                <span className="font-mono font-black text-sm sm:text-base text-foreground">
+                <span className="font-bold text-sm sm:text-base text-foreground font-sans">
                   {formatBid(item.bid)}
                 </span>
               )}
@@ -186,7 +186,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                 <button
                   type="button"
                   onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                  className="px-3.5 py-1.5 rounded-full font-mono font-bold text-xs text-white bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full font-bold text-xs text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-sm active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   Outbid
                 </button>
@@ -205,13 +205,13 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
 
   return (
     <div ref={containerRef} className="group relative">
-      <div className="rounded-2xl border border-border/80 bg-card p-3 sm:p-3.5 hover:border-border hover:shadow-xs transition-all duration-150">
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-3.5 hover:border-primary/40 hover:shadow-sm transition-all duration-150">
         <div className="flex items-center justify-between gap-3">
           {/* Left: Rank + Favicon + Content */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <span
               className={cn(
-                'font-mono text-xs sm:text-sm font-black shrink-0 w-7 text-center',
+                'text-xs sm:text-sm font-bold shrink-0 w-7 text-center font-sans',
                 isPodium2 && 'text-zinc-700 dark:text-zinc-300',
                 isPodium3 && 'text-amber-700 dark:text-amber-400',
                 !isPodium2 && !isPodium3 && 'text-muted-foreground font-semibold'
@@ -227,7 +227,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               onClick={handleClick}
               className="shrink-0"
             >
-              <div className="size-9 sm:size-10 rounded-xl bg-muted/60 border border-border/60 p-1 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shadow-2xs">
+              <div className="size-9 sm:size-10 rounded-xl bg-muted/60 border border-border/80 p-1 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shadow-xs">
                 <FaviconImage
                   url={item.url}
                   name={item.name}
@@ -245,28 +245,28 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
                   target="_blank"
                   rel={relAttribute}
                   onClick={handleClick}
-                  className="font-mono font-bold text-xs sm:text-sm text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1 min-w-0"
+                  className="font-heading font-bold text-xs sm:text-sm text-foreground hover:text-primary transition-colors inline-flex items-center gap-1 min-w-0"
                 >
                   <span className="truncate">{title}</span>
                   {item.is_verified && (
-                    <span className="inline-flex items-center text-blue-500 font-bold shrink-0 ml-0.5" title="Verified SaaS Listing">
-                      <BadgeCheck className="size-3.5 fill-blue-500 text-white dark:text-black" />
+                    <span className="inline-flex items-center text-primary font-bold shrink-0 ml-0.5" title="Verified SaaS Listing">
+                      <BadgeCheck className="size-3.5 fill-primary text-white dark:text-black" />
                     </span>
                   )}
                 </a>
 
                 {item.is_for_sale && (
-                  <span className="inline-flex items-center text-[9px] font-black px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
+                  <span className="inline-flex items-center text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shrink-0">
                     {forSaleBadgeText}
                   </span>
                 )}
               </div>
 
-              <p className="font-body text-[11px] sm:text-xs text-muted-foreground truncate leading-relaxed">
+              <p className="font-sans text-[11px] sm:text-xs text-muted-foreground truncate leading-relaxed">
                 {description}
               </p>
 
-              <div className="flex items-center gap-2.5 pt-0.5 text-[10px] text-muted-foreground font-mono">
+              <div className="flex items-center gap-2.5 pt-0.5 text-[10px] text-muted-foreground font-sans">
                 <span className="inline-flex items-center gap-1">
                   <Eye className="size-2.5 opacity-60" />
                   {clicks.toLocaleString()}
@@ -284,13 +284,13 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href={`/s/${getListingSlug(item)}`}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground hover:text-foreground font-mono hidden md:inline-flex"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground hover:text-foreground font-sans hidden md:inline-flex"
             >
               Page ➔
             </Link>
 
             {siteCopy.feed.showPrices && (
-              <span className="font-mono font-bold text-xs sm:text-sm text-foreground shrink-0 hidden sm:inline-block">
+              <span className="font-bold text-xs sm:text-sm text-foreground shrink-0 hidden sm:inline-block font-sans">
                 {formatBid(item.bid)}
               </span>
             )}
@@ -306,7 +306,7 @@ export function DirectoryCard({ item, index, variant, onClaimClick }: DirectoryC
               <button
                 type="button"
                 onClick={() => onClaimClick(item.rank, Math.max(1, item.bid + 1))}
-                className="px-3 py-1 rounded-full font-bold text-[11px] text-white bg-blue-600 hover:bg-blue-500 shadow-2xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
+                className="px-3 py-1 rounded-full font-bold text-[11px] text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-xs active:scale-95 transition-all font-sans shrink-0 cursor-pointer"
               >
                 {siteCopy.feed.podiumButton}
               </button>

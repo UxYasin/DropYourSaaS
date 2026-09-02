@@ -44,20 +44,20 @@ export default function Home() {
 
   return (
     <MobileLayout>
-      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-blue-600 selection:text-white">
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
         <Header />
 
         <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-4 sm:py-6">
           {showVerifiedBanner && (
-            <div className="mb-6 p-4 rounded-2xl bg-blue-950/60 border border-blue-500/50 text-blue-300 text-xs font-mono flex items-center justify-between shadow-md animate-in fade-in-50 duration-300 w-full mx-auto">
+            <div className="mb-6 p-4 rounded-2xl bg-primary/10 border border-primary/30 text-primary text-xs font-sans flex items-center justify-between shadow-sm animate-in fade-in-50 duration-300 w-full mx-auto">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-blue-400 shrink-0" />
+                <CheckCircle2 className="size-4 text-primary shrink-0" />
                 <span>🎉 Your SaaS listing has been verified &amp; published to the public directory!</span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowVerifiedBanner(false)}
-                className="text-blue-400 hover:text-white p-1 cursor-pointer"
+                className="text-primary hover:text-foreground p-1 cursor-pointer"
               >
                 <X className="size-3.5" />
               </button>

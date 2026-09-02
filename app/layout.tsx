@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist_Mono, Inconsolata, Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, Outfit, Caveat, Roboto_Mono } from 'next/font/google';
 
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -40,22 +40,27 @@ export const metadata: Metadata = {
   },
 };
 
-const inter = Inter({
+const fontSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 });
 
-const fontMono = Geist_Mono({
+const fontHeading = Outfit({
   subsets: ['latin'],
-  variable: '--font-mono',
+  variable: '--font-heading',
   display: 'swap',
 });
 
-const inconsolata = Inconsolata({
+const fontHand = Caveat({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-body',
+  variable: '--font-hand',
+  display: 'swap',
+});
+
+const fontMono = Roboto_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
   display: 'swap',
 });
 
@@ -83,9 +88,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(
         'antialiased',
+        fontSans.variable,
+        fontHeading.variable,
+        fontHand.variable,
         fontMono.variable,
-        inter.variable,
-        inconsolata.variable,
         'font-sans'
       )}
     >

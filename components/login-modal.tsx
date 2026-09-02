@@ -143,12 +143,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="size-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+          <div className="size-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0">
             <ShieldCheck className="size-5" />
           </div>
           <div>
-            <h2 className="font-mono font-bold text-lg text-white">Log In</h2>
-            <p className="font-body text-xs text-zinc-400">
+            <h2 className="font-heading font-bold text-lg text-white">Log In</h2>
+            <p className="font-sans text-xs text-zinc-400">
               {step === 1 ? 'Enter your email to get started' : `Verification for ${email}`}
             </p>
           </div>
@@ -161,7 +161,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         )}
 
         {message && (
-          <div className="mb-4 p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-xs font-mono flex items-center gap-2">
+          <div className="mb-4 p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-xs font-sans flex items-center gap-2">
             <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
             <span>{message}</span>
           </div>
@@ -180,7 +180,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-11 rounded-xl pl-10 focus-visible:ring-blue-500"
+                  className="bg-zinc-900 border-zinc-800 text-white font-sans text-xs sm:text-sm h-11 rounded-xl pl-10 focus-visible:ring-primary"
                   required
                   autoFocus
                 />
@@ -190,7 +190,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             <Button
               type="submit"
-              className="w-full rounded-full bg-blue-600 hover:bg-blue-500 text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-lg flex items-center justify-center gap-2"
+              className="w-full rounded-full bg-primary hover:bg-[#76439c] text-white font-sans font-bold text-xs sm:text-sm h-11 shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               Continue
               <ArrowRight className="size-4" />
@@ -200,12 +200,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           /* STEP 2: HYBRID SELECTION (MAGIC LINK vs PASSWORD) */
           <div className="space-y-5 animate-in fade-in-50 duration-200">
             {/* Email pill */}
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-sans text-zinc-300">
               <span className="truncate">{email}</span>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-blue-400 hover:underline text-[11px] shrink-0 font-sans"
+                className="text-primary hover:underline text-[11px] shrink-0 font-sans"
               >
                 Change
               </button>
@@ -214,17 +214,17 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {/* Option A: Send Magic Link */}
             <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
               <div className="flex items-center gap-2 text-xs font-bold text-white font-sans">
-                <Mail className="size-4 text-blue-400" />
+                <Mail className="size-4 text-primary" />
                 <span>Passwordless Magic Link</span>
               </div>
-              <p className="text-[11px] text-zinc-400 leading-relaxed font-body">
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
                 We will email you a 1-click instant verification link. No password required.
               </p>
               <Button
                 type="button"
                 onClick={handleSendMagicLink}
                 disabled={isLoadingMagic}
-                className="w-full rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 font-sans font-semibold text-xs h-10 flex items-center justify-center gap-2"
+                className="w-full rounded-xl bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 font-sans font-semibold text-xs h-10 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoadingMagic ? (
                   <Loader2 className="size-4 animate-spin" />

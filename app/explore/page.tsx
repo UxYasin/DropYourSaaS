@@ -69,14 +69,14 @@ function ExploreDirectoryContent() {
     <div className="w-full space-y-6">
       {/* Title Header */}
       <div className="text-left space-y-2.5 pb-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold">
           <Sparkles className="size-3.5" />
           SaaS Directory &amp; Marketplace
         </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-mono text-foreground">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight font-heading text-foreground">
           Explore All Products
         </h1>
-        <p className="text-xs sm:text-sm text-muted-foreground font-body leading-relaxed max-w-2xl">
+        <p className="text-xs sm:text-sm text-muted-foreground font-sans leading-relaxed max-w-2xl">
           Browse verified SaaS products, startups for sale, and top developer tools ranked by real live traffic and community backing.
         </p>
 
@@ -88,7 +88,7 @@ function ExploreDirectoryContent() {
             placeholder="Search by product name, category, or keyword..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border/80 bg-card text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40 shadow-2xs font-sans"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-card text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-xs font-sans"
           />
         </div>
       </div>
@@ -106,8 +106,8 @@ function ExploreDirectoryContent() {
       </div>
 
       {/* Sorting Tabs & Count */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/60">
-        <div className="inline-flex items-center p-1 rounded-full bg-muted/60 border border-border/70 text-xs font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/80">
+        <div className="inline-flex items-center p-1 rounded-full bg-muted border border-border text-xs font-sans">
           <button
             type="button"
             onClick={() => {
@@ -117,7 +117,7 @@ function ExploreDirectoryContent() {
             className={cn(
               'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'hot'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs'
+                ? 'bg-primary text-white shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -133,7 +133,7 @@ function ExploreDirectoryContent() {
             className={cn(
               'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'top'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs'
+                ? 'bg-primary text-white shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -149,7 +149,7 @@ function ExploreDirectoryContent() {
             className={cn(
               'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'recent'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs'
+                ? 'bg-primary text-white shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -165,7 +165,7 @@ function ExploreDirectoryContent() {
             className={cn(
               'px-3 py-1 rounded-full font-bold flex items-center gap-1.5 transition-all cursor-pointer',
               sortBy === 'rank'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs'
+                ? 'bg-primary text-white shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -174,7 +174,7 @@ function ExploreDirectoryContent() {
           </button>
         </div>
 
-        <div className="text-xs font-mono text-muted-foreground">
+        <div className="text-xs font-sans text-muted-foreground">
           Showing <span className="font-bold text-foreground">{filteredItems.length}</span> of{' '}
           <span className="font-bold text-foreground">{totalCount}</span> products
         </div>
@@ -188,8 +188,8 @@ function ExploreDirectoryContent() {
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-6 border-t border-border/80">
-          <div className="text-xs font-mono text-muted-foreground">
+        <div className="flex items-center justify-between pt-6 border-t border-border">
+          <div className="text-xs font-sans text-muted-foreground">
             Page <span className="font-bold text-foreground">{page}</span> of{' '}
             <span className="font-bold text-foreground">{totalPages}</span>
           </div>
@@ -200,7 +200,7 @@ function ExploreDirectoryContent() {
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1 || isLoading}
-              className="h-8 gap-1 text-xs cursor-pointer rounded-xl font-mono"
+              className="h-8 gap-1 text-xs cursor-pointer rounded-xl font-sans"
             >
               <ChevronLeft className="size-3.5" />
               Previous
@@ -210,7 +210,7 @@ function ExploreDirectoryContent() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages || isLoading}
-              className="h-8 gap-1 text-xs cursor-pointer rounded-xl font-mono"
+              className="h-8 gap-1 text-xs cursor-pointer rounded-xl font-sans"
             >
               Next
               <ChevronRight className="size-3.5" />
@@ -225,7 +225,7 @@ function ExploreDirectoryContent() {
 export default function ExplorePage() {
   return (
     <MobileLayout>
-      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-blue-600 selection:text-white">
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
         <Header />
         <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-7">
           <div className="flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-7 xl:gap-8 w-full">

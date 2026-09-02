@@ -162,25 +162,25 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
           className
         )}
       >
-        {/* 1. Main Pitch Headline with Blue-to-Purple Gradient Accent */}
+        {/* 1. Main Pitch Headline */}
         <div className="space-y-2 text-left">
-          <h1 className="font-mono font-black text-3xl sm:text-4xl lg:text-[40px] tracking-tight text-foreground leading-[1.1]">
+          <h1 className="font-heading font-bold text-3xl sm:text-4xl lg:text-[40px] tracking-tight text-foreground leading-[1.1]">
             Every great <br />
             project deserves <br />
             its{' '}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-primary">
               first bid.
             </span>
           </h1>
-          <p className="text-xs sm:text-[13px] text-muted-foreground font-mono leading-relaxed">
+          <p className="text-xs sm:text-[13px] text-muted-foreground font-sans leading-relaxed">
             The real-time pay-to-rank software leaderboard. Starting from $1, outbid competitors to claim rankings, live placement, and dofollow backlinks.
           </p>
         </div>
 
         {/* 2. Interactive Claim / Outbid Widget Card */}
-        <div className="p-4 sm:p-5 rounded-2xl border border-blue-500/20 dark:border-blue-500/30 bg-card/95 dark:bg-[#161822] shadow-xs space-y-3.5 relative overflow-hidden">
+        <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3.5 relative overflow-hidden">
           {/* Subtle Ambient Glow */}
-          <div className="absolute -top-10 -right-10 size-28 bg-blue-500/10 dark:bg-purple-500/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -top-10 -right-10 size-28 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
 
           {/* URL Input */}
           <input
@@ -192,27 +192,27 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
               if (error) setError(null);
             }}
             placeholder="yourproduct.com or @handle"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-border/80 bg-muted/40 dark:bg-muted/20 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40 font-sans shadow-2xs"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/40 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 font-sans shadow-xs"
           />
 
           {/* Stepper + Bid Amount Box */}
-          <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-muted/50 dark:bg-muted/30 border border-border/60">
+          <div className="flex items-center justify-between gap-2 p-1.5 rounded-xl bg-muted border border-border">
             <button
               type="button"
               onClick={handleDecrease}
               aria-label="Decrease bid"
-              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer border border-border/60"
+              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-xs cursor-pointer border border-border"
             >
               <Minus className="size-3.5" />
             </button>
 
-            <div className="flex items-center justify-center gap-1.5 font-mono font-black text-xl text-foreground">
-              <span className="text-blue-600 dark:text-blue-400 font-black">$</span>
+            <div className="flex items-center justify-center gap-1.5 font-sans font-bold text-xl text-foreground">
+              <span className="text-primary font-bold">$</span>
               <input
                 type="text"
                 value={bid}
                 onChange={handleBidChange}
-                className="w-14 text-center bg-transparent border-none outline-none font-mono font-black text-foreground"
+                className="w-14 text-center bg-transparent border-none outline-none font-sans font-bold text-foreground"
               />
             </div>
 
@@ -220,18 +220,18 @@ export const LeftHeroSidebar = forwardRef<HTMLInputElement, LeftHeroSidebarProps
               type="button"
               onClick={handleIncrease}
               aria-label="Increase bid"
-              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-2xs cursor-pointer border border-border/60"
+              className="size-8 rounded-lg bg-background hover:bg-muted text-foreground flex items-center justify-center transition-all active:scale-95 shadow-xs cursor-pointer border border-border"
             >
               <Plus className="size-3.5" />
             </button>
           </div>
 
-          {/* Primary Action Button (Blue-to-Purple Gradient) */}
+          {/* Primary Action Button (Biings Primary Purple) */}
           <button
             type="button"
             onClick={() => handleClaim()}
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-xl font-mono font-black text-xs sm:text-sm text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-md shadow-blue-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl font-sans font-bold text-xs sm:text-sm text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <Loader2 className="size-4 animate-spin text-white" />

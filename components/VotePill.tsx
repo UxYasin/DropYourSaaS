@@ -105,7 +105,7 @@ export function VotePill({
   return (
     <div
       className={cn(
-        'inline-flex items-center rounded-full bg-zinc-200/80 dark:bg-zinc-900/80 border border-zinc-300/80 dark:border-zinc-800/80 px-1.5 py-0.5 backdrop-blur-sm select-none transition-all shadow-xs',
+        'inline-flex items-center rounded-full bg-muted border border-border px-1.5 py-0.5 backdrop-blur-sm select-none transition-all shadow-xs',
         className
       )}
       onClick={(e) => {
@@ -122,22 +122,22 @@ export function VotePill({
         className={cn(
           'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none active:scale-90',
           isUpvoted
-            ? 'text-[#FF4500] fill-[#FF4500]'
-            : 'text-zinc-500 dark:text-zinc-400 hover:text-[#FF4500]'
+            ? 'text-primary fill-primary'
+            : 'text-muted-foreground hover:text-primary'
         )}
       >
         <ArrowBigUp
-          className={cn(iconSizes, isUpvoted && 'fill-[#FF4500] text-[#FF4500]')}
+          className={cn(iconSizes, isUpvoted && 'fill-primary text-primary')}
         />
       </button>
 
       {/* Net Score */}
       <span
         className={cn(
-          'px-1 font-bold font-mono text-xs transition-colors min-w-[18px] text-center',
-          isUpvoted && 'text-[#FF4500]',
-          isDownvoted && 'text-[#7193FF]',
-          !isUpvoted && !isDownvoted && 'text-zinc-700 dark:text-zinc-200'
+          'px-1 font-bold font-sans text-xs transition-colors min-w-[18px] text-center',
+          isUpvoted && 'text-primary',
+          isDownvoted && 'text-[#2973cc]',
+          !isUpvoted && !isDownvoted && 'text-foreground'
         )}
       >
         {formatScore(score)}
@@ -153,12 +153,12 @@ export function VotePill({
         className={cn(
           'p-0.5 rounded-full transition-colors cursor-pointer focus:outline-none active:scale-90',
           isDownvoted
-            ? 'text-[#7193FF] fill-[#7193FF]'
-            : 'text-zinc-500 dark:text-zinc-400 hover:text-[#7193FF]'
+            ? 'text-[#2973cc] fill-[#2973cc]'
+            : 'text-muted-foreground hover:text-[#2973cc]'
         )}
       >
         <ArrowBigDown
-          className={cn(iconSizes, isDownvoted && 'fill-[#7193FF] text-[#7193FF]')}
+          className={cn(iconSizes, isDownvoted && 'fill-[#2973cc] text-[#2973cc]')}
         />
       </button>
     </div>

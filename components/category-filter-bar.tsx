@@ -130,10 +130,10 @@ export function CategoryFilterBar({
               type="button"
               onClick={() => onSelectCategory(cat)}
               className={cn(
-                'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer select-none',
+                'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer select-none font-sans',
                 isActive
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xs font-bold'
-                  : 'text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-muted/70'
+                  ? 'bg-primary text-white shadow-xs font-bold hover:bg-[#76439c]'
+                  : 'text-foreground/80 hover:text-primary hover:bg-muted/70'
               )}
             >
               <Icon

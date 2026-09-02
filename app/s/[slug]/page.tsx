@@ -112,12 +112,12 @@ export default async function ListingProfilePage({ params }: PageProps) {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-2xl sm:text-4xl font-mono font-black tracking-tight text-foreground truncate">
+                      <h1 className="text-2xl sm:text-4xl font-heading font-bold tracking-tight text-foreground truncate">
                         {cleanDomain}
                       </h1>
                       {listing.is_verified && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-[#08F9C9] text-xs font-mono font-bold border border-blue-500/20 shadow-2xs shrink-0">
-                          <BadgeCheck className="size-3.5 fill-current" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-sans font-bold border border-primary/20 shadow-xs shrink-0">
+                          <BadgeCheck className="size-3.5 fill-primary text-white dark:text-black" />
                           <span>Verified Fast-Track</span>
                         </span>
                       )}
@@ -127,7 +127,7 @@ export default async function ListingProfilePage({ params }: PageProps) {
                       href={targetHref}
                       target="_blank"
                       rel={listing.is_dofollow ? "noopener" : "nofollow noopener"}
-                      className="text-xs sm:text-sm font-mono text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group/host"
+                      className="text-xs sm:text-sm font-sans text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group/host"
                     >
                       <span>{cleanDomain}</span>
                       <ExternalLink className="size-3 opacity-0 group-hover/host:opacity-100 transition-opacity" />

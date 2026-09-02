@@ -166,12 +166,12 @@ export default function BuySellPage() {
             <div className="w-full max-w-4xl xl:max-w-5xl mx-auto min-w-0 space-y-8">
               {/* Header Section */}
               <div className="text-center space-y-4 max-w-3xl mx-auto pt-4">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-[#08F9C9] text-xs font-mono font-bold">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-sans font-bold">
                   <Sparkles className="size-3.5" />
                   Verified SaaS Marketplace
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight font-mono">
+                <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground leading-tight font-heading">
                   SaaS Startups For Sale
                 </h1>
 

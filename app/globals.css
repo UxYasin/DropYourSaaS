@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-mono);
+    --font-heading: var(--font-heading);
     --font-sans: var(--font-sans);
-    --font-body: var(--font-body);
+    --font-body: var(--font-sans);
+    --font-hand: var(--font-hand);
     --font-mono: var(--font-mono);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -50,55 +51,62 @@
 }
 
 :root {
-  /* Ruboz Design System Foundations */
-  /* Base Surfaces */
-  --background: #ffffff;
-  --surface-base: #f0f1f2;
-  --foreground: #111827;
+  /* Biings Design System (biings-ds) Foundations */
+  /* Base Surfaces: Warm Cream & Crisp White */
+  --background: #faf7f5;
+  --surface-base: #faf7f5;
+  --foreground: #46285d;
   --card: #ffffff;
-  --card-foreground: #111827;
-  --popover: #ffffff;
-  --popover-foreground: #111827;
+  --card-foreground: #46285d;
+  --popover: #faf7f5;
+  --popover-foreground: #46285d;
 
-  /* Text Hierarchy */
-  --text-primary: #6a6a6a;
-  --text-headline: #111827;
+  /* Biings Typography Hierarchy */
+  --text-primary: #46285d;
+  --text-headline: #46285d;
   --text-tertiary: #ffffff;
-  --text-inverse: #6c757d;
-  --muted: #f0f1f2;
-  --muted-foreground: #6a6a6a;
-  --tertiary-foreground: rgba(106, 106, 106, 0.6);
+  --text-inverse: #8a7d7f;
+  --muted: #efebe9;
+  --muted-foreground: #8a7d7f;
+  --tertiary-foreground: #9c9090;
 
-  /* Brand / Interactive - Ruboz Cobalt Blue */
-  --primary: #1a4bed;
+  /* Biings Brand Colors */
+  --primary: #8c50b9;                            /* Pantone 2587 C Biings Purple */
   --primary-foreground: #ffffff;
-  --secondary: #f0f1f2;
-  --secondary-foreground: #111827;
-  --accent: #1a4bed;
+  --primary-hover: #76439c;
+  --primary-dark: #5b2d7d;
+  --primary-light: #f5f0f9;
+  --secondary: #efebe9;                          /* $white-ter */
+  --secondary-foreground: #46285d;
+  --accent: #cb9569;                             /* Biings Caramel */
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --destructive: #f45564;                        /* Biings Danger Red */
+  --success: #53ab73;                            /* Biings Green */
+  --warning: #f2bb50;                            /* Biings Yellow */
+  --info: #2973cc;                               /* Biings Info Blue */
 
   /* Borders / Structure */
-  --border: #dcddde;
-  --border-strong: #dcddde;
-  --border-muted: #2a2a2a;
-  --input: #dcddde;
-  --ring: #1a4bed;
+  --border: #dfdad7;                            /* $grey-lighter */
+  --border-strong: #c8c0bd;                     /* $grey-light */
+  --border-muted: rgba(70, 40, 93, 0.12);
+  --input: #dfdad7;
+  --ring: #8c50b9;
 
   /* Radius Scale */
-  --radius-xs: 5px;
-  --radius-sm: 16px;
-  --radius-md: 28px;
-  --radius-lg: 32px;
-  --radius-xl: 800px;
-  --radius: 16px;
+  --radius-xs: 4px;
+  --radius-sm: 7px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius: 12px;
   --radius-full: 9999px;
 
-  /* Elevation / Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 2px 8px 0 rgba(26, 75, 237, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 12px 32px -4px rgba(26, 75, 237, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-  --shadow-glow: 0 0 24px 0 rgba(26, 75, 237, 0.35);
+  /* Biings Shadows & Glow */
+  --shadow-xs: 0 1px 2px 0 rgba(19, 10, 26, 0.04);
+  --shadow-sm: 0 5px 4px -4px rgba(19, 10, 26, 0.12), 0 0 5px 0 rgba(19, 10, 26, 0.04);
+  --shadow-md: 0 4px 6px -8px rgba(19, 10, 26, 0.12), 0 6px 30px -8px rgba(19, 10, 26, 0.2);
+  --shadow-glow: 0 0 0 0.25em rgba(140, 80, 185, 0.2);
+  --button-disabled-shadow: 0 2px 0 0 rgba(19, 10, 26, 0.05);
 
   /* Motion */
   --duration-instant: 100ms;
@@ -106,94 +114,143 @@
   --duration-normal: 200ms;
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Bento accent surfaces */
-  --bento-blue: #ebf1ff;
-  --bento-yellow: #fff9e6;
-  --bento-pink: #ffeef6;
-  --bento-mint: #eafaf1;
-  --bento-lavender: #f3efff;
-  --bento-gray: #f0f1f2;
+  /* Biings Bento Accent Surfaces */
+  --bento-purple: #f5f0f9;
+  --bento-caramel: #f9efe6;
+  --bento-blue: #eef4fc;
+  --bento-mint: #f1f8f4;
+  --bento-yellow: #fef8ec;
+  --bento-pink: #feecee;
+  --bento-gray: #efebe9;
 
-  --sidebar: #f8fafc;
-  --sidebar-foreground: #111827;
-  --sidebar-primary: #1a4bed;
+  --sidebar: #faf7f5;
+  --sidebar-foreground: #46285d;
+  --sidebar-primary: #8c50b9;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ebf1ff;
-  --sidebar-accent-foreground: #1a4bed;
-  --sidebar-border: #dcddde;
-  --sidebar-ring: #1a4bed;
+  --sidebar-accent: #f5f0f9;
+  --sidebar-accent-foreground: #8c50b9;
+  --sidebar-border: #dfdad7;
+  --sidebar-ring: #8c50b9;
 }
 
 .dark {
-  --background: #0d0f14;
-  --surface-base: #151821;
-  --foreground: #f8fafc;
-  --card: #151821;
-  --card-foreground: #f8fafc;
-  --popover: #151821;
-  --popover-foreground: #f8fafc;
+  /* Biings Dark (Obsidian Plum) */
+  --background: #130a1a;
+  --surface-base: #130a1a;
+  --foreground: #faf7f5;
+  --card: #241b27;
+  --card-foreground: #faf7f5;
+  --popover: #241b27;
+  --popover-foreground: #faf7f5;
 
-  --text-primary: #94a3b8;
-  --text-headline: #f8fafc;
+  --text-primary: #e7e2e0;
+  --text-headline: #faf7f5;
   --text-tertiary: #ffffff;
-  --text-inverse: #64748b;
-  --muted: #1e2330;
-  --muted-foreground: #94a3b8;
-  --tertiary-foreground: rgba(148, 163, 184, 0.6);
+  --text-inverse: #9c9090;
+  --muted: #2d232e;
+  --muted-foreground: #c8c0bd;
+  --tertiary-foreground: rgba(200, 192, 189, 0.6);
 
-  --primary: #1a4bed;
+  --primary: #aa50b5;                            /* Biings Vibrant Purple */
   --primary-foreground: #ffffff;
-  --secondary: #1e2330;
-  --secondary-foreground: #f8fafc;
-  --accent: #3b82f6;
+  --primary-hover: #95429f;
+  --primary-dark: #7b3384;
+  --primary-light: #35213d;
+  --secondary: #2d232e;
+  --secondary-foreground: #faf7f5;
+  --accent: #cb9569;
   --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --destructive: #f45564;
+  --success: #53ab73;
+  --warning: #f2bb50;
+  --info: #2973cc;
 
   --border: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.18);
   --border-muted: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: #1a4bed;
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #aa50b5;
 
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 8px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 24px 0 rgba(26, 75, 237, 0.45);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 4px 6px -4px rgba(0, 0, 0, 0.6), 0 0 5px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px -6px rgba(0, 0, 0, 0.8);
+  --shadow-glow: 0 0 0 0.25em rgba(170, 80, 181, 0.35);
+  --button-disabled-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3);
 
-  /* Bento accents */
-  --bento-blue: #131c2e;
-  --bento-yellow: #262114;
-  --bento-pink: #2a1622;
-  --bento-mint: #11281e;
-  --bento-lavender: #1e1530;
-  --bento-gray: #1a1d27;
+  /* Bento accents (Dark) */
+  --bento-purple: #2a1b33;
+  --bento-caramel: #332219;
+  --bento-blue: #162233;
+  --bento-mint: #162b21;
+  --bento-yellow: #302613;
+  --bento-pink: #331824;
+  --bento-gray: #241b27;
 
-  --sidebar: #10131a;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #1a4bed;
+  --sidebar: #1b1123;
+  --sidebar-foreground: #faf7f5;
+  --sidebar-primary: #aa50b5;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1e2330;
-  --sidebar-accent-foreground: #60a5fa;
+  --sidebar-accent: #2a1b33;
+  --sidebar-accent-foreground: #d28fe0;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #1a4bed;
+  --sidebar-ring: #aa50b5;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    letter-spacing: -0.015625em;
+  }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-body), monospace;
+    font-family: var(--font-sans), 'Averta', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-mono), monospace;
+    font-family: var(--font-heading), 'Plush', var(--font-sans), sans-serif;
     font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text-headline);
   }
   p {
-    font-family: var(--font-body), monospace;
+    font-family: var(--font-sans), sans-serif;
     font-weight: 400;
   }
+  ::selection {
+    background: rgba(140, 80, 185, 0.2);
+  }
+}
+
+.font-hand {
+  font-family: var(--font-hand), 'Caveat', cursive !important;
+}
+
+.bds-box {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease-out, transform 0.2s ease, border-color 0.15s ease;
+}
+
+.bds-box:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.bds-button {
+  font-weight: 600;
+  letter-spacing: 0;
+  border-radius: var(--radius-md);
+  transition: background-color 0.15s linear, box-shadow 0.175s linear, transform 0.1s ease;
+}
+
+.bds-button:hover {
+  box-shadow: var(--shadow-glow);
+}
+
+.bds-button:active {
+  transform: scale(0.98);
 }
 
 @keyframes rainbow-glow {
@@ -211,13 +268,13 @@
 .animate-rainbow-glow {
   background: linear-gradient(
     90deg,
-    #ff007a,
-    #9600ff,
-    #00bfff,
-    #00ffaa,
-    #ffea00,
-    #ff5e00,
-    #ff007a
+    #8c50b9,
+    #cb9569,
+    #01bfea,
+    #53ab73,
+    #ffc748,
+    #f45564,
+    #8c50b9
   );
   background-size: 300% 300%;
   animation: rainbow-glow 6s ease infinite;

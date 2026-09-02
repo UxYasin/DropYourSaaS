@@ -121,9 +121,9 @@ export function CongratulationsModal({
         {/* Glowing Badge */}
         <div className={`size-16 mx-auto rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
           isVerifiedBoost
-            ? 'bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 shadow-blue-500/20'
+            ? 'bg-primary/15 border border-primary/30 text-primary shadow-primary/20'
             : isPinnedAd
-            ? 'bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 shadow-orange-500/20'
+            ? 'bg-accent/15 border border-accent/30 text-accent shadow-accent/20'
             : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20'
         }`}>
           <CheckCircle2 className="size-8" />
@@ -131,11 +131,11 @@ export function CongratulationsModal({
 
         {/* Header Text */}
         <div className="space-y-2">
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-mono font-bold text-xs ${
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-sans font-bold text-xs ${
             isVerifiedBoost
-              ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/30'
+              ? 'bg-primary/10 text-primary border-primary/20'
               : isPinnedAd
-              ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/30'
+              ? 'bg-accent/10 text-accent border-accent/20'
               : 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
           }`}>
             <Sparkles className="size-3.5" />
@@ -148,7 +148,7 @@ export function CongratulationsModal({
             </span>
           </div>
 
-          <h2 className="font-mono font-extrabold text-xl sm:text-2xl text-zinc-900 dark:text-white tracking-tight">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-zinc-900 dark:text-white tracking-tight">
             {isVerifiedBoost
               ? 'Payment Confirmed! Your SaaS is Verified.'
               : isPinnedAd
@@ -158,7 +158,7 @@ export function CongratulationsModal({
               : 'Congratulations! Your SaaS is live.'}
           </h2>
 
-          <p className="font-body text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <p className="font-sans text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
             {isVerifiedBoost
               ? 'Your $5 Fast-Track has been processed. Your dofollow backlink and verified checkmark badge are now live on DropYourSaaS.'
               : isPinnedAd
@@ -173,10 +173,10 @@ export function CongratulationsModal({
             onClick={handleClose}
             className={`w-full rounded-full text-white font-sans font-bold text-xs sm:text-sm h-12 shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
               isVerifiedBoost
-                ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25'
+                ? 'bg-primary hover:bg-[#76439c]'
                 : isPinnedAd
-                ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-orange-500/25'
-                : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/25'
+                ? 'bg-accent hover:bg-[#b88258]'
+                : 'bg-primary hover:bg-[#76439c]'
             }`}
           >
             <span>{isPinnedAd ? 'View Your Active Ad Spot' : 'Check out your product listing'}</span>

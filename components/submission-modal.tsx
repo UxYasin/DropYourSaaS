@@ -218,14 +218,14 @@ export function SubmissionModal({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-mono font-black text-base sm:text-lg text-zinc-900 dark:text-white truncate">
+                <h2 className="font-heading font-bold text-base sm:text-lg text-zinc-900 dark:text-white truncate">
                   Publish &amp; Claim High Rank
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 text-xs font-mono font-bold shrink-0">
+                <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/25 text-xs font-sans font-bold shrink-0">
                   Target Rank #{activeRank}
                 </span>
               </div>
-              <p className="font-body text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
+              <p className="font-sans text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
                 Select your desired rank tier. Instant live placement upon Whop checkout confirmation.
               </p>
             </div>
@@ -280,61 +280,61 @@ export function SubmissionModal({
             </div>
           </div>
 
-          {/* Pay-to-Rank Tier Selection Grid */}
-          <div className="space-y-2 pt-1 text-left">
+          {/* STEP 1: Select Placement Tier */}
+          <div className="space-y-3 pt-1 text-left">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 font-mono tracking-wide uppercase">
-                1. Select Desired Ranking Tier
+              <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 font-sans">
+                1. Choose Your Preferred Placement Tier
               </label>
               <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-sans">
                 Powered by Whop Payments
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {/* Tier 1: Top Spot (#1) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Tier 1: Spot #1 (Billboard / Hero) */}
               <div
                 onClick={() => setSelectedTier('top1')}
                 className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
                   selectedTier === 'top1'
-                    ? 'bg-amber-500/10 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/40 text-zinc-900 dark:text-white shadow-md'
+                    ? 'bg-amber-50/90 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/40 text-zinc-900 dark:text-white shadow-md'
                     : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-amber-600 dark:text-[#FFFC00]">
-                    <Crown className="size-4 fill-current" />
-                    <span>#1 Top Spot</span>
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+                    <Crown className="size-4" />
+                    <span>👑 Rank #1 Spotlight</span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500 text-black shadow-xs">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-sans font-bold bg-amber-500 text-zinc-950 shadow-xs">
                     $50
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
-                  Crown spotlight at very top of leaderboard, #1 badge, automated viral X tweet.
+                  Maximum top visibility, 2x click conversion, verified gold badge &amp; dofollow SEO link.
                 </p>
               </div>
 
-              {/* Tier 2: Podium (#2–#3) */}
+              {/* Tier 2: Podium Top 2 & 3 */}
               <div
                 onClick={() => setSelectedTier('podium')}
                 className={`relative p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left ${
                   selectedTier === 'podium'
-                    ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/40 text-zinc-900 dark:text-white shadow-md'
+                    ? 'bg-primary/10 border-primary ring-2 ring-primary/40 text-zinc-900 dark:text-white shadow-md'
                     : 'bg-zinc-50/60 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-blue-600 dark:text-blue-400">
+                  <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-primary">
                     <Award className="size-4" />
                     <span>#2–#3 Podium</span>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-600 text-white shadow-xs">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-sans font-bold bg-primary text-white shadow-xs">
                     $25
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-600 dark:text-zinc-300 font-sans leading-snug">
-                  High-contrast podium cards with large preview images, verified blue checkmark.
+                  High-contrast podium cards with large preview images, verified checkmark.
                 </p>
               </div>
 

@@ -180,23 +180,23 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         <div className="lg:col-span-7 space-y-5 text-left">
           {/* Trust Eyebrow Badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
-              <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold">
+              <span className="size-2 rounded-full bg-primary animate-pulse" />
               <span>ahrefs DR 35+</span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-mono font-bold shadow-2xs">
-              <Sparkles className="size-3 fill-current" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#46285d] text-white dark:bg-card dark:text-foreground text-xs font-semibold shadow-xs">
+              <Sparkles className="size-3 fill-[#ffc748] text-[#ffc748]" />
               <span>DISCOVER THE BEST STARTUPS</span>
             </div>
           </div>
 
           {/* Main Hero Headline */}
           <div className="space-y-2">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-sans tracking-tight text-foreground leading-[1.08]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-heading tracking-tight text-foreground leading-[1.08]">
               Launch today. <br />
-              <span className="text-foreground">Get discovered.</span>
+              <span className="text-primary">Get discovered.</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground font-body leading-relaxed max-w-xl">
+            <p className="text-sm sm:text-base text-muted-foreground font-sans leading-relaxed max-w-xl">
               Guaranteed homepage placement, a permanent dofollow listing page, and founders discovering your product long after launch day.
             </p>
           </div>
@@ -206,7 +206,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             <button
               type="button"
               onClick={() => handleQuickSelect(1, outbid1Cost)}
-              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
+              className="px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold inline-flex items-center gap-1 transition-all cursor-pointer"
             >
               <Crown className="size-3 fill-current" />
               <span>👑 Spot #1 (${outbid1Cost})</span>
@@ -214,7 +214,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             <button
               type="button"
               onClick={() => handleQuickSelect(2, outbid2Cost)}
-              className="px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
+              className="px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-semibold inline-flex items-center gap-1 transition-all cursor-pointer"
             >
               <Award className="size-3" />
               <span>🥈 Spot #2 (${outbid2Cost})</span>
@@ -222,7 +222,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             <button
               type="button"
               onClick={() => handleQuickSelect(3, outbid3Cost)}
-              className="px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
+              className="px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold inline-flex items-center gap-1 transition-all cursor-pointer"
             >
               <Flame className="size-3" />
               <span>🥉 Spot #3 (${outbid3Cost})</span>
@@ -230,9 +230,9 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             <button
               type="button"
               onClick={() => handleQuickSelect(Math.max(4, (topItems.length || 3) + 1), 1)}
-              className="px-3 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-foreground border border-border/80 text-xs font-mono font-medium inline-flex items-center gap-1 transition-all cursor-pointer hover:bg-muted"
+              className="px-3 py-1 rounded-full bg-muted text-foreground border border-border text-xs font-medium inline-flex items-center gap-1 transition-all cursor-pointer hover:bg-muted/80"
             >
-              <Zap className="size-3 text-amber-500 fill-amber-500" />
+              <Zap className="size-3 text-accent fill-accent" />
               <span>Free / $1 to Rank</span>
             </button>
           </div>
@@ -244,7 +244,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
                 e.preventDefault();
                 handleClaim();
               }}
-              className="p-1.5 sm:p-2 rounded-2xl sm:rounded-full bg-card border border-border/90 text-left shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2"
+              className="p-1.5 sm:p-2 rounded-2xl sm:rounded-full bg-card border border-border text-left shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2"
             >
               <div className="flex items-center gap-2.5 flex-1 min-w-0 pl-3 sm:pl-4">
                 <Link2 className="size-4 text-muted-foreground shrink-0" />
@@ -262,27 +262,27 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               </div>
 
               {/* Stepper Inside Form */}
-              <div className="flex items-center gap-1.5 self-end sm:self-center px-2 py-1 bg-muted/50 rounded-full border border-border/60">
+              <div className="flex items-center gap-1.5 self-end sm:self-center px-2 py-1 bg-muted/60 rounded-full border border-border/80">
                 <button
                   type="button"
                   onClick={handleDecrease}
-                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-2xs text-xs font-bold"
+                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs text-xs font-bold"
                 >
                   <Minus className="size-3" />
                 </button>
-                <div className="flex items-center font-mono font-bold text-xs text-foreground">
-                  <span className="text-amber-500 mr-0.5">$</span>
+                <div className="flex items-center font-bold text-xs text-foreground font-sans">
+                  <span className="text-primary mr-0.5 font-bold">$</span>
                   <input
                     type="text"
                     value={bid}
                     onChange={handleBidInputChange}
-                    className="w-8 text-center bg-transparent border-none outline-none font-mono font-bold text-foreground p-0 text-xs"
+                    className="w-8 text-center bg-transparent border-none outline-none font-bold text-foreground p-0 text-xs font-sans"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleIncrease}
-                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-2xs text-xs font-bold"
+                  className="size-6 rounded-full bg-background hover:bg-muted text-foreground flex items-center justify-center transition-transform active:scale-90 cursor-pointer shadow-xs text-xs font-bold"
                 >
                   <Plus className="size-3" />
                 </button>
@@ -291,10 +291,10 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-10 sm:h-10 px-5 sm:px-6 rounded-full shrink-0 font-mono font-bold text-xs sm:text-sm text-white bg-zinc-950 hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="h-10 sm:h-10 px-5 sm:px-6 rounded-full shrink-0 font-bold text-xs sm:text-sm text-white bg-primary hover:bg-[#76439c] active:bg-[#5b2d7d] shadow-sm hover:shadow-[0_0_0_0.25em_rgba(140,80,185,0.25)] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <Loader2 className="size-4 animate-spin text-white dark:text-zinc-950" />
+                  <Loader2 className="size-4 animate-spin text-white" />
                 ) : (
                   <>
                     <span>Claim #{displayRank} for {bidText}</span>
@@ -305,25 +305,25 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
             </form>
 
             {error && (
-              <div className="text-xs font-mono text-rose-500 bg-rose-500/10 p-2 rounded-xl border border-rose-500/20 text-center">
+              <div className="text-xs text-rose-600 bg-rose-500/10 p-2 rounded-xl border border-rose-500/20 text-center font-sans">
                 {error}
               </div>
             )}
           </div>
 
           {/* Social Proof & Metrics */}
-          <div className="flex items-center gap-6 pt-2 text-xs font-mono text-muted-foreground flex-wrap">
+          <div className="flex items-center gap-6 pt-2 text-xs text-muted-foreground flex-wrap font-sans">
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2 overflow-hidden">
-                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-blue-500 text-white font-bold text-[9px] flex items-center justify-center">YA</div>
-                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-emerald-500 text-white font-bold text-[9px] flex items-center justify-center">SB</div>
-                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-purple-500 text-white font-bold text-[9px] flex items-center justify-center">RC</div>
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-primary text-white font-bold text-[9px] flex items-center justify-center">YA</div>
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-[#53ab73] text-white font-bold text-[9px] flex items-center justify-center">SB</div>
+                <div className="inline-block size-6 rounded-full ring-2 ring-background bg-accent text-white font-bold text-[9px] flex items-center justify-center">RC</div>
               </div>
               <span className="font-bold text-foreground">750+</span> founders launched
             </div>
 
             <div className="flex items-center gap-1.5">
-              <Rocket className="size-3.5 text-zinc-500 dark:text-zinc-400" />
+              <Rocket className="size-3.5 text-primary" />
               <span><strong className="text-foreground">1,200+</strong> products listed</span>
             </div>
 
@@ -337,7 +337,7 @@ export const HeroSection = forwardRef<HTMLInputElement, HeroSectionProps>(functi
         {/* ================= RIGHT COLUMN: LAUNCHING NOW LIVE CARD (LaunchIt Style) ================= */}
         <div className="lg:col-span-5 relative">
           {/* Subtle Ambient Background Grid & Glow */}
-          <div className="absolute -inset-2 bg-gradient-to-tr from-blue-500/10 via-transparent to-amber-500/10 rounded-3xl blur-xl -z-10" />
+          <div className="absolute -inset-2 bg-gradient-to-tr from-primary/15 via-transparent to-accent/15 rounded-3xl blur-xl -z-10" />
 
           <div className="rounded-3xl border border-border/90 bg-card p-5 sm:p-6 shadow-md relative overflow-hidden space-y-4">
             {/* Top Bar of Floating Card */}
